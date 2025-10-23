@@ -4,148 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diplomatic Plate Decoder - Decode US Diplomatic License Plates</title>
+
+    <!-- svgMap Library -->
+    <link href="https://cdn.jsdelivr.net/gh/StephanWagner/svgMap@v2.10.1/dist/svgMap.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <span class="logo-icon">🏛️</span>
-                <h1>Diplomatic Plate Decoder</h1>
-            </div>
-            <p class="tagline">Decode US diplomatic license plates and discover their origins</p>
-        </header>
+    <div class="page-wrapper">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="brand">
+                        <div class="brand-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h1 class="brand-title">Diplomatic Decoder</h1>
+                    </div>
+                    <p class="hero-description">Decode US diplomatic license plates instantly</p>
+                </div>
 
-        <main class="main-content">
-            <!-- Input Section -->
-            <section class="input-section">
-                <div class="input-wrapper">
-                    <div class="plate-preview" id="platePreview">
-                        <div class="plate-container">
-                            <div class="plate-top">DIPLOMAT</div>
-                            <div class="plate-code">
-                                <input type="text"
-                                       id="countryCode"
-                                       class="code-input"
-                                       maxlength="2"
-                                       placeholder="XX"
-                                       autocomplete="off">
-                                <span class="separator">-</span>
-                                <input type="text"
-                                       id="staffCode"
-                                       class="code-input staff-input"
-                                       maxlength="1"
-                                       placeholder="X"
-                                       autocomplete="off">
-                                <span class="separator">-</span>
-                                <input type="text"
-                                       id="sequenceNumber"
-                                       class="code-input sequence-input"
-                                       maxlength="4"
-                                       placeholder="####"
-                                       autocomplete="off">
+                <!-- Plate Input -->
+                <div class="plate-input-section">
+                    <div class="plate-visual">
+                        <div class="plate-frame">
+                            <div class="plate-header">DIPLOMAT</div>
+                            <div class="plate-number">
+                                <input
+                                    type="text"
+                                    id="plateCode"
+                                    class="plate-input"
+                                    maxlength="3"
+                                    placeholder="DAF"
+                                    autocomplete="off"
+                                    spellcheck="false">
                             </div>
-                            <div class="plate-bottom">WASHINGTON DC</div>
+                            <div class="plate-footer">DISTRICT OF COLUMBIA</div>
                         </div>
                     </div>
-                    <button id="lookupBtn" class="lookup-btn">
-                        <span class="btn-icon">🔍</span>
-                        Decode Plate
+                    <button id="decodeBtn" class="decode-btn">
+                        <span>Decode</span>
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
                     </button>
                 </div>
-            </section>
+            </div>
+        </header>
 
-            <!-- Result Section -->
-            <section class="result-section" id="resultSection">
-                <div class="result-card" id="resultCard">
-                    <div class="result-header">
-                        <span class="flag" id="resultFlag"></span>
-                        <h2 id="resultCountry"></h2>
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection">
+            <div class="container">
+                <div class="results-grid">
+                    <!-- Country Info -->
+                    <div class="country-card">
+                        <div class="card-header">
+                            <span class="country-flag" id="countryFlag"></span>
+                            <div class="country-info">
+                                <h2 class="country-name" id="countryName"></h2>
+                                <p class="country-region" id="countryRegion"></p>
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Plate Code</span>
+                                <span class="detail-value" id="plateCodeDisplay"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Staff Type</span>
+                                <span class="detail-value" id="staffType"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Country Code</span>
+                                <span class="detail-value" id="countryCode"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="result-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Country Code:</span>
-                            <span class="detail-value" id="resultCode"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Staff Type:</span>
-                            <span class="detail-value" id="resultStaff"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Region:</span>
-                            <span class="detail-value" id="resultRegion"></span>
-                        </div>
+
+                    <!-- Map Visualization -->
+                    <div class="map-card">
+                        <div id="svgMap"></div>
                     </div>
-                    <div class="world-map" id="worldMap">
-                        <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="400" fill="#e8f4f8"/>
-                            <g id="mapMarker" style="display: none;">
-                                <circle cx="400" cy="200" r="8" fill="#ff4444">
-                                    <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle cx="400" cy="200" r="12" fill="#ff4444" opacity="0.3">
-                                    <animate attributeName="r" values="12;20;12" dur="1.5s" repeatCount="indefinite"/>
-                                </circle>
-                            </g>
-                            <text x="400" y="200" text-anchor="middle" font-size="24" fill="#666" id="mapText">
-                                Discover diplomatic origins on the map
-                            </text>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Lookups -->
+        <section class="recent-section">
+            <div class="container">
+                <h3 class="section-heading">Recent Lookups</h3>
+                <div class="recent-grid" id="recentGrid">
+                    <div class="empty-message">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
+                        <p>No recent lookups</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Recent Searches -->
-            <section class="recent-section">
-                <h3 class="section-title">Recent Lookups</h3>
-                <div class="recent-list" id="recentList">
-                    <div class="empty-state">
-                        <span class="empty-icon">📋</span>
-                        <p>No recent lookups yet. Try decoding a plate above!</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Info Section -->
-            <section class="info-section">
-                <div class="info-card">
-                    <h3>How It Works</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-icon">🌍</span>
-                            <h4>Country Code</h4>
-                            <p>The first two letters identify the country. These codes are intentionally obscure for security.</p>
+        <!-- Info Section -->
+        <section class="info-section">
+            <div class="container">
+                <h3 class="section-heading">Understanding the Code</h3>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
                         </div>
-                        <div class="info-item">
-                            <span class="info-icon">👔</span>
-                            <h4>Staff Type</h4>
-                            <p>The third letter indicates the role: D (Diplomat), C (Consular), S (Staff), A (Admin), M (Mission).</p>
+                        <h4>Staff Type (1st Letter)</h4>
+                        <p>D = Diplomat, C = Consular, S = Staff, A = Admin & Technical, M = Mission</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
-                        <div class="info-item">
-                            <span class="info-icon">🔢</span>
-                            <h4>Sequence Number</h4>
-                            <p>The final numbers are simply a unique identifier for that specific vehicle.</p>
+                        <h4>Country Code (2nd & 3rd Letters)</h4>
+                        <p>Two-letter code intentionally obscure for security. For example: AF = Japan, FP = UK</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
+                        <h4>Format</h4>
+                        <p>Example: "DAF" = Diplomat (D) from Japan (AF). Codes are assigned by the US State Department.</p>
                     </div>
                 </div>
 
-                <div class="quick-examples">
-                    <h4>Try These Examples:</h4>
-                    <div class="example-buttons">
-                        <button class="example-btn" data-country="AF" data-staff="D">AF-D-1234 (Japan)</button>
-                        <button class="example-btn" data-country="FP" data-staff="D">FP-D-5678 (UK)</button>
-                        <button class="example-btn" data-country="DA" data-staff="C">DA-C-9012 (Germany)</button>
-                        <button class="example-btn" data-country="CC" data-staff="S">CC-S-3456 (China)</button>
+                <!-- Quick Examples -->
+                <div class="examples-section">
+                    <h4 class="examples-heading">Try These Examples</h4>
+                    <div class="examples-grid">
+                        <button class="example-chip" data-code="DAF">DAF <span>Japan Diplomat</span></button>
+                        <button class="example-chip" data-code="DFP">DFP <span>UK Diplomat</span></button>
+                        <button class="example-chip" data-code="CDA">CDA <span>Germany Consular</span></button>
+                        <button class="example-chip" data-code="SCC">SCC <span>China Staff</span></button>
+                        <button class="example-chip" data-code="DEE">DEE <span>Mexico Diplomat</span></button>
+                        <button class="example-chip" data-code="ACA">ACA <span>Canada Admin</span></button>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </section>
 
+        <!-- Footer -->
         <footer class="footer">
-            <p>Created for educational and informational purposes. Data based on public US Department of State information.</p>
+            <div class="container">
+                <p>Data based on US Department of State Office of Foreign Missions • For educational purposes</p>
+            </div>
         </footer>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/gh/StephanWagner/svgMap@v2.10.1/dist/svgMap.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
