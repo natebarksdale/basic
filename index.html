@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diplomatic Plate Decoder - Decode US Diplomatic License Plates</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🏛️</span>
+                <h1>Diplomatic Plate Decoder</h1>
+            </div>
+            <p class="tagline">Decode US diplomatic license plates and discover their origins</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="input-wrapper">
+                    <div class="plate-preview" id="platePreview">
+                        <div class="plate-container">
+                            <div class="plate-top">DIPLOMAT</div>
+                            <div class="plate-code">
+                                <input type="text"
+                                       id="countryCode"
+                                       class="code-input"
+                                       maxlength="2"
+                                       placeholder="XX"
+                                       autocomplete="off">
+                                <span class="separator">-</span>
+                                <input type="text"
+                                       id="staffCode"
+                                       class="code-input staff-input"
+                                       maxlength="1"
+                                       placeholder="X"
+                                       autocomplete="off">
+                                <span class="separator">-</span>
+                                <input type="text"
+                                       id="sequenceNumber"
+                                       class="code-input sequence-input"
+                                       maxlength="4"
+                                       placeholder="####"
+                                       autocomplete="off">
+                            </div>
+                            <div class="plate-bottom">WASHINGTON DC</div>
+                        </div>
+                    </div>
+                    <button id="lookupBtn" class="lookup-btn">
+                        <span class="btn-icon">🔍</span>
+                        Decode Plate
+                    </button>
+                </div>
+            </section>
+
+            <!-- Result Section -->
+            <section class="result-section" id="resultSection">
+                <div class="result-card" id="resultCard">
+                    <div class="result-header">
+                        <span class="flag" id="resultFlag"></span>
+                        <h2 id="resultCountry"></h2>
+                    </div>
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Country Code:</span>
+                            <span class="detail-value" id="resultCode"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Staff Type:</span>
+                            <span class="detail-value" id="resultStaff"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Region:</span>
+                            <span class="detail-value" id="resultRegion"></span>
+                        </div>
+                    </div>
+                    <div class="world-map" id="worldMap">
+                        <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="400" fill="#e8f4f8"/>
+                            <g id="mapMarker" style="display: none;">
+                                <circle cx="400" cy="200" r="8" fill="#ff4444">
+                                    <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="400" cy="200" r="12" fill="#ff4444" opacity="0.3">
+                                    <animate attributeName="r" values="12;20;12" dur="1.5s" repeatCount="indefinite"/>
+                                </circle>
+                            </g>
+                            <text x="400" y="200" text-anchor="middle" font-size="24" fill="#666" id="mapText">
+                                Discover diplomatic origins on the map
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Searches -->
+            <section class="recent-section">
+                <h3 class="section-title">Recent Lookups</h3>
+                <div class="recent-list" id="recentList">
+                    <div class="empty-state">
+                        <span class="empty-icon">📋</span>
+                        <p>No recent lookups yet. Try decoding a plate above!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Info Section -->
+            <section class="info-section">
+                <div class="info-card">
+                    <h3>How It Works</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-icon">🌍</span>
+                            <h4>Country Code</h4>
+                            <p>The first two letters identify the country. These codes are intentionally obscure for security.</p>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">👔</span>
+                            <h4>Staff Type</h4>
+                            <p>The third letter indicates the role: D (Diplomat), C (Consular), S (Staff), A (Admin), M (Mission).</p>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">🔢</span>
+                            <h4>Sequence Number</h4>
+                            <p>The final numbers are simply a unique identifier for that specific vehicle.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-examples">
+                    <h4>Try These Examples:</h4>
+                    <div class="example-buttons">
+                        <button class="example-btn" data-country="AF" data-staff="D">AF-D-1234 (Japan)</button>
+                        <button class="example-btn" data-country="FP" data-staff="D">FP-D-5678 (UK)</button>
+                        <button class="example-btn" data-country="DA" data-staff="C">DA-C-9012 (Germany)</button>
+                        <button class="example-btn" data-country="CC" data-staff="S">CC-S-3456 (China)</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Created for educational and informational purposes. Data based on public US Department of State information.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
