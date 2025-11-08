@@ -64,82 +64,6 @@ const VOICE_ICONS = {
     sunglasses: '🕶️',
 };
 
-// Voice-Specific Badge Messages (for the revealed items)
-const VOICE_BADGE_MESSAGES = {
-    standard: {
-        correctLie: [
-            "This was the lie",
-            "This is false",
-            "This was fabricated"
-        ],
-        wrongTruth: [
-            "This is actually true",
-            "This is a true fact",
-            "This is genuine"
-        ]
-    },
-    twain: {
-        correctLie: [
-            "A bald-faced lie, I tell you!",
-            "Pure fabrication, friend",
-            "The tall tale revealed"
-        ],
-        wrongTruth: [
-            "Ah, but this tale is true!",
-            "The honest truth, surprisingly",
-            "This yarn is genuine"
-        ]
-    },
-    bird: {
-        correctLie: [
-            "A fabrication, I'm afraid",
-            "This observation is false",
-            "Not as I witnessed it"
-        ],
-        wrongTruth: [
-            "Quite authentic, dear reader",
-            "This is true, as I observed",
-            "A genuine account"
-        ]
-    },
-    battuta: {
-        correctLie: [
-            "A falsehood, praise be!",
-            "This is untrue",
-            "Not as witnessed by this traveler"
-        ],
-        wrongTruth: [
-            "True, as Allah is my witness",
-            "An authentic account",
-            "This is the truth"
-        ]
-    },
-    west: {
-        correctLie: [
-            "Fiction, I'm afraid",
-            "Not quite accurate",
-            "A falsehood, regrettably"
-        ],
-        wrongTruth: [
-            "Quite true, actually",
-            "An authentic detail",
-            "True, though you doubted"
-        ]
-    },
-    thompson: {
-        correctLie: [
-            "Total BS, baby!",
-            "Lies and propaganda!",
-            "Fake news, pure fiction"
-        ],
-        wrongTruth: [
-            "The ugly truth!",
-            "Real as it gets",
-            "Hard truth, kid"
-        ]
-    }
-};
-
 // Category Templates by Location Type
 const CATEGORY_TEMPLATES = {
     city: ['Introduction', 'Where to Go', 'What to Eat', 'What to Do', 'Where to Stay', 'Getting Around', 'Day Trips', 'Practical Tips'],
@@ -821,10 +745,12 @@ CRITICAL: Format text like a travel guide by wrapping important place names, lan
 
 REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
 
+FEEDBACK: For each item, provide a SHORT contextual feedback message (1 sentence max) that reveals whether it's true or false. Use the writing style voice. Be specific to the content, not generic.
+
 Examples:
 - "Visit <strong>Café de Flore</strong> in the heart of <strong>Saint-Germain-des-Prés</strong> for authentic Parisian atmosphere."
-- "The <strong>Louvre Museum</strong> houses over 35,000 works of art across <strong>eight curatorial departments</strong>."
-- "Head to <strong>Le Marais</strong> for vintage shopping at <strong>Free'P'Star</strong> and grab dinner at <strong>L'As du Fallafel</strong>."
+  - If TRUE feedback: "Indeed, this legendary café has been serving intellectuals since 1887."
+  - If LIE feedback: "Actually, Café de Flore is in a different neighborhood."
 
 Categories: ${categories.join(', ')}
 
@@ -837,9 +763,9 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
-        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false}
+        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false, "feedback": "Contextual message confirming this is true"},
+        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true, "feedback": "Contextual message revealing why this is false"},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false, "feedback": "Contextual message about this truth"}
       ]
     }
   ]
@@ -1054,7 +980,7 @@ function createItemElement(item, categoryIndex, itemIndex) {
         if (e.target.classList.contains('place-link')) {
             return;
         }
-        revealItem(itemEl, item.isLie);
+        revealItem(itemEl, item);
     });
 
     return itemEl;
@@ -1093,41 +1019,37 @@ function handlePlaceLink(event, placeName) {
 }
 
 // Reveal if item is truth or lie
-function revealItem(itemEl, isLie) {
+function revealItem(itemEl, item) {
     if (itemEl.classList.contains('revealed')) return;
 
     itemEl.classList.add('revealed');
 
-    // Get voice-specific badge messages
-    const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.standard;
+    const isLie = item.isLie;
+    const feedback = item.feedback || (isLie ? 'This was the lie!' : 'This is actually true.');
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-
-        // Add varied voiced commentary to the badge
-        const messages = badgeMessages.correctLie;
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-
-        // Create and append the badge element
-        const badge = document.createElement('div');
-        badge.className = 'item-badge';
-        badge.textContent = randomMessage;
-        itemEl.appendChild(badge);
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-
-        // Add varied voiced commentary to the badge
-        const messages = badgeMessages.wrongTruth;
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-
-        // Create and append the badge element
-        const badge = document.createElement('div');
-        badge.className = 'item-badge';
-        badge.textContent = randomMessage;
-        itemEl.appendChild(badge);
     }
+
+    // Create and show overlay with feedback
+    const overlay = document.createElement('div');
+    overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
+    overlay.textContent = feedback;
+    itemEl.appendChild(overlay);
+
+    // Trigger animation
+    setTimeout(() => overlay.classList.add('show'), 10);
+
+    // Fade out and remove after 3 seconds
+    setTimeout(() => {
+        overlay.classList.remove('show');
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 500);
+    }, 3000);
 }
 
 // Update Score

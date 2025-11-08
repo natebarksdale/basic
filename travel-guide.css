@@ -918,23 +918,43 @@ input, select, textarea {
     border-color: var(--color-error);
 }
 
-.item-badge {
-    display: block;
-    margin-top: 1rem;
-    padding: 0.75rem;
+/* Feedback Overlay */
+.item-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(0, 0, 0, 0.92);
     color: white;
-    border-radius: 6px;
-    font-size: 0.875rem;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
     font-weight: 500;
     text-align: center;
+    max-width: 80%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    line-height: 1.5;
 }
 
-.item.is-lie .item-badge {
-    background: var(--color-success);
+.item-overlay.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
 
-.item.is-truth .item-badge {
-    background: var(--color-error);
+.item-overlay.fade-out {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.item-overlay.overlay-lie {
+    background: linear-gradient(135deg, var(--color-success) 0%, #3d8a5d 100%);
+}
+
+.item-overlay.overlay-truth {
+    background: linear-gradient(135deg, var(--color-error) 0%, #b85849 100%);
 }
 
 /* Loading State */
