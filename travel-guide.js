@@ -13,6 +13,9 @@ const AppState = {
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
     map: null,
+    homeMap: null,
+    homeMarker: null,
+    selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
     markers: [],
     isGenerating: false
 };
@@ -241,51 +244,68 @@ async function loadPlaceHeroImage(locationName) {
     }
 }
 
-// Load random travel hero image for home view
-async function loadHomeHeroImage() {
-    const heroContainer = document.getElementById('homeHero');
-    const heroImage = document.getElementById('homeHeroImage');
+// Initialize home map with draggable marker
+function initializeHomeMap() {
+    // Create map centered on Paris (default)
+    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 3);
 
-    // Pick a random well-known destination for the home hero
-    const famousPlaces = ['Eiffel Tower', 'Taj Mahal', 'Great Wall of China', 'Colosseum',
-                          'Machu Picchu', 'Santorini', 'Grand Canyon', 'Angkor Wat'];
-    const randomPlace = famousPlaces[Math.floor(Math.random() * famousPlaces.length)];
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(AppState.homeMap);
 
-    // Try Wikipedia image first, fallback to placeholder
-    let imageUrl = await fetchWikipediaImage(randomPlace);
+    // Add draggable marker
+    AppState.homeMarker = L.marker([AppState.selectedCoords.lat, AppState.selectedCoords.lng], {
+        draggable: true,
+        icon: L.divIcon({
+            className: 'custom-marker home-marker',
+            html: '<div class="marker-pin-large"></div>',
+            iconSize: [40, 56],
+            iconAnchor: [20, 56]
+        })
+    }).addTo(AppState.homeMap);
 
-    if (!imageUrl) {
-        imageUrl = await fetchPlaceholderImage(randomPlace);
-    }
+    // Update coordinates when marker is dragged
+    AppState.homeMarker.on('dragend', function(e) {
+        const position = e.target.getLatLng();
+        AppState.selectedCoords = { lat: position.lat, lng: position.lng };
+    });
 
-    if (imageUrl) {
-        // Add error handler with fallback
-        heroImage.onerror = async () => {
-            if (imageUrl.includes('wikipedia')) {
-                const fallbackUrl = await fetchPlaceholderImage(randomPlace);
-                if (fallbackUrl && fallbackUrl !== heroImage.src) {
-                    heroImage.src = fallbackUrl;
-                } else {
-                    heroContainer.style.display = 'none';
-                    heroImage.style.display = 'none';
+    // Click on map to move marker
+    AppState.homeMap.on('click', function(e) {
+        AppState.homeMarker.setLatLng(e.latlng);
+        AppState.selectedCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+    });
+}
+
+// Reverse geocode coordinates to get location name
+async function reverseGeocode(lat, lng) {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+            {
+                headers: {
+                    'User-Agent': 'TwoTruthsLieTravelGuide/1.0'
                 }
-            } else {
-                heroContainer.style.display = 'none';
-                heroImage.style.display = 'none';
             }
-        };
+        );
 
-        // Add load handler to show hero when image loads successfully
-        heroImage.onload = () => {
-            heroImage.style.display = 'block';
-            heroContainer.style.display = 'block';
-        };
+        const data = await response.json();
 
-        heroImage.src = imageUrl;
-        heroImage.alt = 'Travel destination';
-    } else {
-        // Hide hero if no image URL
-        heroContainer.style.display = 'none';
+        if (data && data.address) {
+            // Try to get a meaningful location name
+            const addr = data.address;
+            const locationName = addr.city || addr.town || addr.village ||
+                               addr.county || addr.state || addr.country ||
+                               `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            return locationName;
+        }
+
+        return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     }
 }
 
@@ -332,6 +352,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeApp() {
     // Set up event listeners
     document.getElementById('exploreBtn').addEventListener('click', handleExplore);
+    document.getElementById('exploreMapBtn').addEventListener('click', handleExploreMap);
+    document.getElementById('nearMeBtn').addEventListener('click', handleNearMe);
     document.getElementById('locationInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleExplore();
     });
@@ -389,9 +411,9 @@ function initializeApp() {
     // Update API key status indicator
     updateApiKeyStatus();
 
-    // Generate random suggestion chips and load home hero image
+    // Generate random suggestion chips and initialize home map
     generateSuggestionChips();
-    loadHomeHeroImage();
+    initializeHomeMap();
 
     // Note: We always have a key now (default key), so don't auto-open settings
 
@@ -631,6 +653,62 @@ function updateApiKeyStatus() {
             statusElement.innerHTML = '<span style="color: #2196F3;">✓ Using your personal API key</span>';
         }
     }
+}
+
+// Handle Explore Map Location
+async function handleExploreMap() {
+    const locationName = await reverseGeocode(AppState.selectedCoords.lat, AppState.selectedCoords.lng);
+
+    // Cancel any ongoing generation
+    if (AppState.isGenerating) {
+        AppState.isGenerating = false;
+    }
+
+    await loadPlace(locationName, true);
+}
+
+// Handle Near Me
+async function handleNearMe() {
+    if (!navigator.geolocation) {
+        showNotification('Geolocation is not supported by your browser', 'error');
+        return;
+    }
+
+    showNotification('Getting your location...', 'info');
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Update map marker
+            AppState.homeMarker.setLatLng([lat, lng]);
+            AppState.homeMap.setView([lat, lng], 12);
+            AppState.selectedCoords = { lat, lng };
+
+            const locationName = await reverseGeocode(lat, lng);
+            showNotification(`Found: ${locationName}`, 'success');
+
+            // Optionally auto-explore
+            // await loadPlace(locationName, true);
+        },
+        (error) => {
+            let message = 'Unable to get your location';
+            if (error.code === error.PERMISSION_DENIED) {
+                message = 'Location permission denied. Please enable location access.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                message = 'Location information unavailable';
+            } else if (error.code === error.TIMEOUT) {
+                message = 'Location request timed out';
+            }
+            showNotification(message, 'error');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
 }
 
 // Handle Explore
@@ -1170,9 +1248,13 @@ function showSearchSection() {
     AppState.history = [];
     history.pushState({}, '', '#');
 
-    // Regenerate suggestions and hero image on return to home
+    // Regenerate suggestions on return to home
     generateSuggestionChips();
-    loadHomeHeroImage();
+
+    // Re-initialize home map if it was cleared
+    if (!AppState.homeMap) {
+        initializeHomeMap();
+    }
 }
 
 // Show Notification
