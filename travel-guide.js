@@ -13,6 +13,9 @@ const AppState = {
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
     map: null,
+    homeMap: null,
+    homeMarker: null,
+    selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
     markers: [],
     isGenerating: false
 };
@@ -59,82 +62,6 @@ const VOICE_ICONS = {
     compass: '🧭',
     pen: '✍️',
     sunglasses: '🕶️',
-};
-
-// Voice-Specific Badge Messages (for the revealed items)
-const VOICE_BADGE_MESSAGES = {
-    standard: {
-        correctLie: [
-            "This was the lie",
-            "This is false",
-            "This was fabricated"
-        ],
-        wrongTruth: [
-            "This is actually true",
-            "This is a true fact",
-            "This is genuine"
-        ]
-    },
-    twain: {
-        correctLie: [
-            "A bald-faced lie, I tell you!",
-            "Pure fabrication, friend",
-            "The tall tale revealed"
-        ],
-        wrongTruth: [
-            "Ah, but this tale is true!",
-            "The honest truth, surprisingly",
-            "This yarn is genuine"
-        ]
-    },
-    bird: {
-        correctLie: [
-            "A fabrication, I'm afraid",
-            "This observation is false",
-            "Not as I witnessed it"
-        ],
-        wrongTruth: [
-            "Quite authentic, dear reader",
-            "This is true, as I observed",
-            "A genuine account"
-        ]
-    },
-    battuta: {
-        correctLie: [
-            "A falsehood, praise be!",
-            "This is untrue",
-            "Not as witnessed by this traveler"
-        ],
-        wrongTruth: [
-            "True, as Allah is my witness",
-            "An authentic account",
-            "This is the truth"
-        ]
-    },
-    west: {
-        correctLie: [
-            "Fiction, I'm afraid",
-            "Not quite accurate",
-            "A falsehood, regrettably"
-        ],
-        wrongTruth: [
-            "Quite true, actually",
-            "An authentic detail",
-            "True, though you doubted"
-        ]
-    },
-    thompson: {
-        correctLie: [
-            "Total BS, baby!",
-            "Lies and propaganda!",
-            "Fake news, pure fiction"
-        ],
-        wrongTruth: [
-            "The ugly truth!",
-            "Real as it gets",
-            "Hard truth, kid"
-        ]
-    }
 };
 
 // Category Templates by Location Type
@@ -241,51 +168,68 @@ async function loadPlaceHeroImage(locationName) {
     }
 }
 
-// Load random travel hero image for home view
-async function loadHomeHeroImage() {
-    const heroContainer = document.getElementById('homeHero');
-    const heroImage = document.getElementById('homeHeroImage');
+// Initialize home map with draggable marker
+function initializeHomeMap() {
+    // Create map centered on Paris (default)
+    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 3);
 
-    // Pick a random well-known destination for the home hero
-    const famousPlaces = ['Eiffel Tower', 'Taj Mahal', 'Great Wall of China', 'Colosseum',
-                          'Machu Picchu', 'Santorini', 'Grand Canyon', 'Angkor Wat'];
-    const randomPlace = famousPlaces[Math.floor(Math.random() * famousPlaces.length)];
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(AppState.homeMap);
 
-    // Try Wikipedia image first, fallback to placeholder
-    let imageUrl = await fetchWikipediaImage(randomPlace);
+    // Add draggable marker
+    AppState.homeMarker = L.marker([AppState.selectedCoords.lat, AppState.selectedCoords.lng], {
+        draggable: true,
+        icon: L.divIcon({
+            className: 'custom-marker home-marker',
+            html: '<div class="marker-pin-large"></div>',
+            iconSize: [40, 56],
+            iconAnchor: [20, 56]
+        })
+    }).addTo(AppState.homeMap);
 
-    if (!imageUrl) {
-        imageUrl = await fetchPlaceholderImage(randomPlace);
-    }
+    // Update coordinates when marker is dragged
+    AppState.homeMarker.on('dragend', function(e) {
+        const position = e.target.getLatLng();
+        AppState.selectedCoords = { lat: position.lat, lng: position.lng };
+    });
 
-    if (imageUrl) {
-        // Add error handler with fallback
-        heroImage.onerror = async () => {
-            if (imageUrl.includes('wikipedia')) {
-                const fallbackUrl = await fetchPlaceholderImage(randomPlace);
-                if (fallbackUrl && fallbackUrl !== heroImage.src) {
-                    heroImage.src = fallbackUrl;
-                } else {
-                    heroContainer.style.display = 'none';
-                    heroImage.style.display = 'none';
+    // Click on map to move marker
+    AppState.homeMap.on('click', function(e) {
+        AppState.homeMarker.setLatLng(e.latlng);
+        AppState.selectedCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+    });
+}
+
+// Reverse geocode coordinates to get location name
+async function reverseGeocode(lat, lng) {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+            {
+                headers: {
+                    'User-Agent': 'TwoTruthsLieTravelGuide/1.0'
                 }
-            } else {
-                heroContainer.style.display = 'none';
-                heroImage.style.display = 'none';
             }
-        };
+        );
 
-        // Add load handler to show hero when image loads successfully
-        heroImage.onload = () => {
-            heroImage.style.display = 'block';
-            heroContainer.style.display = 'block';
-        };
+        const data = await response.json();
 
-        heroImage.src = imageUrl;
-        heroImage.alt = 'Travel destination';
-    } else {
-        // Hide hero if no image URL
-        heroContainer.style.display = 'none';
+        if (data && data.address) {
+            // Try to get a meaningful location name
+            const addr = data.address;
+            const locationName = addr.city || addr.town || addr.village ||
+                               addr.county || addr.state || addr.country ||
+                               `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            return locationName;
+        }
+
+        return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     }
 }
 
@@ -332,6 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeApp() {
     // Set up event listeners
     document.getElementById('exploreBtn').addEventListener('click', handleExplore);
+    document.getElementById('exploreMapBtn').addEventListener('click', handleExploreMap);
+    document.getElementById('nearMeBtn').addEventListener('click', handleNearMe);
     document.getElementById('locationInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleExplore();
     });
@@ -389,9 +335,9 @@ function initializeApp() {
     // Update API key status indicator
     updateApiKeyStatus();
 
-    // Generate random suggestion chips and load home hero image
+    // Generate random suggestion chips and initialize home map
     generateSuggestionChips();
-    loadHomeHeroImage();
+    initializeHomeMap();
 
     // Note: We always have a key now (default key), so don't auto-open settings
 
@@ -633,6 +579,62 @@ function updateApiKeyStatus() {
     }
 }
 
+// Handle Explore Map Location
+async function handleExploreMap() {
+    const locationName = await reverseGeocode(AppState.selectedCoords.lat, AppState.selectedCoords.lng);
+
+    // Cancel any ongoing generation
+    if (AppState.isGenerating) {
+        AppState.isGenerating = false;
+    }
+
+    await loadPlace(locationName, true);
+}
+
+// Handle Near Me
+async function handleNearMe() {
+    if (!navigator.geolocation) {
+        showNotification('Geolocation is not supported by your browser', 'error');
+        return;
+    }
+
+    showNotification('Getting your location...', 'info');
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Update map marker
+            AppState.homeMarker.setLatLng([lat, lng]);
+            AppState.homeMap.setView([lat, lng], 12);
+            AppState.selectedCoords = { lat, lng };
+
+            const locationName = await reverseGeocode(lat, lng);
+            showNotification(`Found: ${locationName}`, 'success');
+
+            // Optionally auto-explore
+            // await loadPlace(locationName, true);
+        },
+        (error) => {
+            let message = 'Unable to get your location';
+            if (error.code === error.PERMISSION_DENIED) {
+                message = 'Location permission denied. Please enable location access.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                message = 'Location information unavailable';
+            } else if (error.code === error.TIMEOUT) {
+                message = 'Location request timed out';
+            }
+            showNotification(message, 'error');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
 // Handle Explore
 async function handleExplore() {
     const location = document.getElementById('locationInput').value.trim();
@@ -743,10 +745,12 @@ CRITICAL: Format text like a travel guide by wrapping important place names, lan
 
 REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
 
+FEEDBACK: For each item, provide a SHORT contextual feedback message (1 sentence max) that reveals whether it's true or false. Use the writing style voice. Be specific to the content, not generic.
+
 Examples:
 - "Visit <strong>Café de Flore</strong> in the heart of <strong>Saint-Germain-des-Prés</strong> for authentic Parisian atmosphere."
-- "The <strong>Louvre Museum</strong> houses over 35,000 works of art across <strong>eight curatorial departments</strong>."
-- "Head to <strong>Le Marais</strong> for vintage shopping at <strong>Free'P'Star</strong> and grab dinner at <strong>L'As du Fallafel</strong>."
+  - If TRUE feedback: "Indeed, this legendary café has been serving intellectuals since 1887."
+  - If LIE feedback: "Actually, Café de Flore is in a different neighborhood."
 
 Categories: ${categories.join(', ')}
 
@@ -759,9 +763,9 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
-        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false}
+        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false, "feedback": "Contextual message confirming this is true"},
+        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true, "feedback": "Contextual message revealing why this is false"},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false, "feedback": "Contextual message about this truth"}
       ]
     }
   ]
@@ -976,7 +980,7 @@ function createItemElement(item, categoryIndex, itemIndex) {
         if (e.target.classList.contains('place-link')) {
             return;
         }
-        revealItem(itemEl, item.isLie);
+        revealItem(itemEl, item);
     });
 
     return itemEl;
@@ -1015,41 +1019,37 @@ function handlePlaceLink(event, placeName) {
 }
 
 // Reveal if item is truth or lie
-function revealItem(itemEl, isLie) {
+function revealItem(itemEl, item) {
     if (itemEl.classList.contains('revealed')) return;
 
     itemEl.classList.add('revealed');
 
-    // Get voice-specific badge messages
-    const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.standard;
+    const isLie = item.isLie;
+    const feedback = item.feedback || (isLie ? 'This was the lie!' : 'This is actually true.');
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-
-        // Add varied voiced commentary to the badge
-        const messages = badgeMessages.correctLie;
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-
-        // Create and append the badge element
-        const badge = document.createElement('div');
-        badge.className = 'item-badge';
-        badge.textContent = randomMessage;
-        itemEl.appendChild(badge);
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-
-        // Add varied voiced commentary to the badge
-        const messages = badgeMessages.wrongTruth;
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-
-        // Create and append the badge element
-        const badge = document.createElement('div');
-        badge.className = 'item-badge';
-        badge.textContent = randomMessage;
-        itemEl.appendChild(badge);
     }
+
+    // Create and show overlay with feedback
+    const overlay = document.createElement('div');
+    overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
+    overlay.textContent = feedback;
+    itemEl.appendChild(overlay);
+
+    // Trigger animation
+    setTimeout(() => overlay.classList.add('show'), 10);
+
+    // Fade out and remove after 3 seconds
+    setTimeout(() => {
+        overlay.classList.remove('show');
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.remove(), 500);
+    }, 3000);
 }
 
 // Update Score
@@ -1170,9 +1170,13 @@ function showSearchSection() {
     AppState.history = [];
     history.pushState({}, '', '#');
 
-    // Regenerate suggestions and hero image on return to home
+    // Regenerate suggestions on return to home
     generateSuggestionChips();
-    loadHomeHeroImage();
+
+    // Re-initialize home map if it was cleared
+    if (!AppState.homeMap) {
+        initializeHomeMap();
+    }
 }
 
 // Show Notification

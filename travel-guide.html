@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="travel-guide.css?v=1762580606">
+    <link rel="stylesheet" href="travel-guide.css?v=1762581639">
 </head>
 <body>
     <div class="app-container">
@@ -152,19 +152,40 @@
             <div class="container">
                 <!-- Search Section -->
                 <section id="searchSection" class="search-section">
-                    <!-- Hero Image for Home View -->
-                    <div class="home-hero" id="homeHero">
-                        <img id="homeHeroImage" src="" alt="Random travel destination" style="display: none;">
-                        <div class="home-hero-overlay"></div>
+                    <!-- Interactive World Map for Home View -->
+                    <div class="home-map-container">
+                        <div id="homeMap" class="home-map"></div>
+                        <div class="map-instructions">
+                            <p>Drag the marker to explore any location</p>
+                        </div>
                     </div>
 
                     <div class="search-card">
                         <h2>Explore Any Destination</h2>
-                        <p class="search-description">Enter a city, landmark, museum, or any place you'd like to explore. Each guide presents facts as "Two Truths and a Lie" - can you spot the fiction?</p>
+                        <p class="search-description">Drag the map marker to select a location, search for a specific place, or discover what's nearby.</p>
+
+                        <div class="location-buttons">
+                            <button id="nearMeBtn" class="btn-near-me">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                                </svg>
+                                What's Near Me
+                            </button>
+                            <button id="exploreMapBtn" class="btn-explore-map">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                                Explore This Location
+                            </button>
+                        </div>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
 
                         <div class="search-input-group">
                             <input type="text" id="locationInput" placeholder="Paris, Tokyo, The Louvre..." autocomplete="off">
-                            <button id="exploreBtn" class="btn-explore">Explore</button>
+                            <button id="exploreBtn" class="btn-explore">Search</button>
                         </div>
 
                         <div class="quick-suggestions" id="quickSuggestions">
@@ -222,6 +243,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="travel-guide.js?v=1762580606"></script>
+    <script src="travel-guide.js?v=1762581639"></script>
 </body>
 </html>
