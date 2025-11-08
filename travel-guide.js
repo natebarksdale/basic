@@ -4,9 +4,22 @@
 // Default Free-Tier API Key (injected at build time from GitHub Secrets)
 const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
 
+// Check if we have a valid API key (not a placeholder)
+function getValidApiKey() {
+    const stored = localStorage.getItem('openrouter_api_key');
+    if (stored) return stored;
+
+    // Check if default key is still a placeholder
+    if (DEFAULT_API_KEY.startsWith('__') && DEFAULT_API_KEY.endsWith('__')) {
+        return null; // No valid key for local development
+    }
+
+    return DEFAULT_API_KEY;
+}
+
 // Application State
 const AppState = {
-    apiKey: localStorage.getItem('openrouter_api_key') || DEFAULT_API_KEY,
+    apiKey: getValidApiKey(),
     currentLocation: null,
     currentModel: 'google/gemini-2.5-flash-lite',
     writingStyle: 'twain',
@@ -200,8 +213,8 @@ function initializeHomeMap() {
         icon: L.divIcon({
             className: 'custom-marker home-marker',
             html: '<div class="marker-pin-large"></div>',
-            iconSize: [40, 56],
-            iconAnchor: [20, 56]
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
         })
     }).addTo(AppState.homeMap);
 
@@ -245,8 +258,8 @@ function initializeBottomMap(lat, lng) {
         icon: L.divIcon({
             className: 'custom-marker home-marker',
             html: '<div class="marker-pin-large"></div>',
-            iconSize: [40, 56],
-            iconAnchor: [20, 56]
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
         })
     }).addTo(AppState.bottomMap);
 
@@ -719,7 +732,12 @@ async function handleExplore() {
         return;
     }
 
-    // Note: We always have an API key now (default or user-provided)
+    // Check if we have a valid API key
+    if (!AppState.apiKey) {
+        showNotification('Please add your OpenRouter API key in settings', 'error');
+        toggleSettings();
+        return;
+    }
 
     // Cancel any ongoing generation
     if (AppState.isGenerating) {
@@ -1119,20 +1137,27 @@ function revealItem(itemEl, item) {
     itemEl.classList.add('revealed');
 
     const isLie = item.isLie;
-    const feedback = item.feedback || (isLie ? 'This was the lie!' : 'This is actually true.');
+    const baseFeedback = item.feedback || (isLie ? 'This was the lie!' : 'This is actually true.');
+
+    let pointsMessage = '';
+    let fullFeedback = '';
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
+        pointsMessage = '🎉 You spotted the lie! +10 points';
+        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
+        pointsMessage = '❌ This was actually true. -5 points';
+        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
     }
 
     // Create and show overlay with feedback
     const overlay = document.createElement('div');
     overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
-    overlay.innerHTML = feedback; // Use innerHTML to support <strong> tags
+    overlay.innerHTML = fullFeedback; // Use innerHTML to support <strong> tags
     itemEl.appendChild(overlay);
 
     // Trigger animation
