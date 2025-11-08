@@ -507,8 +507,8 @@ input, select, textarea {
     position: relative;
     left: 50%;
     right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
     margin-top: 0;
     margin-bottom: 0;
     overflow: hidden;
@@ -919,7 +919,7 @@ input, select, textarea {
     background: rgba(0, 0, 0, 0.92);
     color: white;
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 500;
     display: flex;
@@ -931,6 +931,7 @@ input, select, textarea {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
     line-height: 1.5;
+    cursor: pointer;
 }
 
 .item-overlay.show {

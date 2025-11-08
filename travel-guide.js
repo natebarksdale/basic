@@ -1117,18 +1117,19 @@ function revealItem(itemEl, item) {
     // Create and show overlay with feedback
     const overlay = document.createElement('div');
     overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
-    overlay.textContent = feedback;
+    overlay.innerHTML = feedback; // Use innerHTML to support <strong> tags
     itemEl.appendChild(overlay);
 
     // Trigger animation
     setTimeout(() => overlay.classList.add('show'), 10);
 
-    // Fade out and remove after 3 seconds
-    setTimeout(() => {
+    // Add click handler to dismiss overlay
+    overlay.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent tile click
         overlay.classList.remove('show');
         overlay.classList.add('fade-out');
-        setTimeout(() => overlay.remove(), 500);
-    }, 3000);
+        setTimeout(() => overlay.remove(), 300);
+    });
 }
 
 // Update Score
