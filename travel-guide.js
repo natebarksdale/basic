@@ -61,31 +61,79 @@ const VOICE_ICONS = {
     sunglasses: '🕶️',
 };
 
-// Voice-Specific Notification Messages
-const VOICE_MESSAGES = {
+// Voice-Specific Badge Messages (for the revealed items)
+const VOICE_BADGE_MESSAGES = {
     standard: {
-        correctLie: "Correct! This was the lie. +10 points",
-        wrongTruth: "Wrong! This is actually true. -5 points"
+        correctLie: [
+            "This was the lie",
+            "This is false",
+            "This was fabricated"
+        ],
+        wrongTruth: [
+            "This is actually true",
+            "This is a true fact",
+            "This is genuine"
+        ]
     },
     twain: {
-        correctLie: "Well spotted, friend! That was the bald-faced lie. +10 points",
-        wrongTruth: "Ah, you've been bamboozled! This tale happens to be true. -5 points"
+        correctLie: [
+            "A bald-faced lie, I tell you!",
+            "Pure fabrication, friend",
+            "The tall tale revealed"
+        ],
+        wrongTruth: [
+            "Ah, but this tale is true!",
+            "The honest truth, surprisingly",
+            "This yarn is genuine"
+        ]
     },
     bird: {
-        correctLie: "Your keen eye has caught the fabrication! Most delightful. +10 points",
-        wrongTruth: "I'm afraid my dear reader, this observation is quite authentic. -5 points"
+        correctLie: [
+            "A fabrication, I'm afraid",
+            "This observation is false",
+            "Not as I witnessed it"
+        ],
+        wrongTruth: [
+            "Quite authentic, dear reader",
+            "This is true, as I observed",
+            "A genuine account"
+        ]
     },
     battuta: {
-        correctLie: "Praise be! You have unveiled the falsehood. +10 points",
-        wrongTruth: "Alas, this account is true as witnessed by this humble traveler. -5 points"
+        correctLie: [
+            "A falsehood, praise be!",
+            "This is untrue",
+            "Not as witnessed by this traveler"
+        ],
+        wrongTruth: [
+            "True, as Allah is my witness",
+            "An authentic account",
+            "This is the truth"
+        ]
     },
     west: {
-        correctLie: "How perceptive! You've discerned the fiction from fact. +10 points",
-        wrongTruth: "I must correct you—this detail is, regrettably, quite true. -5 points"
+        correctLie: [
+            "Fiction, I'm afraid",
+            "Not quite accurate",
+            "A falsehood, regrettably"
+        ],
+        wrongTruth: [
+            "Quite true, actually",
+            "An authentic detail",
+            "True, though you doubted"
+        ]
     },
     thompson: {
-        correctLie: "Hot damn! You nailed the lie. Fear and loathing avoided. +10 points",
-        wrongTruth: "Wrong! That's the ugly truth, baby. Reality bites harder. -5 points"
+        correctLie: [
+            "Total BS, baby!",
+            "Lies and propaganda!",
+            "Fake news, pure fiction"
+        ],
+        wrongTruth: [
+            "The ugly truth!",
+            "Real as it gets",
+            "Hard truth, kid"
+        ]
     }
 };
 
@@ -99,6 +147,99 @@ const CATEGORY_TEMPLATES = {
     restaurant: ['Introduction', 'Signature Dishes', 'Atmosphere', 'History', 'Practical Information'],
     default: ['Introduction', 'Background', 'Where to Go', 'What to Eat', 'What to Do', 'Practical Information']
 };
+
+// Diverse suggestion pools for dynamic generation
+const SUGGESTION_POOLS = {
+    cities: ['Paris', 'Tokyo', 'Rome', 'Barcelona', 'Istanbul', 'Cairo', 'Bangkok', 'Rio de Janeiro', 'Sydney', 'New York', 'London', 'Dubai', 'Singapore', 'Amsterdam', 'Prague'],
+    landmarks: ['The Louvre', 'Machu Picchu', 'Taj Mahal', 'Colosseum', 'Eiffel Tower', 'Great Wall of China', 'Petra', 'Angkor Wat', 'Sagrada Familia', 'Stonehenge'],
+    museums: ['British Museum', 'Metropolitan Museum of Art', 'Uffizi Gallery', 'Hermitage Museum', 'Prado Museum', 'Vatican Museums', 'Smithsonian'],
+    nature: ['Grand Canyon', 'Mount Fuji', 'Santorini', 'Yosemite', 'Banff', 'Patagonia', 'Serengeti', 'Great Barrier Reef']
+};
+
+// Unsplash API helper (using free public API - no auth needed for basic usage)
+async function fetchUnsplashImage(query, orientation = 'landscape') {
+    try {
+        // Using Unsplash Source API for simplicity (no API key required)
+        const width = orientation === 'landscape' ? 1200 : 800;
+        const height = orientation === 'landscape' ? 600 : 1000;
+
+        // Add random seed to get different images each time
+        const randomSeed = Math.random().toString(36).substring(7);
+
+        return `https://source.unsplash.com/${width}x${height}/?${encodeURIComponent(query)}&sig=${randomSeed}`;
+    } catch (error) {
+        console.error('Error fetching Unsplash image:', error);
+        return null;
+    }
+}
+
+// Load hero image for a place
+async function loadPlaceHeroImage(locationName) {
+    const heroContainer = document.getElementById('placeHero');
+    const heroImage = document.getElementById('placeHeroImage');
+
+    // Get image URL from Unsplash
+    const imageUrl = await fetchUnsplashImage(locationName);
+
+    if (imageUrl) {
+        heroImage.src = imageUrl;
+        heroImage.alt = locationName;
+        heroImage.style.display = 'block';
+        heroContainer.style.display = 'block';
+    }
+}
+
+// Load random travel hero image for home view
+async function loadHomeHeroImage() {
+    const heroContainer = document.getElementById('homeHero');
+    const heroImage = document.getElementById('homeHeroImage');
+
+    const randomDestinations = ['travel', 'adventure', 'wanderlust', 'explore', 'journey', 'destination', 'vacation', 'landmark'];
+    const randomQuery = randomDestinations[Math.floor(Math.random() * randomDestinations.length)];
+
+    const imageUrl = await fetchUnsplashImage(randomQuery);
+
+    if (imageUrl) {
+        heroImage.src = imageUrl;
+        heroImage.style.display = 'block';
+        heroContainer.style.display = 'block';
+    }
+}
+
+// Generate random suggestion chips
+function generateSuggestionChips() {
+    const container = document.getElementById('quickSuggestions');
+
+    // Clear existing chips (except label)
+    const label = container.querySelector('.suggestion-label');
+    container.innerHTML = '';
+    container.appendChild(label);
+
+    // Pick 2 random cities
+    const cities = [...SUGGESTION_POOLS.cities].sort(() => 0.5 - Math.random()).slice(0, 2);
+
+    // Pick 1 random landmark
+    const landmark = SUGGESTION_POOLS.landmarks[Math.floor(Math.random() * SUGGESTION_POOLS.landmarks.length)];
+
+    // Pick 1 random museum or nature spot
+    const extraPool = Math.random() > 0.5 ? SUGGESTION_POOLS.museums : SUGGESTION_POOLS.nature;
+    const extra = extraPool[Math.floor(Math.random() * extraPool.length)];
+
+    // Combine and create chips
+    const suggestions = [...cities, landmark, extra];
+
+    suggestions.forEach(location => {
+        const chip = document.createElement('button');
+        chip.className = 'suggestion-chip';
+        chip.dataset.location = location;
+        chip.textContent = location;
+        chip.addEventListener('click', () => {
+            document.getElementById('locationInput').value = location;
+            handleExplore();
+        });
+        container.appendChild(chip);
+    });
+}
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,12 +306,43 @@ function initializeApp() {
     // Update API key status indicator
     updateApiKeyStatus();
 
+    // Generate random suggestion chips and load home hero image
+    generateSuggestionChips();
+    loadHomeHeroImage();
+
     // Note: We always have a key now (default key), so don't auto-open settings
 
-    // Handle browser back/forward
+    // Check for hash on page load and navigate to that location
+    if (window.location.hash) {
+        const location = decodeURIComponent(window.location.hash.substring(1));
+        if (location) {
+            loadPlace(location, false);
+        }
+    }
+
+    // Handle browser back/forward and hash changes
     window.addEventListener('popstate', (e) => {
         if (e.state && e.state.location) {
             loadPlace(e.state.location, false);
+        } else if (window.location.hash) {
+            const location = decodeURIComponent(window.location.hash.substring(1));
+            if (location) {
+                loadPlace(location, false);
+            } else {
+                showSearchSection();
+            }
+        } else {
+            showSearchSection();
+        }
+    });
+
+    // Handle hash changes (e.g., from manual URL edits)
+    window.addEventListener('hashchange', (e) => {
+        if (window.location.hash) {
+            const location = decodeURIComponent(window.location.hash.substring(1));
+            if (location) {
+                loadPlace(location, false);
+            }
         } else {
             showSearchSection();
         }
@@ -283,12 +455,16 @@ function updateActiveVoiceOption() {
 
 function updateVoiceIcon() {
     const iconElement = document.getElementById('voiceIcon');
+    const toggleElement = document.getElementById('voiceToggle');
     const currentStyle = WRITING_STYLES[AppState.writingStyle];
     const iconKey = currentStyle.icon;
 
     if (VOICE_ICONS[iconKey]) {
         iconElement.textContent = VOICE_ICONS[iconKey];
     }
+
+    // Update data-voice attribute for background color
+    toggleElement.setAttribute('data-voice', AppState.writingStyle);
 }
 
 // Settings Panel Management
@@ -424,6 +600,9 @@ async function loadPlace(location, addToHistory = true) {
         history.pushState({ location: cleanLocationName }, '', `#${encodeURIComponent(cleanLocationName)}`);
     }
     updateBreadcrumb();
+
+    // Load hero image for this place
+    loadPlaceHeroImage(location);
 
     try {
         // Generate content
@@ -758,17 +937,37 @@ function revealItem(itemEl, isLie) {
 
     itemEl.classList.add('revealed');
 
-    // Get voice-specific messages
-    const messages = VOICE_MESSAGES[AppState.writingStyle] || VOICE_MESSAGES.standard;
+    // Get voice-specific badge messages
+    const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.standard;
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-        showNotification(messages.correctLie, 'success');
+        showNotification('+10', 'success');
+
+        // Add varied voiced commentary to the badge
+        const messages = badgeMessages.correctLie;
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+        // Create and append the badge element
+        const badge = document.createElement('div');
+        badge.className = 'item-badge';
+        badge.textContent = randomMessage;
+        itemEl.appendChild(badge);
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-        showNotification(messages.wrongTruth, 'error');
+        showNotification('-5', 'error');
+
+        // Add varied voiced commentary to the badge
+        const messages = badgeMessages.wrongTruth;
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+        // Create and append the badge element
+        const badge = document.createElement('div');
+        badge.className = 'item-badge';
+        badge.textContent = randomMessage;
+        itemEl.appendChild(badge);
     }
 }
 
@@ -782,6 +981,18 @@ function updateScore(delta) {
 
 function updateScoreDisplay() {
     document.getElementById('scoreValue').textContent = AppState.score;
+
+    // Update header score indicator
+    const headerScore = document.getElementById('headerScore');
+    const headerScoreValue = document.getElementById('headerScoreValue');
+
+    if (AppState.score > 0) {
+        headerScoreValue.textContent = AppState.score;
+        headerScore.style.display = 'block';
+    } else {
+        headerScore.style.display = 'none';
+    }
+
     // Update title bar with score
     document.title = `(${AppState.score}) Two Truths & A Lie`;
 }
@@ -862,10 +1073,14 @@ function navigateToBreadcrumb(index) {
 
 // Show Search Section
 function showSearchSection() {
-    document.getElementById('searchSection').style.display = 'block';
+    document.getElementById('searchSection').style.display = 'flex';
     document.getElementById('placeSection').style.display = 'none';
     AppState.history = [];
     history.pushState({}, '', '#');
+
+    // Regenerate suggestions and hero image on return to home
+    generateSuggestionChips();
+    loadHomeHeroImage();
 }
 
 // Show Notification
