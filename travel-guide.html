@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two Truths & A Lie - Gamified Travel Guide</title>
-
-    <!-- Leaflet CSS for maps -->
+    <title>Two Truths & A Lie - Travel Guide</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="travel-guide.css">
 </head>
 <body>
@@ -17,82 +13,74 @@
         <header class="header">
             <div class="container">
                 <div class="header-content">
-                    <h1 class="logo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="logo-icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Two Truths & A Lie
-                    </h1>
-                    <p class="tagline">A Gamified Travel Guide</p>
-                </div>
-
-                <!-- Controls -->
-                <div class="controls">
-                    <!-- Writing Style Selector -->
-                    <div class="control-group">
-                        <label for="writingStyle">Writing Style:</label>
-                        <select id="writingStyle" class="style-selector">
-                            <option value="standard">Standard</option>
-                            <option value="burton">Richard Francis Burton</option>
-                            <option value="bird">Isabella Bird</option>
-                            <option value="battuta">Ibn Battuta</option>
-                            <option value="west">Dorothy West</option>
-                            <option value="thompson">Hunter S. Thompson</option>
-                        </select>
-                    </div>
-
-                    <!-- Model Selector -->
-                    <div class="control-group">
-                        <label for="modelSelect">LLM Model:</label>
-                        <select id="modelSelect" class="model-selector">
-                            <optgroup label="Fast & Cheap (Recommended)">
-                                <option value="google/gemini-flash-1.5" selected>Gemini 1.5 Flash (Fastest!)</option>
-                                <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-                                <option value="google/gemini-pro-1.5">Gemini 1.5 Pro</option>
-                            </optgroup>
-                            <optgroup label="Balanced">
-                                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                                <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-                                <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                            </optgroup>
-                            <optgroup label="Premium (Slower)">
-                                <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-                                <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-                            </optgroup>
-                        </select>
-                    </div>
-
-                    <!-- API Key -->
-                    <div class="control-group">
-                        <button id="apiKeyBtn" class="api-key-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    <div>
+                        <h1 class="logo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="logo-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            API Key
-                        </button>
+                            Two Truths & A Lie
+                        </h1>
                     </div>
-
-                    <!-- Score Display -->
-                    <div class="score-display">
-                        <span class="score-label">Score:</span>
-                        <span id="scoreValue" class="score-value">0</span>
-                    </div>
+                    <button class="menu-toggle" id="menuToggle">
+                        <span>Settings</span>
+                        <div class="hamburger">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <!-- API Key Modal -->
-        <div id="apiKeyModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>OpenRouter API Key</h2>
-                    <button class="modal-close" onclick="closeApiKeyModal()">×</button>
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-header">
+                <h3>Settings</h3>
+                <button class="close-settings" id="closeSettings">×</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-group">
+                    <label for="apiKeyInput">OpenRouter API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-...">
+                    <button class="btn-save" id="saveApiKey">Save API Key</button>
                 </div>
-                <div class="modal-body">
-                    <p>Enter your OpenRouter API key to use the travel guide. Get one at <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a></p>
-                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." class="api-key-input">
-                    <button onclick="saveApiKey()" class="btn-primary">Save API Key</button>
+
+                <div class="setting-group">
+                    <label for="modelSelect">Model</label>
+                    <select id="modelSelect">
+                        <optgroup label="Fast & Cheap">
+                            <option value="google/gemini-flash-1.5" selected>Gemini Flash 1.5</option>
+                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="anthropic/claude-3-haiku">Claude Haiku</option>
+                        </optgroup>
+                        <optgroup label="Balanced">
+                            <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+                            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+                            <option value="anthropic/claude-3.5-sonnet">Claude Sonnet</option>
+                        </optgroup>
+                        <optgroup label="Premium">
+                            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+                            <option value="anthropic/claude-3-opus">Claude Opus</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="writingStyle">Writing Style</label>
+                    <select id="writingStyle">
+                        <option value="standard">Standard</option>
+                        <option value="burton">Richard Francis Burton</option>
+                        <option value="bird">Isabella Bird</option>
+                        <option value="battuta">Ibn Battuta</option>
+                        <option value="west">Dorothy West</option>
+                        <option value="thompson">Hunter S. Thompson</option>
+                    </select>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="scoreValue">0</div>
                 </div>
             </div>
         </div>
@@ -107,72 +95,45 @@
                         <p class="search-description">Enter a city, landmark, museum, or any place you'd like to explore. Each guide presents facts as "Two Truths and a Lie" - can you spot the fiction?</p>
 
                         <div class="search-input-group">
-                            <input
-                                type="text"
-                                id="locationInput"
-                                placeholder="e.g., Paris, The Louvre, Tokyo Tower..."
-                                class="search-input"
-                                autocomplete="off">
-                            <button id="exploreBtn" class="btn-explore">
-                                <span>Explore</span>
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"/>
-                                </svg>
-                            </button>
+                            <input type="text" id="locationInput" placeholder="Paris, Tokyo, The Louvre..." autocomplete="off">
+                            <button id="exploreBtn" class="btn-explore">Explore</button>
                         </div>
 
                         <div class="quick-suggestions">
-                            <span class="suggestion-label">Quick suggestions:</span>
-                            <button class="suggestion-chip" data-location="Rome">Rome</button>
-                            <button class="suggestion-chip" data-location="Machu Picchu">Machu Picchu</button>
-                            <button class="suggestion-chip" data-location="The British Museum">The British Museum</button>
+                            <span class="suggestion-label">Try these:</span>
+                            <button class="suggestion-chip" data-location="Paris">Paris</button>
                             <button class="suggestion-chip" data-location="Tokyo">Tokyo</button>
-                            <button class="suggestion-chip" data-location="The Colosseum">The Colosseum</button>
+                            <button class="suggestion-chip" data-location="Rome">Rome</button>
+                            <button class="suggestion-chip" data-location="The Louvre">The Louvre</button>
+                            <button class="suggestion-chip" data-location="Machu Picchu">Machu Picchu</button>
                         </div>
                     </div>
                 </section>
 
                 <!-- Place Content Section -->
                 <section id="placeSection" class="place-section" style="display: none;">
-                    <!-- Navigation -->
                     <div class="place-nav">
                         <button id="backBtn" class="btn-back">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                             </svg>
-                            Back to Search
+                            Back
                         </button>
-
                         <div class="breadcrumb" id="breadcrumb"></div>
                     </div>
 
-                    <!-- Place Header -->
                     <div class="place-header">
                         <h1 id="placeName" class="place-name"></h1>
                         <p id="placeType" class="place-type"></p>
                     </div>
 
-                    <!-- Map -->
+                    <!-- Hidden map for speed -->
                     <div class="map-container">
                         <div id="map" class="map"></div>
-                        <div class="map-legend">
-                            <div class="legend-item">
-                                <span class="legend-marker legend-main"></span>
-                                <span>Main Location</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-marker legend-mentioned"></span>
-                                <span>Mentioned Places</span>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Content Categories -->
-                    <div id="categoriesContainer" class="categories-container">
-                        <!-- Categories will be inserted here dynamically -->
-                    </div>
+                    <div id="categoriesContainer" class="categories-container"></div>
 
-                    <!-- Loading State -->
                     <div id="loadingState" class="loading-state" style="display: none;">
                         <div class="spinner"></div>
                         <p>Generating your travel guide...</p>
@@ -184,13 +145,12 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
-                <p>Two Truths & A Lie Travel Guide - AI-generated content for entertainment purposes</p>
-                <p class="footer-note">Can you separate fact from fiction?</p>
+                <p>Two Truths & A Lie Travel Guide</p>
+                <p>AI-generated content for entertainment</p>
             </div>
         </footer>
     </div>
 
-    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="travel-guide.js"></script>
 </body>
