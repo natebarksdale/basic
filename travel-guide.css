@@ -477,7 +477,7 @@ input, select, textarea {
 .score-display {
     margin-top: 1.5rem;
     padding: 1rem;
-    background: var(--color-bg);
+    background: rgba(250, 250, 249, 0.4);
     border-radius: 6px;
     text-align: center;
 }
@@ -690,7 +690,7 @@ input, select, textarea {
 
 .btn-explore {
     position: absolute;
-    right: 0.75rem;
+    right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     width: 2.5rem !important;
