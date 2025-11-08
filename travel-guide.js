@@ -38,6 +38,16 @@ const AppState = {
 
 // Writing Style Personas
 const WRITING_STYLES = {
+    parker: {
+        name: "Dorothy Parker",
+        prompt: "Write in the style of Dorothy Parker - razor-sharp wit, biting humor, and devastating one-liners. Use elegant yet caustic prose with sophisticated observations and perfectly timed sarcasm.",
+        icon: "cocktail"
+    },
+    thompson: {
+        name: "Hunter S. Thompson",
+        prompt: "Write in the style of Hunter S. Thompson - gonzo journalism with wild imagery, sharp cultural criticism, dark humor, and surreal observations. Use punchy, irreverent prose with vivid metaphors.",
+        icon: "sunglasses"
+    },
     twain: {
         name: "Mark Twain",
         prompt: "Write in the style of Mark Twain - witty, satirical observations with folksy wisdom and humorous exaggeration. Use colorful storytelling with sharp social commentary and a conversational tone.",
@@ -53,11 +63,6 @@ const WRITING_STYLES = {
         prompt: "Write in the style of Ibn Battuta - focus on Islamic culture, trade routes, scholarly encounters, and the hospitality of rulers. Include observations about religious practices and social customs with reverence and wonder.",
         icon: "compass"
     },
-    parker: {
-        name: "Dorothy Parker",
-        prompt: "Write in the style of Dorothy Parker - razor-sharp wit, biting humor, and devastating one-liners. Use elegant yet caustic prose with sophisticated observations and perfectly timed sarcasm.",
-        icon: "cocktail"
-    },
     wodehouse: {
         name: "P.G. Wodehouse",
         prompt: "Write in the style of P.G. Wodehouse - delightfully absurd, charming, and whimsical prose with impeccable comedic timing. Use elaborate metaphors, British wit, and cheerfully convoluted sentences.",
@@ -72,11 +77,6 @@ const WRITING_STYLES = {
         name: "Man Who Lost His Keys",
         prompt: "Write in the style of a man desperately trying to remember where he left his keys - distracted, scattered thoughts that keep veering off topic. Obsessively mention checking pockets, retracing steps, and sudden false epiphanies about key locations. Frequently lose train of thought mid-sentence.",
         icon: "key"
-    },
-    thompson: {
-        name: "Hunter S. Thompson",
-        prompt: "Write in the style of Hunter S. Thompson - gonzo journalism with wild imagery, sharp cultural criticism, dark humor, and surreal observations. Use punchy, irreverent prose with vivid metaphors.",
-        icon: "sunglasses"
     }
 };
 
@@ -1174,21 +1174,26 @@ function revealItem(itemEl, item) {
 
 // Update Score
 function updateScore(delta) {
+    const oldScore = AppState.score;
     AppState.score += delta;
     if (AppState.score < 0) AppState.score = 0;
     localStorage.setItem('travel_guide_score', AppState.score);
-    updateScoreDisplay(delta);
+    updateScoreDisplay(delta, oldScore);
 }
 
-function updateScoreDisplay(delta = 0) {
-    document.getElementById('scoreValue').textContent = AppState.score;
+function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
+    // Animate the score ticker
+    if (delta !== 0) {
+        animateScoreTicker(oldScore, AppState.score, delta > 0);
+    } else {
+        document.getElementById('scoreValue').textContent = AppState.score;
+    }
 
     // Update header score indicator
     const headerScore = document.getElementById('headerScore');
     const headerScoreValue = document.getElementById('headerScoreValue');
 
     if (AppState.score > 0) {
-        headerScoreValue.textContent = AppState.score;
         headerScore.style.display = 'flex';
 
         // Add animation class based on delta
@@ -1201,12 +1206,71 @@ function updateScoreDisplay(delta = 0) {
             headerScore.classList.add('score-decrease');
             setTimeout(() => headerScore.classList.remove('score-decrease'), 500);
         }
+
+        // Animate header score
+        if (delta !== 0) {
+            animateHeaderScore(oldScore, AppState.score);
+        } else {
+            headerScoreValue.textContent = AppState.score;
+        }
     } else {
         headerScore.style.display = 'none';
     }
 
     // Update title bar with score
     document.title = `(${AppState.score}) Two Truths & A Lie`;
+}
+
+// Animate score ticker
+function animateScoreTicker(from, to, isIncrease) {
+    const duration = 400;
+    const steps = Math.abs(to - from);
+    const stepDuration = duration / Math.max(steps, 1);
+    let current = from;
+
+    const interval = setInterval(() => {
+        if (isIncrease) {
+            current++;
+            if (current >= to) {
+                current = to;
+                clearInterval(interval);
+            }
+        } else {
+            current--;
+            if (current <= to) {
+                current = to;
+                clearInterval(interval);
+            }
+        }
+        document.getElementById('scoreValue').textContent = current;
+    }, stepDuration);
+}
+
+// Animate header score
+function animateHeaderScore(from, to) {
+    const duration = 400;
+    const steps = Math.abs(to - from);
+    const stepDuration = duration / Math.max(steps, 1);
+    let current = from;
+    const isIncrease = to > from;
+
+    const headerScoreValue = document.getElementById('headerScoreValue');
+    const interval = setInterval(() => {
+        if (isIncrease) {
+            current++;
+            if (current >= to) {
+                current = to;
+                clearInterval(interval);
+            }
+        } else {
+            current--;
+            if (current <= to) {
+                current = to;
+                clearInterval(interval);
+            }
+        }
+        headerScoreValue.textContent = current;
+    }, stepDuration);
 }
 
 // Initialize Map
