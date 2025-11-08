@@ -110,11 +110,11 @@ body {
 
 /* Score animations */
 .header-score.score-increase {
-    animation: scoreIncrease 0.5s ease;
+    animation: scoreIncrease 0.5s ease, scoreTicker 0.5s ease;
 }
 
 .header-score.score-decrease {
-    animation: scoreDecrease 0.5s ease;
+    animation: scoreDecrease 0.5s ease, scoreTicker 0.5s ease;
 }
 
 @keyframes scoreIncrease {
@@ -144,6 +144,18 @@ body {
     100% {
         transform: scale(1);
         background: var(--color-accent);
+    }
+}
+
+@keyframes scoreTicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    10%, 30%, 50%, 70%, 90% {
+        opacity: 0.7;
+    }
+    20%, 40%, 60%, 80% {
+        opacity: 1;
     }
 }
 
@@ -511,6 +523,7 @@ input, select, textarea {
     overflow: hidden;
     aspect-ratio: 16 / 9;
     background: #e5e3df;
+    position: relative;
 }
 
 .home-map {
@@ -615,45 +628,57 @@ input, select, textarea {
 }
 
 .btn-near-me {
-    width: 100%;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    padding: 0;
+    border: 2px solid white;
+    border-radius: 50%;
     cursor: pointer;
     transition: var(--transition);
-    background: var(--color-card);
-    color: var(--color-text);
-    margin-top: 2rem;
+    background: var(--color-accent);
+    color: white;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-near-me:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: var(--color-accent-hover);
+    transform: scale(1.1);
+}
+
+.btn-near-me svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
 }
 
 .search-input-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 0;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    height: 2em;
+    background: var(--color-card);
+    position: relative;
 }
 
 .search-input {
-    width: 100%;
-    padding: 1.25rem 1.5rem;
+    flex: 1;
+    height: 100%;
+    padding: 0 3.5rem 0 1.5rem;
     border: none;
     font-size: 16px;
     transition: var(--transition);
-    background: var(--color-card);
+    background: transparent;
 }
 
 .search-input:focus {
@@ -661,20 +686,26 @@ input, select, textarea {
 }
 
 .btn-explore {
-    width: 100%;
-    padding: 1.25rem;
-    background: var(--color-accent);
-    color: white;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    padding: 0 1.25rem;
+    background: transparent;
+    color: var(--color-accent);
     border: none;
     border-radius: 0;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-explore:hover {
-    background: var(--color-accent-hover);
+    color: var(--color-accent-hover);
 }
 
 .quick-suggestions {
@@ -916,6 +947,7 @@ input, select, textarea {
     z-index: 10;
     line-height: 1.5;
     cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Noto Emoji', sans-serif;
 }
 
 .item-overlay.show {
