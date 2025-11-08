@@ -5,7 +5,7 @@
 const AppState = {
     apiKey: localStorage.getItem('openrouter_api_key') || '',
     currentLocation: null,
-    currentModel: 'meta-llama/llama-3.2-3b-instruct:free',
+    currentModel: 'google/gemini-2.0-flash-exp:free',
     writingStyle: 'standard',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
