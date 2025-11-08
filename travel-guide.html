@@ -101,8 +101,12 @@
             <div class="settings-body">
                 <div class="setting-group">
                     <label for="apiKeyInput">OpenRouter API Key</label>
-                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-...">
-                    <button class="btn-save" id="saveApiKey">Save API Key</button>
+                    <div id="apiKeyStatus" style="font-size: 0.85em; margin-bottom: 8px; font-weight: 500;"></div>
+                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-... (optional - defaults to free tier)">
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="btn-save" id="saveApiKey">Save API Key</button>
+                        <button class="btn-save" id="resetApiKey" style="background: #666;">Reset to Free Key</button>
+                    </div>
                 </div>
 
                 <div class="setting-group">

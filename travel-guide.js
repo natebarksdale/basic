@@ -1,9 +1,12 @@
 // Two Truths & A Lie - Gamified Travel Guide
 // Main Application Logic
 
+// Default Free-Tier API Key (with $0 spend limit - free models only)
+const DEFAULT_API_KEY = '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';
+
 // Application State
 const AppState = {
-    apiKey: localStorage.getItem('openrouter_api_key') || '',
+    apiKey: localStorage.getItem('openrouter_api_key') || DEFAULT_API_KEY,
     currentLocation: null,
     currentModel: 'google/gemini-2.5-flash-lite',
     writingStyle: 'standard',
@@ -129,6 +132,7 @@ function initializeApp() {
     document.getElementById('menuToggle').addEventListener('click', toggleSettings);
     document.getElementById('closeSettings').addEventListener('click', closeSettings);
     document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
+    document.getElementById('resetApiKey').addEventListener('click', resetToDefaultKey);
 
     document.getElementById('modelSelect').addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
@@ -152,23 +156,16 @@ function initializeApp() {
     // Initialize voice icon
     updateVoiceIcon();
 
-    // Load existing API key into input field
+    // Load existing API key into input field (only if it's not the default key)
     const apiKeyInput = document.getElementById('apiKeyInput');
-    if (AppState.apiKey) {
+    if (!isUsingDefaultKey()) {
         apiKeyInput.value = AppState.apiKey;
-        // Don't open settings if we have a key
-    } else {
-        // Open settings if no API key after a short delay
-        setTimeout(() => {
-            const panel = document.getElementById('settingsPanel');
-            const toggle = document.getElementById('menuToggle');
-            panel.style.display = 'block';
-            setTimeout(() => {
-                panel.classList.add('open');
-                toggle.classList.add('active');
-            }, 10);
-        }, 500);
     }
+
+    // Update API key status indicator
+    updateApiKeyStatus();
+
+    // Note: We always have a key now (default key), so don't auto-open settings
 
     // Handle browser back/forward
     window.addEventListener('popstate', (e) => {
@@ -309,6 +306,11 @@ function toggleSettings() {
     panel.classList.toggle('open');
     toggle.classList.toggle('active');
 
+    // Update API key status when opening
+    if (panel.classList.contains('open')) {
+        updateApiKeyStatus();
+    }
+
     // Hide panel after animation if closing
     if (!panel.classList.contains('open')) {
         setTimeout(() => {
@@ -341,11 +343,35 @@ function saveApiKey() {
     localStorage.setItem('openrouter_api_key', apiKey);
 
     showNotification('API key saved!', 'success');
+    updateApiKeyStatus();
 
     // Close settings panel after short delay
     setTimeout(() => {
         closeSettings();
     }, 1000);
+}
+
+function resetToDefaultKey() {
+    AppState.apiKey = DEFAULT_API_KEY;
+    localStorage.removeItem('openrouter_api_key');
+    document.getElementById('apiKeyInput').value = '';
+    showNotification('Reset to free-tier API key', 'success');
+    updateApiKeyStatus();
+}
+
+function isUsingDefaultKey() {
+    return !localStorage.getItem('openrouter_api_key') || AppState.apiKey === DEFAULT_API_KEY;
+}
+
+function updateApiKeyStatus() {
+    const statusElement = document.getElementById('apiKeyStatus');
+    if (statusElement) {
+        if (isUsingDefaultKey()) {
+            statusElement.innerHTML = '<span style="color: #4CAF50;">✓ Using shared free-tier key (free models only)</span>';
+        } else {
+            statusElement.innerHTML = '<span style="color: #2196F3;">✓ Using your personal API key</span>';
+        }
+    }
 }
 
 // Handle Explore
@@ -356,11 +382,7 @@ async function handleExplore() {
         return;
     }
 
-    if (!AppState.apiKey) {
-        showNotification('Please add your API key in settings', 'error');
-        toggleSettings();
-        return;
-    }
+    // Note: We always have an API key now (default or user-provided)
 
     // Cancel any ongoing generation
     if (AppState.isGenerating) {
