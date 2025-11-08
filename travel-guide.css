@@ -456,10 +456,18 @@ body {
     border: 2px solid var(--border);
     border-radius: 8px;
     transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
 }
 
 .item:hover {
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.item:not(.revealed):hover {
+    background: #f0f9ff;
 }
 
 .item-text {
@@ -481,25 +489,28 @@ body {
     border-bottom-style: solid;
 }
 
-.reveal-btn {
-    padding: 0.75rem 1.5rem;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: all 0.2s;
+.item-hint {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
 }
 
-.reveal-btn:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-.item.revealed .reveal-btn {
+.item.revealed .item-hint {
     display: none;
+}
+
+.item.revealed {
+    cursor: default;
+}
+
+.item.revealed:hover {
+    transform: none;
 }
 
 .item.revealed {
