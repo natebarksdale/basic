@@ -58,6 +58,34 @@ const VOICE_ICONS = {
     sunglasses: '🕶️',
 };
 
+// Voice-Specific Notification Messages
+const VOICE_MESSAGES = {
+    standard: {
+        correctLie: "Correct! This was the lie. +10 points",
+        wrongTruth: "Wrong! This is actually true. -5 points"
+    },
+    twain: {
+        correctLie: "Well spotted, friend! That was the bald-faced lie. +10 points",
+        wrongTruth: "Ah, you've been bamboozled! This tale happens to be true. -5 points"
+    },
+    bird: {
+        correctLie: "Your keen eye has caught the fabrication! Most delightful. +10 points",
+        wrongTruth: "I'm afraid my dear reader, this observation is quite authentic. -5 points"
+    },
+    battuta: {
+        correctLie: "Praise be! You have unveiled the falsehood. +10 points",
+        wrongTruth: "Alas, this account is true as witnessed by this humble traveler. -5 points"
+    },
+    west: {
+        correctLie: "How perceptive! You've discerned the fiction from fact. +10 points",
+        wrongTruth: "I must correct you—this detail is, regrettably, quite true. -5 points"
+    },
+    thompson: {
+        correctLie: "Hot damn! You nailed the lie. Fear and loathing avoided. +10 points",
+        wrongTruth: "Wrong! That's the ugly truth, baby. Reality bites harder. -5 points"
+    }
+};
+
 // Category Templates by Location Type
 const CATEGORY_TEMPLATES = {
     city: ['Introduction', 'Where to Go', 'What to Eat', 'What to Do', 'Where to Stay', 'Getting Around', 'Day Trips', 'Practical Tips'],
@@ -671,9 +699,12 @@ function createItemElement(item, categoryIndex, itemIndex) {
 }
 
 // Convert place names to clickable links
-// Now expects text with <strong> tags from LLM
+// Handles both <strong> tags and markdown **bold** syntax
 function convertPlaceNamesToLinks(text) {
-    // Convert <strong>text</strong> to <strong><a href="..." class="place-link">text</a></strong>
+    // First, convert markdown **bold** to <strong> tags
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Then convert <strong>text</strong> to <strong><a href="..." class="place-link">text</a></strong>
     return text.replace(/<strong>(.*?)<\/strong>/g, (match, content) => {
         // Escape single quotes in content for onclick handler
         const escapedContent = content.replace(/'/g, "\\'");
@@ -705,14 +736,17 @@ function revealItem(itemEl, isLie) {
 
     itemEl.classList.add('revealed');
 
+    // Get voice-specific messages
+    const messages = VOICE_MESSAGES[AppState.writingStyle] || VOICE_MESSAGES.standard;
+
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-        showNotification('🎯 Correct! This was the lie! +10 points', 'success');
+        showNotification(messages.correctLie, 'success');
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-        showNotification('❌ Wrong! This is actually true. -5 points', 'error');
+        showNotification(messages.wrongTruth, 'error');
     }
 }
 
@@ -726,6 +760,8 @@ function updateScore(delta) {
 
 function updateScoreDisplay() {
     document.getElementById('scoreValue').textContent = AppState.score;
+    // Update title bar with score
+    document.title = `(${AppState.score}) Two Truths & A Lie`;
 }
 
 // Initialize Map

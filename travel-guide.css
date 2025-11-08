@@ -113,6 +113,8 @@ body {
 .voice-icon {
     font-size: 1.5rem;
     line-height: 1;
+    font-family: 'Noto Emoji', sans-serif;
+    font-weight: 400;
 }
 
 /* Hamburger Menu */
@@ -239,6 +241,8 @@ body {
     font-size: 2rem;
     line-height: 1;
     flex-shrink: 0;
+    font-family: 'Noto Emoji', sans-serif;
+    font-weight: 400;
 }
 
 .voice-option-text {
