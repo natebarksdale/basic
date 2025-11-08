@@ -1222,6 +1222,21 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
         document.getElementById('scoreValue').textContent = AppState.score;
     }
 
+    // Update score color based on value
+    const scoreValueElement = document.getElementById('scoreValue');
+    let scoreColor;
+    if (AppState.score < 0) {
+        // Red for negative scores
+        scoreColor = '#d96b5e';
+    } else if (AppState.score === 0) {
+        // Neutral gray for zero
+        scoreColor = '#6b6b6b';
+    } else {
+        // Green for positive scores
+        scoreColor = '#52a675';
+    }
+    scoreValueElement.style.color = scoreColor;
+
     // Update header score indicator
     const headerScore = document.getElementById('headerScore');
     const headerScoreValue = document.getElementById('headerScoreValue');
