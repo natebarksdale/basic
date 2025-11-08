@@ -61,31 +61,79 @@ const VOICE_ICONS = {
     sunglasses: '🕶️',
 };
 
-// Voice-Specific Notification Messages
-const VOICE_MESSAGES = {
+// Voice-Specific Badge Messages (for the revealed items)
+const VOICE_BADGE_MESSAGES = {
     standard: {
-        correctLie: "Correct! This was the lie. +10 points",
-        wrongTruth: "Wrong! This is actually true. -5 points"
+        correctLie: [
+            "This was the lie",
+            "This is false",
+            "This was fabricated"
+        ],
+        wrongTruth: [
+            "This is actually true",
+            "This is a true fact",
+            "This is genuine"
+        ]
     },
     twain: {
-        correctLie: "Well spotted, friend! That was the bald-faced lie. +10 points",
-        wrongTruth: "Ah, you've been bamboozled! This tale happens to be true. -5 points"
+        correctLie: [
+            "A bald-faced lie, I tell you!",
+            "Pure fabrication, friend",
+            "The tall tale revealed"
+        ],
+        wrongTruth: [
+            "Ah, but this tale is true!",
+            "The honest truth, surprisingly",
+            "This yarn is genuine"
+        ]
     },
     bird: {
-        correctLie: "Your keen eye has caught the fabrication! Most delightful. +10 points",
-        wrongTruth: "I'm afraid my dear reader, this observation is quite authentic. -5 points"
+        correctLie: [
+            "A fabrication, I'm afraid",
+            "This observation is false",
+            "Not as I witnessed it"
+        ],
+        wrongTruth: [
+            "Quite authentic, dear reader",
+            "This is true, as I observed",
+            "A genuine account"
+        ]
     },
     battuta: {
-        correctLie: "Praise be! You have unveiled the falsehood. +10 points",
-        wrongTruth: "Alas, this account is true as witnessed by this humble traveler. -5 points"
+        correctLie: [
+            "A falsehood, praise be!",
+            "This is untrue",
+            "Not as witnessed by this traveler"
+        ],
+        wrongTruth: [
+            "True, as Allah is my witness",
+            "An authentic account",
+            "This is the truth"
+        ]
     },
     west: {
-        correctLie: "How perceptive! You've discerned the fiction from fact. +10 points",
-        wrongTruth: "I must correct you—this detail is, regrettably, quite true. -5 points"
+        correctLie: [
+            "Fiction, I'm afraid",
+            "Not quite accurate",
+            "A falsehood, regrettably"
+        ],
+        wrongTruth: [
+            "Quite true, actually",
+            "An authentic detail",
+            "True, though you doubted"
+        ]
     },
     thompson: {
-        correctLie: "Hot damn! You nailed the lie. Fear and loathing avoided. +10 points",
-        wrongTruth: "Wrong! That's the ugly truth, baby. Reality bites harder. -5 points"
+        correctLie: [
+            "Total BS, baby!",
+            "Lies and propaganda!",
+            "Fake news, pure fiction"
+        ],
+        wrongTruth: [
+            "The ugly truth!",
+            "Real as it gets",
+            "Hard truth, kid"
+        ]
     }
 };
 
@@ -167,10 +215,37 @@ function initializeApp() {
 
     // Note: We always have a key now (default key), so don't auto-open settings
 
-    // Handle browser back/forward
+    // Check for hash on page load and navigate to that location
+    if (window.location.hash) {
+        const location = decodeURIComponent(window.location.hash.substring(1));
+        if (location) {
+            loadPlace(location, false);
+        }
+    }
+
+    // Handle browser back/forward and hash changes
     window.addEventListener('popstate', (e) => {
         if (e.state && e.state.location) {
             loadPlace(e.state.location, false);
+        } else if (window.location.hash) {
+            const location = decodeURIComponent(window.location.hash.substring(1));
+            if (location) {
+                loadPlace(location, false);
+            } else {
+                showSearchSection();
+            }
+        } else {
+            showSearchSection();
+        }
+    });
+
+    // Handle hash changes (e.g., from manual URL edits)
+    window.addEventListener('hashchange', (e) => {
+        if (window.location.hash) {
+            const location = decodeURIComponent(window.location.hash.substring(1));
+            if (location) {
+                loadPlace(location, false);
+            }
         } else {
             showSearchSection();
         }
@@ -758,17 +833,37 @@ function revealItem(itemEl, isLie) {
 
     itemEl.classList.add('revealed');
 
-    // Get voice-specific messages
-    const messages = VOICE_MESSAGES[AppState.writingStyle] || VOICE_MESSAGES.standard;
+    // Get voice-specific badge messages
+    const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.standard;
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-        showNotification(messages.correctLie, 'success');
+        showNotification('+10', 'success');
+
+        // Add varied voiced commentary to the badge
+        const messages = badgeMessages.correctLie;
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+        // Create and append the badge element
+        const badge = document.createElement('div');
+        badge.className = 'item-badge';
+        badge.textContent = randomMessage;
+        itemEl.appendChild(badge);
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-        showNotification(messages.wrongTruth, 'error');
+        showNotification('-5', 'error');
+
+        // Add varied voiced commentary to the badge
+        const messages = badgeMessages.wrongTruth;
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+        // Create and append the badge element
+        const badge = document.createElement('div');
+        badge.className = 'item-badge';
+        badge.textContent = randomMessage;
+        itemEl.appendChild(badge);
     }
 }
 
@@ -782,6 +877,18 @@ function updateScore(delta) {
 
 function updateScoreDisplay() {
     document.getElementById('scoreValue').textContent = AppState.score;
+
+    // Update header score indicator
+    const headerScore = document.getElementById('headerScore');
+    const headerScoreValue = document.getElementById('headerScoreValue');
+
+    if (AppState.score > 0) {
+        headerScoreValue.textContent = AppState.score;
+        headerScore.style.display = 'block';
+    } else {
+        headerScore.style.display = 'none';
+    }
+
     // Update title bar with score
     document.title = `(${AppState.score}) Two Truths & A Lie`;
 }

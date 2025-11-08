@@ -92,6 +92,18 @@ body {
     gap: 0.75rem;
 }
 
+/* Header Score */
+.header-score {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border-radius: 6px;
+    border: 2px solid var(--color-accent);
+    line-height: 1;
+}
+
 /* Voice Toggle */
 .voice-toggle {
     background: none;
@@ -243,6 +255,7 @@ body {
     flex-shrink: 0;
     font-family: 'Noto Emoji', sans-serif;
     font-weight: 400;
+    color: #000;
 }
 
 .voice-option-text {
@@ -656,39 +669,32 @@ input, select, textarea {
 }
 
 .item.is-lie {
-    background: #fef5f3;
-    border-color: var(--color-error);
-}
-
-.item.is-lie::after {
-    content: 'This was the lie';
-    display: block;
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: var(--color-error);
-    color: white;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-align: center;
-}
-
-.item.is-truth {
     background: #f3f9f6;
     border-color: var(--color-success);
 }
 
-.item.is-truth::after {
-    content: 'This is true';
+.item.is-truth {
+    background: #fef5f3;
+    border-color: var(--color-error);
+}
+
+.item-badge {
     display: block;
     margin-top: 1rem;
     padding: 0.75rem;
-    background: var(--color-success);
     color: white;
     border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 500;
     text-align: center;
+}
+
+.item.is-lie .item-badge {
+    background: var(--color-success);
+}
+
+.item.is-truth .item-badge {
+    background: var(--color-error);
 }
 
 /* Loading State */
