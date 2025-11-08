@@ -65,7 +65,12 @@ function initializeApp() {
         if (e.key === 'Enter') handleExplore();
     });
     document.getElementById('backBtn').addEventListener('click', showSearchSection);
-    document.getElementById('apiKeyBtn').addEventListener('click', openApiKeyModal);
+
+    // Settings panel
+    document.getElementById('menuToggle').addEventListener('click', toggleSettings);
+    document.getElementById('closeSettings').addEventListener('click', closeSettings);
+    document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
+
     document.getElementById('writingStyle').addEventListener('change', (e) => {
         AppState.writingStyle = e.target.value;
     });
@@ -81,12 +86,13 @@ function initializeApp() {
         });
     });
 
-    // Update score display
+    // Update score display and load API key
     updateScoreDisplay();
-
-    // Check for API key
-    if (!AppState.apiKey) {
-        setTimeout(() => openApiKeyModal(), 1000);
+    if (AppState.apiKey) {
+        document.getElementById('apiKeyInput').value = AppState.apiKey;
+    } else {
+        // Open settings if no API key
+        setTimeout(() => toggleSettings(), 500);
     }
 
     // Handle browser back/forward
@@ -99,14 +105,19 @@ function initializeApp() {
     });
 }
 
-// API Key Management
-function openApiKeyModal() {
-    document.getElementById('apiKeyModal').style.display = 'flex';
-    document.getElementById('apiKeyInput').value = AppState.apiKey;
+// Settings Panel Management
+function toggleSettings() {
+    const panel = document.getElementById('settingsPanel');
+    const toggle = document.getElementById('menuToggle');
+    panel.classList.toggle('open');
+    toggle.classList.toggle('active');
 }
 
-function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').style.display = 'none';
+function closeSettings() {
+    const panel = document.getElementById('settingsPanel');
+    const toggle = document.getElementById('menuToggle');
+    panel.classList.remove('open');
+    toggle.classList.remove('active');
 }
 
 function saveApiKey() {
@@ -117,8 +128,7 @@ function saveApiKey() {
     }
     AppState.apiKey = apiKey;
     localStorage.setItem('openrouter_api_key', apiKey);
-    closeApiKeyModal();
-    showNotification('API key saved successfully!', 'success');
+    showNotification('API key saved!', 'success');
 }
 
 // Handle Explore
@@ -130,7 +140,8 @@ async function handleExplore() {
     }
 
     if (!AppState.apiKey) {
-        openApiKeyModal();
+        showNotification('Please add your API key in settings', 'error');
+        toggleSettings();
         return;
     }
 
@@ -249,8 +260,8 @@ Return ONLY valid JSON:
         throw new Error('Failed to parse location data');
     }
 
-    // Extract and geocode mentioned places (parallel, limited)
-    placeData.mentionedPlaces = await extractAndGeocodePlaces(placeData);
+    // Skip geocoding for speed - just return the data
+    placeData.mentionedPlaces = [];
 
     return placeData;
 }
@@ -415,12 +426,7 @@ function createItemElement(item, categoryIndex, itemIndex) {
     textEl.className = 'item-text';
     textEl.innerHTML = textWithLinks;
 
-    const hintEl = document.createElement('div');
-    hintEl.className = 'item-hint';
-    hintEl.textContent = 'Click to reveal if this is the lie';
-
     itemEl.appendChild(textEl);
-    itemEl.appendChild(hintEl);
 
     // Make entire item clickable
     itemEl.addEventListener('click', (e) => {
@@ -597,7 +603,5 @@ function showNotification(message, type = 'info') {
 }
 
 // Make functions globally available
-window.closeApiKeyModal = closeApiKeyModal;
-window.saveApiKey = saveApiKey;
 window.handlePlaceLink = handlePlaceLink;
 window.navigateToBreadcrumb = navigateToBreadcrumb;
