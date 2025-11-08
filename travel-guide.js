@@ -156,19 +156,20 @@ const SUGGESTION_POOLS = {
     nature: ['Grand Canyon', 'Mount Fuji', 'Santorini', 'Yosemite', 'Banff', 'Patagonia', 'Serengeti', 'Great Barrier Reef']
 };
 
-// Unsplash API helper (using free public API - no auth needed for basic usage)
-async function fetchUnsplashImage(query, orientation = 'landscape') {
+// Image API helper (using Lorem Picsum for reliable, free images)
+async function fetchPlaceholderImage(query, orientation = 'landscape') {
     try {
-        // Using Unsplash Source API for simplicity (no API key required)
-        const width = orientation === 'landscape' ? 1200 : 800;
-        const height = orientation === 'landscape' ? 600 : 1000;
+        // Using Lorem Picsum for reliable placeholder images
+        // 16:9 aspect ratio
+        const width = 1600;
+        const height = 900;
 
-        // Add random seed to get different images each time
-        const randomSeed = Math.random().toString(36).substring(7);
+        // Add random seed based on query to get consistent but varied images
+        const seed = Math.abs(query.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
 
-        return `https://source.unsplash.com/${width}x${height}/?${encodeURIComponent(query)}&sig=${randomSeed}`;
+        return `https://picsum.photos/seed/${seed}/${width}/${height}`;
     } catch (error) {
-        console.error('Error fetching Unsplash image:', error);
+        console.error('Error fetching image:', error);
         return null;
     }
 }
@@ -178,14 +179,27 @@ async function loadPlaceHeroImage(locationName) {
     const heroContainer = document.getElementById('placeHero');
     const heroImage = document.getElementById('placeHeroImage');
 
-    // Get image URL from Unsplash
-    const imageUrl = await fetchUnsplashImage(locationName);
+    // Get image URL
+    const imageUrl = await fetchPlaceholderImage(locationName);
 
     if (imageUrl) {
+        // Add error handler to hide hero if image fails to load
+        heroImage.onerror = () => {
+            heroContainer.style.display = 'none';
+            heroImage.style.display = 'none';
+        };
+
+        // Add load handler to show hero when image loads successfully
+        heroImage.onload = () => {
+            heroImage.style.display = 'block';
+            heroContainer.style.display = 'block';
+        };
+
         heroImage.src = imageUrl;
         heroImage.alt = locationName;
-        heroImage.style.display = 'block';
-        heroContainer.style.display = 'block';
+    } else {
+        // Hide hero if no image URL
+        heroContainer.style.display = 'none';
     }
 }
 
@@ -197,12 +211,26 @@ async function loadHomeHeroImage() {
     const randomDestinations = ['travel', 'adventure', 'wanderlust', 'explore', 'journey', 'destination', 'vacation', 'landmark'];
     const randomQuery = randomDestinations[Math.floor(Math.random() * randomDestinations.length)];
 
-    const imageUrl = await fetchUnsplashImage(randomQuery);
+    const imageUrl = await fetchPlaceholderImage(randomQuery);
 
     if (imageUrl) {
+        // Add error handler to hide hero if image fails to load
+        heroImage.onerror = () => {
+            heroContainer.style.display = 'none';
+            heroImage.style.display = 'none';
+        };
+
+        // Add load handler to show hero when image loads successfully
+        heroImage.onload = () => {
+            heroImage.style.display = 'block';
+            heroContainer.style.display = 'block';
+        };
+
         heroImage.src = imageUrl;
-        heroImage.style.display = 'block';
-        heroContainer.style.display = 'block';
+        heroImage.alt = 'Travel destination';
+    } else {
+        // Hide hero if no image URL
+        heroContainer.style.display = 'none';
     }
 }
 
