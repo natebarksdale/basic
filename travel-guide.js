@@ -15,6 +15,9 @@ const AppState = {
     map: null,
     homeMap: null,
     homeMarker: null,
+    bottomMap: null,
+    bottomMarker: null,
+    bottomMapCoords: { lat: 48.8566, lng: 2.3522 },
     selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
     markers: [],
     isGenerating: false
@@ -203,6 +206,51 @@ function initializeHomeMap() {
     });
 }
 
+// Initialize bottom map with draggable marker
+function initializeBottomMap(lat, lng) {
+    // Clear existing map if present
+    if (AppState.bottomMap) {
+        AppState.bottomMap.remove();
+        AppState.bottomMap = null;
+        AppState.bottomMarker = null;
+    }
+
+    // Update coordinates
+    AppState.bottomMapCoords = { lat, lng };
+
+    // Create map centered on place coordinates
+    AppState.bottomMap = L.map('bottomMap').setView([lat, lng], 12);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(AppState.bottomMap);
+
+    // Add draggable marker
+    AppState.bottomMarker = L.marker([lat, lng], {
+        draggable: true,
+        icon: L.divIcon({
+            className: 'custom-marker home-marker',
+            html: '<div class="marker-pin-large"></div>',
+            iconSize: [40, 56],
+            iconAnchor: [20, 56]
+        })
+    }).addTo(AppState.bottomMap);
+
+    // Update coordinates when marker is dragged
+    AppState.bottomMarker.on('dragend', function(e) {
+        const position = e.target.getLatLng();
+        AppState.bottomMapCoords = { lat: position.lat, lng: position.lng };
+    });
+
+    // Click on map to move marker
+    AppState.bottomMap.on('click', function(e) {
+        AppState.bottomMarker.setLatLng(e.latlng);
+        AppState.bottomMapCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+    });
+}
+
 // Reverse geocode coordinates to get location name
 async function reverseGeocode(lat, lng) {
     try {
@@ -277,6 +325,7 @@ function initializeApp() {
     // Set up event listeners
     document.getElementById('exploreBtn').addEventListener('click', handleExplore);
     document.getElementById('exploreMapBtn').addEventListener('click', handleExploreMap);
+    document.getElementById('exploreBottomMapBtn').addEventListener('click', handleExploreBottomMap);
     document.getElementById('nearMeBtn').addEventListener('click', handleNearMe);
     document.getElementById('locationInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleExplore();
@@ -591,6 +640,18 @@ async function handleExploreMap() {
     await loadPlace(locationName, true);
 }
 
+// Handle Explore Bottom Map Location
+async function handleExploreBottomMap() {
+    const locationName = await reverseGeocode(AppState.bottomMapCoords.lat, AppState.bottomMapCoords.lng);
+
+    // Cancel any ongoing generation
+    if (AppState.isGenerating) {
+        AppState.isGenerating = false;
+    }
+
+    await loadPlace(locationName, true);
+}
+
 // Handle Near Me
 async function handleNearMe() {
     if (!navigator.geolocation) {
@@ -745,12 +806,12 @@ CRITICAL: Format text like a travel guide by wrapping important place names, lan
 
 REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
 
-FEEDBACK: For each item, provide a SHORT contextual feedback message (1 sentence max) that reveals whether it's true or false. Use the writing style voice. Be specific to the content, not generic.
+FEEDBACK: For each item, provide a SHORT contextual feedback message (1 sentence max) that reveals whether it's true or false. IMPORTANT: Write the feedback in the EXACT SAME VOICE AND STYLE as the main content. Be specific to the content, not generic. Match the tone, vocabulary, and personality of your chosen writing style.
 
-Examples:
-- "Visit <strong>Café de Flore</strong> in the heart of <strong>Saint-Germain-des-Prés</strong> for authentic Parisian atmosphere."
-  - If TRUE feedback: "Indeed, this legendary café has been serving intellectuals since 1887."
-  - If LIE feedback: "Actually, Café de Flore is in a different neighborhood."
+Examples for different voices:
+- Standard: "Indeed, this legendary café has been serving intellectuals since 1887."
+- Mark Twain: "Ah, but this tale is true, friend - the café's been there longer than most governments!"
+- Hunter S. Thompson: "Wrong, kid - that's pure fiction designed to separate tourists from their money."
 
 Categories: ${categories.join(', ')}
 
@@ -763,9 +824,9 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false, "feedback": "Contextual message confirming this is true"},
-        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true, "feedback": "Contextual message revealing why this is false"},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false, "feedback": "Contextual message about this truth"}
+        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false, "feedback": "Contextual message in the SAME VOICE confirming this is true"},
+        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true, "feedback": "Contextual message in the SAME VOICE revealing why this is false"},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false, "feedback": "Contextual message in the SAME VOICE about this truth"}
       ]
     }
   ]
@@ -933,6 +994,24 @@ function displayPlaceContent(placeData) {
         const categoryEl = createCategoryElement(category, categoryIndex);
         container.appendChild(categoryEl);
     });
+
+    // Show and initialize bottom map
+    const bottomMapContainer = document.getElementById('bottomMapContainer');
+    const exploreBottomMapBtn = document.getElementById('exploreBottomMapBtn');
+
+    if (placeData.coordinates) {
+        bottomMapContainer.style.display = 'block';
+        exploreBottomMapBtn.style.display = 'flex';
+
+        // Initialize map with place coordinates
+        // Use setTimeout to ensure DOM is ready
+        setTimeout(() => {
+            initializeBottomMap(placeData.coordinates.lat, placeData.coordinates.lon);
+        }, 100);
+    } else {
+        bottomMapContainer.style.display = 'none';
+        exploreBottomMapBtn.style.display = 'none';
+    }
 }
 
 // Create Category Element
@@ -1169,6 +1248,10 @@ function showSearchSection() {
     document.getElementById('placeSection').style.display = 'none';
     AppState.history = [];
     history.pushState({}, '', '#');
+
+    // Hide bottom map
+    document.getElementById('bottomMapContainer').style.display = 'none';
+    document.getElementById('exploreBottomMapBtn').style.display = 'none';
 
     // Regenerate suggestions on return to home
     generateSuggestionChips();

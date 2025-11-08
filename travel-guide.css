@@ -488,7 +488,7 @@ input, select, textarea {
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 3rem 0;
+    padding: 0;
 }
 
 /* Search Section */
@@ -510,7 +510,7 @@ input, select, textarea {
     margin-left: -50vw;
     margin-right: -50vw;
     margin-top: 0;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     overflow: hidden;
     aspect-ratio: 16 / 9;
     background: #e5e3df;
@@ -575,6 +575,7 @@ input, select, textarea {
     text-align: center;
     max-width: 600px;
     z-index: 1;
+    padding: 0 2rem;
 }
 
 .search-card h2 {
@@ -591,15 +592,36 @@ input, select, textarea {
     line-height: 1.7;
 }
 
-.location-buttons {
+.btn-explore-map {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: 0;
+    margin-bottom: 3rem;
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--color-accent);
+    color: white;
 }
 
-.btn-near-me,
-.btn-explore-map {
-    flex: 1;
+.btn-explore-map:hover {
+    background: var(--color-accent-hover);
+}
+
+.btn-near-me {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -613,43 +635,12 @@ input, select, textarea {
     transition: var(--transition);
     background: var(--color-card);
     color: var(--color-text);
+    margin-top: 2rem;
 }
 
-.btn-near-me:hover,
-.btn-explore-map:hover {
+.btn-near-me:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
-}
-
-.btn-explore-map {
-    background: var(--color-accent);
-    color: white;
-    border-color: var(--color-accent);
-}
-
-.btn-explore-map:hover {
-    background: var(--color-accent-hover);
-    color: white;
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    margin: 1.5rem 0;
-    color: var(--color-text-light);
-    font-size: 0.875rem;
-}
-
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--color-border);
-}
-
-.divider span {
-    padding: 0 1rem;
 }
 
 .search-input-group {
@@ -723,7 +714,7 @@ input, select, textarea {
 /* Place Section */
 .place-section {
     animation: fadeIn 0.3s ease;
-    margin-top: -3rem;
+    padding-top: 0;
 }
 
 @keyframes fadeIn {
@@ -921,19 +912,22 @@ input, select, textarea {
 /* Feedback Overlay */
 .item-overlay {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.92);
     color: white;
-    padding: 1.5rem 2rem;
+    padding: 1.5rem;
     border-radius: 12px;
     font-size: 1rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    max-width: 80%;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     opacity: 0;
+    transform: scale(0.95);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
     line-height: 1.5;
@@ -941,12 +935,12 @@ input, select, textarea {
 
 .item-overlay.show {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
 }
 
 .item-overlay.fade-out {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: scale(0.95);
 }
 
 .item-overlay.overlay-lie {
@@ -1113,12 +1107,61 @@ input, select, textarea {
     border-left: 3px solid var(--color-accent);
 }
 
+/* Bottom Map Container */
+.bottom-map-container {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: 4rem;
+    margin-bottom: 0;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #e5e3df;
+}
+
+.bottom-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.btn-explore-bottom-map {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: 0;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--color-accent);
+    color: white;
+}
+
+.btn-explore-bottom-map:hover {
+    background: var(--color-accent-hover);
+}
+
 /* Footer */
 .footer {
     border-top: 1px solid var(--color-border);
     padding: 2rem 0;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 0;
 }
 
 .footer p {
@@ -1143,10 +1186,6 @@ input, select, textarea {
 
     .place-name {
         font-size: 1.75rem;
-    }
-
-    .location-buttons {
-        flex-direction: column;
     }
 
     .search-input-group {
