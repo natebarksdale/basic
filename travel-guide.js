@@ -21,7 +21,7 @@ function getValidApiKey() {
 const AppState = {
     apiKey: getValidApiKey(),
     currentLocation: null,
-    currentModel: 'google/gemini-2.5-pro-exp-03-25:free',
+    currentModel: 'google/gemini-2.0-flash-exp:free',
     writingStyle: 'parker',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
