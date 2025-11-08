@@ -188,13 +188,18 @@ body {
     letter-spacing: 0.05em;
 }
 
+/* Prevent zoom on input focus on iOS */
+input, select, textarea {
+    font-size: 16px !important;
+}
+
 .setting-group select,
 .setting-group input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 16px;
     background: var(--color-bg);
     transition: var(--transition);
 }
@@ -289,7 +294,7 @@ body {
     padding: 1rem 1.25rem;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 16px;
     transition: var(--transition);
     background: var(--color-card);
 }
@@ -634,7 +639,7 @@ body {
     padding: 0.75rem;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 16px;
     margin-bottom: 1rem;
     font-family: 'SF Mono', Monaco, monospace;
 }
@@ -711,15 +716,19 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .container {
-        padding: 0 1.5rem;
+        padding: 0 1rem;
     }
 
     .search-card h2 {
-        font-size: 2rem;
+        font-size: 1.75rem;
+    }
+
+    .search-description {
+        font-size: 1rem;
     }
 
     .place-name {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .search-input-group {
@@ -732,5 +741,17 @@ body {
 
     .settings-panel {
         width: 100%;
+    }
+
+    .category-title {
+        font-size: 1.25rem;
+    }
+
+    .item {
+        padding: 1rem;
+    }
+
+    .item-text {
+        font-size: 0.9375rem;
     }
 }
