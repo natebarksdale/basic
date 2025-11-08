@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="travel-guide.css?v=1762583808">
+    <link rel="stylesheet" href="travel-guide.css?v=1762612811">
 </head>
 <body>
     <div class="app-container">
@@ -50,13 +50,6 @@
                 <button class="close-voice-menu" id="closeVoiceMenu">×</button>
             </div>
             <div class="voice-menu-body">
-                <button class="voice-option" data-voice="standard">
-                    <div class="voice-option-emoji">📖</div>
-                    <div class="voice-option-text">
-                        <div class="voice-option-name">Standard</div>
-                        <div class="voice-option-desc">Clear, informative travel guide</div>
-                    </div>
-                </button>
                 <button class="voice-option" data-voice="twain">
                     <div class="voice-option-emoji">🚢</div>
                     <div class="voice-option-text">
@@ -78,11 +71,32 @@
                         <div class="voice-option-desc">Cultural encounters & customs</div>
                     </div>
                 </button>
-                <button class="voice-option" data-voice="west">
-                    <div class="voice-option-emoji">✍️</div>
+                <button class="voice-option" data-voice="parker">
+                    <div class="voice-option-emoji">🍸</div>
                     <div class="voice-option-text">
-                        <div class="voice-option-name">Dorothy West</div>
-                        <div class="voice-option-desc">Elegant social observation</div>
+                        <div class="voice-option-name">Dorothy Parker</div>
+                        <div class="voice-option-desc">Razor-sharp wit & biting humor</div>
+                    </div>
+                </button>
+                <button class="voice-option" data-voice="wodehouse">
+                    <div class="voice-option-emoji">🎩</div>
+                    <div class="voice-option-text">
+                        <div class="voice-option-name">P.G. Wodehouse</div>
+                        <div class="voice-option-desc">Absurd charm & British wit</div>
+                    </div>
+                </button>
+                <button class="voice-option" data-voice="laotzu">
+                    <div class="voice-option-emoji">☯️</div>
+                    <div class="voice-option-text">
+                        <div class="voice-option-name">Lao Tzu</div>
+                        <div class="voice-option-desc">Simple, profound wisdom</div>
+                    </div>
+                </button>
+                <button class="voice-option" data-voice="keys">
+                    <div class="voice-option-emoji">🔑</div>
+                    <div class="voice-option-text">
+                        <div class="voice-option-name">Man Who Lost His Keys</div>
+                        <div class="voice-option-desc">Distracted, scattered thoughts</div>
                     </div>
                 </button>
                 <button class="voice-option" data-voice="thompson">
@@ -155,9 +169,6 @@
                     <!-- Interactive World Map for Home View -->
                     <div class="home-map-container">
                         <div id="homeMap" class="home-map"></div>
-                        <div class="map-instructions">
-                            <p>Drag the marker to explore any location</p>
-                        </div>
                     </div>
 
                     <button id="exploreMapBtn" class="btn-explore-map">
@@ -228,9 +239,6 @@
                     <!-- Bottom Map for Exploration -->
                     <div id="bottomMapContainer" class="bottom-map-container" style="display: none;">
                         <div id="bottomMap" class="bottom-map"></div>
-                        <div class="map-instructions">
-                            <p>Drag the marker to explore nearby</p>
-                        </div>
                     </div>
 
                     <button id="exploreBottomMapBtn" class="btn-explore-bottom-map" style="display: none;">
@@ -253,6 +261,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="travel-guide.js?v=1762583808"></script>
+    <script src="travel-guide.js?v=1762612811"></script>
 </body>
 </html>

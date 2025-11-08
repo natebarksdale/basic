@@ -639,22 +639,25 @@ input, select, textarea {
 
 .search-input-group {
     display: flex;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0;
     margin-bottom: 2rem;
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-    padding: 0 2rem;
 }
 
 .search-input {
-    flex: 1;
+    width: 100%;
     padding: 1.25rem 1.5rem;
     border: 1px solid var(--color-border);
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 16px;
     transition: var(--transition);
     background: var(--color-card);
+    border-top: none;
+    border-left: none;
+    border-right: none;
 }
 
 .search-input:focus {
@@ -663,16 +666,16 @@ input, select, textarea {
 }
 
 .btn-explore {
-    padding: 1rem 2rem;
+    width: 100%;
+    padding: 1.25rem;
     background: var(--color-accent);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    white-space: nowrap;
 }
 
 .btn-explore:hover {

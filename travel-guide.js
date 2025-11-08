@@ -9,7 +9,7 @@ const AppState = {
     apiKey: localStorage.getItem('openrouter_api_key') || DEFAULT_API_KEY,
     currentLocation: null,
     currentModel: 'google/gemini-2.5-flash-lite',
-    writingStyle: 'standard',
+    writingStyle: 'twain',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
     map: null,
@@ -25,11 +25,6 @@ const AppState = {
 
 // Writing Style Personas
 const WRITING_STYLES = {
-    standard: {
-        name: "Standard Travel Guide",
-        prompt: "Write in a clear, informative travel guide style.",
-        icon: "book"
-    },
     twain: {
         name: "Mark Twain",
         prompt: "Write in the style of Mark Twain - witty, satirical observations with folksy wisdom and humorous exaggeration. Use colorful storytelling with sharp social commentary and a conversational tone.",
@@ -45,10 +40,25 @@ const WRITING_STYLES = {
         prompt: "Write in the style of Ibn Battuta - focus on Islamic culture, trade routes, scholarly encounters, and the hospitality of rulers. Include observations about religious practices and social customs with reverence and wonder.",
         icon: "compass"
     },
-    west: {
-        name: "Dorothy West",
-        prompt: "Write in the style of Dorothy West - elegant, perceptive prose focusing on social dynamics, class, culture, and the subtle nuances of place. Use sophisticated, literary language with keen social observation.",
-        icon: "pen"
+    parker: {
+        name: "Dorothy Parker",
+        prompt: "Write in the style of Dorothy Parker - razor-sharp wit, biting humor, and devastating one-liners. Use elegant yet caustic prose with sophisticated observations and perfectly timed sarcasm.",
+        icon: "cocktail"
+    },
+    wodehouse: {
+        name: "P.G. Wodehouse",
+        prompt: "Write in the style of P.G. Wodehouse - delightfully absurd, charming, and whimsical prose with impeccable comedic timing. Use elaborate metaphors, British wit, and cheerfully convoluted sentences.",
+        icon: "tophat"
+    },
+    laotzu: {
+        name: "Lao Tzu",
+        prompt: "Write in the style of Lao Tzu - simple, profound wisdom with paradoxical observations. Use brief, meditative prose that finds deeper meaning in everyday experiences. Focus on harmony, balance, and the natural way.",
+        icon: "yin-yang"
+    },
+    keys: {
+        name: "Man Who Lost His Keys",
+        prompt: "Write in the style of a man desperately trying to remember where he left his keys - distracted, scattered thoughts that keep veering off topic. Obsessively mention checking pockets, retracing steps, and sudden false epiphanies about key locations. Frequently lose train of thought mid-sentence.",
+        icon: "key"
     },
     thompson: {
         name: "Hunter S. Thompson",
@@ -59,11 +69,13 @@ const WRITING_STYLES = {
 
 // Voice Icons (Emoji)
 const VOICE_ICONS = {
-    book: '📖',
     steamboat: '🚢',
     bird: '🦅',
     compass: '🧭',
-    pen: '✍️',
+    cocktail: '🍸',
+    tophat: '🎩',
+    'yin-yang': '☯️',
+    key: '🔑',
     sunglasses: '🕶️',
 };
 
@@ -290,8 +302,8 @@ function generateSuggestionChips() {
     container.innerHTML = '';
     container.appendChild(label);
 
-    // Pick 2 random cities
-    const cities = [...SUGGESTION_POOLS.cities].sort(() => 0.5 - Math.random()).slice(0, 2);
+    // Pick 1 random city
+    const city = SUGGESTION_POOLS.cities[Math.floor(Math.random() * SUGGESTION_POOLS.cities.length)];
 
     // Pick 1 random landmark
     const landmark = SUGGESTION_POOLS.landmarks[Math.floor(Math.random() * SUGGESTION_POOLS.landmarks.length)];
@@ -301,7 +313,7 @@ function generateSuggestionChips() {
     const extra = extraPool[Math.floor(Math.random() * extraPool.length)];
 
     // Combine and create chips
-    const suggestions = [...cities, landmark, extra];
+    const suggestions = [city, landmark, extra];
 
     suggestions.forEach(location => {
         const chip = document.createElement('button');
