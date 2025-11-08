@@ -7,11 +7,13 @@ const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
 // Check if we have a valid API key (not a placeholder)
 function getValidApiKey() {
     const stored = localStorage.getItem('openrouter_api_key');
-    if (stored) return stored;
+    if (stored && stored.trim()) return stored;
 
-    // Check if default key is still a placeholder
-    if (DEFAULT_API_KEY.startsWith('__') && DEFAULT_API_KEY.endsWith('__')) {
-        return null; // No valid key for local development
+    // Check if default key is still a placeholder or empty
+    if (!DEFAULT_API_KEY ||
+        DEFAULT_API_KEY.trim() === '' ||
+        (DEFAULT_API_KEY.startsWith('__') && DEFAULT_API_KEY.endsWith('__'))) {
+        return null; // No valid key available
     }
 
     return DEFAULT_API_KEY;
@@ -625,10 +627,15 @@ function saveApiKey() {
 }
 
 function resetToDefaultKey() {
-    AppState.apiKey = DEFAULT_API_KEY;
     localStorage.removeItem('openrouter_api_key');
+    AppState.apiKey = getValidApiKey();
     document.getElementById('apiKeyInput').value = '';
-    showNotification('Reset to free-tier API key', 'success');
+
+    if (AppState.apiKey) {
+        showNotification('Reset to free-tier API key', 'success');
+    } else {
+        showNotification('No default API key available. Please enter your own OpenRouter API key.', 'error');
+    }
     updateApiKeyStatus();
 }
 
@@ -639,7 +646,9 @@ function isUsingDefaultKey() {
 function updateApiKeyStatus() {
     const statusElement = document.getElementById('apiKeyStatus');
     if (statusElement) {
-        if (isUsingDefaultKey()) {
+        if (!AppState.apiKey) {
+            statusElement.innerHTML = '<span style="color: #f44336;">⚠ No API key set - please add your OpenRouter API key</span>';
+        } else if (isUsingDefaultKey()) {
             statusElement.innerHTML = '<span style="color: #4CAF50;">✓ Using shared free-tier key (free models only)</span>';
         } else {
             statusElement.innerHTML = '<span style="color: #2196F3;">✓ Using your personal API key</span>';

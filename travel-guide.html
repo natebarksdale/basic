@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="travel-guide.css?v=1762626532">
+    <link rel="stylesheet" href="travel-guide.css?v=1762627341">
 </head>
 <body>
     <div class="app-container">
@@ -113,6 +113,9 @@
                     <label for="apiKeyInput">OpenRouter API Key</label>
                     <div id="apiKeyStatus" style="font-size: 0.85em; margin-bottom: 8px; font-weight: 500;"></div>
                     <input type="password" id="apiKeyInput" placeholder="sk-or-v1-... (optional - defaults to free tier)">
+                    <div style="font-size: 0.8em; color: #888; margin-top: 4px;">
+                        Get your free API key at <a href="https://openrouter.ai/keys" target="_blank" style="color: #2196F3;">openrouter.ai/keys</a>
+                    </div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button class="btn-save" id="saveApiKey">Save API Key</button>
                         <button class="btn-save" id="resetApiKey" style="background: #666;">Reset to Free Key</button>
@@ -254,6 +257,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="travel-guide.js?v=1762626532"></script>
+    <script src="travel-guide.js?v=1762627341"></script>
 </body>
 </html>
