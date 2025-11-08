@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="travel-guide.css?v=1762582126">
+    <link rel="stylesheet" href="travel-guide.css?v=1762582465">
 </head>
 <body>
     <div class="app-container">
@@ -224,6 +224,21 @@
                         <div class="spinner"></div>
                         <p>Generating your travel guide...</p>
                     </div>
+
+                    <!-- Bottom Map for Exploration -->
+                    <div id="bottomMapContainer" class="bottom-map-container" style="display: none;">
+                        <div id="bottomMap" class="bottom-map"></div>
+                        <div class="map-instructions">
+                            <p>Drag the marker to explore nearby</p>
+                        </div>
+                    </div>
+
+                    <button id="exploreBottomMapBtn" class="btn-explore-bottom-map" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        Explore This Location
+                    </button>
                 </section>
             </div>
         </main>
@@ -238,6 +253,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="travel-guide.js?v=1762582126"></script>
+    <script src="travel-guide.js?v=1762582465"></script>
 </body>
 </html>
