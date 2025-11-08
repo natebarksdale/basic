@@ -693,8 +693,12 @@ input, select, textarea {
     right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    max-width: 2.5rem;
+    max-height: 2.5rem;
     padding: 0;
     background: var(--color-accent);
     color: white;
@@ -703,6 +707,7 @@ input, select, textarea {
     cursor: pointer;
     transition: var(--transition);
     display: flex;
+    flex: none;
     align-items: center;
     justify-content: center;
     z-index: 2;
