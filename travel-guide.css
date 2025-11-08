@@ -108,13 +108,11 @@ body {
 
 .voice-toggle:hover {
     background: var(--color-bg);
-    color: var(--color-accent-hover);
 }
 
 .voice-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    stroke-width: 2;
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 /* Hamburger Menu */
@@ -237,11 +235,9 @@ body {
     background: #fef5f3;
 }
 
-.voice-option-icon {
-    width: 2rem;
-    height: 2rem;
-    stroke-width: 1.5;
-    color: var(--color-accent);
+.voice-option-emoji {
+    font-size: 2rem;
+    line-height: 1;
     flex-shrink: 0;
 }
 
