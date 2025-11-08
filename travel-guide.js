@@ -232,7 +232,9 @@ async function loadPlace(location, addToHistory = true) {
         document.getElementById('loadingState').style.display = 'none';
     } catch (error) {
         console.error('Error loading place:', error);
-        showNotification('Failed to generate content. Please check your API key and try again.', 'error');
+        // Show the actual error message instead of generic one
+        const errorMessage = error.message || 'Failed to generate content. Please try again.';
+        showNotification(errorMessage, 'error');
         document.getElementById('loadingState').style.display = 'none';
     } finally {
         AppState.isGenerating = false;
