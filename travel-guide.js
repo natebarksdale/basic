@@ -5,7 +5,7 @@
 const AppState = {
     apiKey: localStorage.getItem('openrouter_api_key') || '',
     currentLocation: null,
-    currentModel: 'google/gemini-2.0-flash-exp:free',
+    currentModel: 'google/gemini-2.5-flash-lite',
     writingStyle: 'standard',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
@@ -18,28 +18,44 @@ const AppState = {
 const WRITING_STYLES = {
     standard: {
         name: "Standard Travel Guide",
-        prompt: "Write in a clear, informative travel guide style."
+        prompt: "Write in a clear, informative travel guide style.",
+        icon: "book"
     },
-    burton: {
-        name: "Richard Francis Burton",
-        prompt: "Write in the style of Victorian explorer Richard Francis Burton - erudite, adventurous, with detailed observations of customs, languages, and cultural practices. Use elaborate Victorian prose with scholarly references."
+    twain: {
+        name: "Mark Twain",
+        prompt: "Write in the style of Mark Twain - witty, satirical observations with folksy wisdom and humorous exaggeration. Use colorful storytelling with sharp social commentary and a conversational tone.",
+        icon: "steamboat"
     },
     bird: {
         name: "Isabella Bird",
-        prompt: "Write in the style of Isabella Bird - vivid, detailed, personal observations with a focus on daily life, natural beauty, and the human experience. Use engaging first-person narrative with rich sensory details."
+        prompt: "Write in the style of Isabella Bird - vivid, detailed, personal observations with a focus on daily life, natural beauty, and the human experience. Use engaging first-person narrative with rich sensory details.",
+        icon: "bird"
     },
     battuta: {
         name: "Ibn Battuta",
-        prompt: "Write in the style of Ibn Battuta - focus on Islamic culture, trade routes, scholarly encounters, and the hospitality of rulers. Include observations about religious practices and social customs with reverence and wonder."
+        prompt: "Write in the style of Ibn Battuta - focus on Islamic culture, trade routes, scholarly encounters, and the hospitality of rulers. Include observations about religious practices and social customs with reverence and wonder.",
+        icon: "compass"
     },
     west: {
         name: "Dorothy West",
-        prompt: "Write in the style of Dorothy West - elegant, perceptive prose focusing on social dynamics, class, culture, and the subtle nuances of place. Use sophisticated, literary language with keen social observation."
+        prompt: "Write in the style of Dorothy West - elegant, perceptive prose focusing on social dynamics, class, culture, and the subtle nuances of place. Use sophisticated, literary language with keen social observation.",
+        icon: "pen"
     },
     thompson: {
         name: "Hunter S. Thompson",
-        prompt: "Write in the style of Hunter S. Thompson - gonzo journalism with wild imagery, sharp cultural criticism, dark humor, and surreal observations. Use punchy, irreverent prose with vivid metaphors."
+        prompt: "Write in the style of Hunter S. Thompson - gonzo journalism with wild imagery, sharp cultural criticism, dark humor, and surreal observations. Use punchy, irreverent prose with vivid metaphors.",
+        icon: "sunglasses"
     }
+};
+
+// Voice Icons (SVG paths)
+const VOICE_ICONS = {
+    book: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
+    steamboat: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 9l-5-5-5 5M12 4v12"/>',
+    bird: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 4l-4 6h3v4l4-6h-3z"/>',
+    compass: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14l-4 6 4-2 4 6-4-10z"/>',
+    pen: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    sunglasses: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 9s3-4 10-4 10 4 10 4M6 13h4M14 13h4M12 16v5"/>',
 };
 
 // Category Templates by Location Type
@@ -66,6 +82,12 @@ function initializeApp() {
     });
     document.getElementById('backBtn').addEventListener('click', showSearchSection);
 
+    // Logo home click
+    document.getElementById('logoHome').addEventListener('click', showSearchSection);
+
+    // Voice toggle
+    document.getElementById('voiceToggle').addEventListener('click', cycleVoice);
+
     // Settings panel
     document.getElementById('menuToggle').addEventListener('click', toggleSettings);
     document.getElementById('closeSettings').addEventListener('click', closeSettings);
@@ -73,6 +95,7 @@ function initializeApp() {
 
     document.getElementById('writingStyle').addEventListener('change', (e) => {
         AppState.writingStyle = e.target.value;
+        updateVoiceIcon();
     });
     document.getElementById('modelSelect').addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
@@ -88,6 +111,9 @@ function initializeApp() {
 
     // Update score display and load API key
     updateScoreDisplay();
+
+    // Initialize voice icon
+    updateVoiceIcon();
 
     // Load existing API key into input field
     const apiKeyInput = document.getElementById('apiKeyInput');
@@ -115,6 +141,34 @@ function initializeApp() {
             showSearchSection();
         }
     });
+}
+
+// Voice Toggle Functions
+function cycleVoice() {
+    const voices = ['standard', 'twain', 'bird', 'battuta', 'west', 'thompson'];
+    const currentIndex = voices.indexOf(AppState.writingStyle);
+    const nextIndex = (currentIndex + 1) % voices.length;
+    AppState.writingStyle = voices[nextIndex];
+
+    // Update dropdown
+    document.getElementById('writingStyle').value = AppState.writingStyle;
+
+    // Update icon
+    updateVoiceIcon();
+
+    // Show notification
+    const styleName = WRITING_STYLES[AppState.writingStyle].name;
+    showNotification(`Writing style: ${styleName}`, 'info');
+}
+
+function updateVoiceIcon() {
+    const iconElement = document.getElementById('voiceIcon');
+    const currentStyle = WRITING_STYLES[AppState.writingStyle];
+    const iconKey = currentStyle.icon;
+
+    if (VOICE_ICONS[iconKey]) {
+        iconElement.innerHTML = VOICE_ICONS[iconKey];
+    }
 }
 
 // Settings Panel Management
@@ -266,6 +320,8 @@ async function generatePlaceContent(location) {
 
 For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
 
+IMPORTANT: Each item MUST include 1-2 specific, clickable place names (restaurants, museums, neighborhoods, landmarks, streets, etc.). Use proper capitalized names that readers can explore further.
+
 Categories: ${categories.join(', ')}
 
 Return ONLY valid JSON:
@@ -277,9 +333,9 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with specific place names.", "isLie": false},
-        {"text": "Another description.", "isLie": true},
-        {"text": "Third description.", "isLie": false}
+        {"text": "Description with specific place names like Café de Flore and Le Marais.", "isLie": false},
+        {"text": "Another description with Notre Dame Cathedral.", "isLie": true},
+        {"text": "Third description mentioning Louvre Museum.", "isLie": false}
       ]
     }
   ]
@@ -526,7 +582,16 @@ function convertPlaceNamesToLinks(text) {
 // Handle place link clicks
 function handlePlaceLink(event, placeName) {
     event.preventDefault();
-    loadPlace(placeName, true);
+
+    // Build contextual place name with breadcrumbs
+    let contextualName = placeName;
+    if (AppState.history.length > 0) {
+        // Add context from breadcrumbs (e.g., "President Hotel (Asunción, Paraguay)")
+        const breadcrumbContext = AppState.history.slice().reverse().slice(0, 3).join(', ');
+        contextualName = `${placeName} (${breadcrumbContext})`;
+    }
+
+    loadPlace(contextualName, true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
