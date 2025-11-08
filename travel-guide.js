@@ -649,6 +649,9 @@ async function handleExploreBottomMap() {
         AppState.isGenerating = false;
     }
 
+    // Clear breadcrumb history for fresh exploration
+    AppState.history = [];
+
     await loadPlace(locationName, true);
 }
 
