@@ -188,9 +188,16 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* Prevent zoom on input focus on iOS */
+/* Prevent zoom on input focus and text selection on iOS */
 input, select, textarea {
     font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent selection zoom on iOS */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 }
 
 .setting-group select,
@@ -642,6 +649,8 @@ input, select, textarea {
     font-size: 16px;
     margin-bottom: 1rem;
     font-family: 'SF Mono', Monaco, monospace;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .api-key-input:focus {

@@ -97,7 +97,13 @@ function initializeApp() {
     } else {
         // Open settings if no API key after a short delay
         setTimeout(() => {
-            toggleSettings();
+            const panel = document.getElementById('settingsPanel');
+            const toggle = document.getElementById('menuToggle');
+            panel.style.display = 'block';
+            setTimeout(() => {
+                panel.classList.add('open');
+                toggle.classList.add('active');
+            }, 10);
         }, 500);
     }
 
@@ -115,8 +121,23 @@ function initializeApp() {
 function toggleSettings() {
     const panel = document.getElementById('settingsPanel');
     const toggle = document.getElementById('menuToggle');
+
+    // Show panel if hidden
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        // Force reflow before adding class
+        panel.offsetHeight;
+    }
+
     panel.classList.toggle('open');
     toggle.classList.toggle('active');
+
+    // Hide panel after animation if closing
+    if (!panel.classList.contains('open')) {
+        setTimeout(() => {
+            panel.style.display = 'none';
+        }, 200);
+    }
 }
 
 function closeSettings() {
@@ -124,6 +145,11 @@ function closeSettings() {
     const toggle = document.getElementById('menuToggle');
     panel.classList.remove('open');
     toggle.classList.remove('active');
+
+    // Hide panel after animation
+    setTimeout(() => {
+        panel.style.display = 'none';
+    }, 200);
 }
 
 function saveApiKey() {
@@ -282,30 +308,48 @@ Return ONLY valid JSON:
 
 // Call OpenRouter LLM
 async function callLLM(prompt, maxTokens = 2000) {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${AppState.apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Two Truths & A Lie Travel Guide'
-        },
-        body: JSON.stringify({
-            model: AppState.currentModel,
-            messages: [
-                { role: 'user', content: prompt }
-            ],
-            max_tokens: maxTokens
-        })
-    });
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${AppState.apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Two Truths & A Lie Travel Guide'
+            },
+            body: JSON.stringify({
+                model: AppState.currentModel,
+                messages: [
+                    { role: 'user', content: prompt }
+                ],
+                max_tokens: maxTokens
+            })
+        });
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`API Error: ${error}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            const errorMessage = errorData.error?.message || errorData.error || 'API request failed';
+            throw new Error(`API Error (${response.status}): ${errorMessage}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            throw new Error('Invalid response format from API');
+        }
+
+        return data.choices[0].message.content;
+    } catch (error) {
+        console.error('LLM API Error:', error);
+        if (error.message.includes('401') || error.message.includes('403')) {
+            throw new Error('Invalid API key. Please check your OpenRouter API key in settings.');
+        } else if (error.message.includes('429')) {
+            throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (error.message.includes('insufficient')) {
+            throw new Error('Insufficient credits on your OpenRouter account.');
+        }
+        throw error;
     }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
 }
 
 // Extract place names from content and geocode them
