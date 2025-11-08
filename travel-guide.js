@@ -50,23 +50,23 @@ const WRITING_STYLES = {
 
 // Voice Icons (SVG paths)
 const VOICE_ICONS = {
-    book: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
-    steamboat: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 9l-5-5-5 5M12 4v12"/>',
-    bird: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 4l-4 6h3v4l4-6h-3z"/>',
-    compass: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14l-4 6 4-2 4 6-4-10z"/>',
-    pen: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
-    sunglasses: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 9s3-4 10-4 10 4 10 4M6 13h4M14 13h4M12 16v5"/>',
+    book: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
+    steamboat: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 17h18M5 17v-4M9 17V9M15 17V9M19 17v-4M7 9h10M7 9l5-5m0 0l5 5m-5-5v5"/>',
+    bird: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 12c0-1 0-2 1-3 1-1 2-1 3-1h6c1 0 2 0 3 1 1 1 1 2 1 3 0 1 0 2-1 3-1 1-2 1-3 1h-2l-2 4v-4H9c-1 0-2 0-3-1-1-1-1-2-1-3zm7-4v4m-3-1l3-2 3 2"/>',
+    compass: '<circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
+    pen: '<path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    sunglasses: '<path stroke-linecap="round" stroke-linejoin="round" d="M2 10s2-3 5-3 5 3 5 3m0 0s2-3 5-3 5 3 5 3m-20 0v1c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-1m8 0v1c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-1"/>',
 };
 
 // Category Templates by Location Type
 const CATEGORY_TEMPLATES = {
-    city: ['Introduction', 'Getting There', 'Where to Stay', 'Food & Drink', 'Top Sights', 'Activities', 'Day Trips', 'Practical Tips'],
+    city: ['Introduction', 'Where to Go', 'What to Eat', 'What to Do', 'Where to Stay', 'Getting Around', 'Day Trips', 'Practical Tips'],
     museum: ['Introduction', 'History & Architecture', 'Must-See Exhibits', 'Hidden Gems', 'Special Collections', 'Visitor Information'],
     building: ['Introduction', 'History', 'Architecture & Design', 'Notable Features', 'Cultural Significance', 'Visiting'],
     monument: ['Introduction', 'Historical Context', 'Design & Construction', 'Cultural Impact', 'Visiting Information'],
-    nature: ['Introduction', 'Geography & Climate', 'Flora & Fauna', 'Activities', 'Best Times to Visit', 'Conservation'],
+    nature: ['Introduction', 'Geography & Climate', 'Flora & Fauna', 'What to Do', 'Best Times to Visit', 'Conservation'],
     restaurant: ['Introduction', 'Signature Dishes', 'Atmosphere', 'History', 'Practical Information'],
-    default: ['Introduction', 'Background', 'Key Features', 'Experience', 'Practical Information']
+    default: ['Introduction', 'Background', 'Where to Go', 'What to Eat', 'What to Do', 'Practical Information']
 };
 
 // Initialize Application
@@ -96,9 +96,17 @@ function initializeApp() {
     document.getElementById('writingStyle').addEventListener('change', (e) => {
         AppState.writingStyle = e.target.value;
         updateVoiceIcon();
+        // Refresh current page if viewing one
+        if (AppState.currentLocation) {
+            regenerateCurrentPage();
+        }
     });
     document.getElementById('modelSelect').addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
+        // Refresh current page if viewing one
+        if (AppState.currentLocation) {
+            regenerateCurrentPage();
+        }
     });
 
     // Suggestion chips
@@ -141,6 +149,39 @@ function initializeApp() {
             showSearchSection();
         }
     });
+
+    // Handle pull-to-refresh
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        const touchY = e.touches[0].clientY;
+        const touchDiff = touchY - touchStartY;
+
+        // If we're at the top of the page and pulling down
+        if (window.scrollY === 0 && touchDiff > 0 && AppState.currentLocation) {
+            // This will trigger a page refresh which we want to intercept
+        }
+    }, { passive: true });
+}
+
+// Regenerate Current Page
+function regenerateCurrentPage() {
+    if (!AppState.currentLocation) return;
+
+    // Get the current location name from history (last item)
+    const currentLocationName = AppState.history[AppState.history.length - 1];
+
+    // Remove the last item from history temporarily
+    AppState.history.pop();
+
+    // Reload the page
+    loadPlace(currentLocationName, true);
+
+    // Close settings panel
+    closeSettings();
 }
 
 // Voice Toggle Functions
@@ -583,11 +624,13 @@ function convertPlaceNamesToLinks(text) {
 function handlePlaceLink(event, placeName) {
     event.preventDefault();
 
-    // Build contextual place name with breadcrumbs
+    // Build contextual place name with breadcrumbs (last 3 only)
     let contextualName = placeName;
     if (AppState.history.length > 0) {
-        // Add context from breadcrumbs (e.g., "President Hotel (Asunción, Paraguay)")
-        const breadcrumbContext = AppState.history.slice().reverse().slice(0, 3).join(', ');
+        // Add context from last 3 breadcrumbs in reverse order
+        // e.g., "President Hotel (Asunción, Paraguay, South America)"
+        const lastThree = AppState.history.slice(-3).reverse();
+        const breadcrumbContext = lastThree.join(', ');
         contextualName = `${placeName} (${breadcrumbContext})`;
     }
 
