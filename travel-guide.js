@@ -343,6 +343,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    // Debug: Log API key state on initialization
+    console.log('App initialized. API Key state:', {
+        hasApiKey: !!AppState.apiKey,
+        isUsingDefault: isUsingDefaultKey(),
+        localStorageKey: !!localStorage.getItem('openrouter_api_key')
+    });
+
     // Set up event listeners
     document.getElementById('exploreBtn').addEventListener('click', handleExplore);
     document.getElementById('exploreMapBtn').addEventListener('click', handleExploreMap);
@@ -396,14 +403,12 @@ function initializeApp() {
     // Initialize voice icon
     updateVoiceIcon();
 
-    // Load existing API key into input field (only if it's not the default key)
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    if (!isUsingDefaultKey()) {
-        apiKeyInput.value = AppState.apiKey;
-    }
-
     // Update API key status indicator
     updateApiKeyStatus();
+
+    // Note: We don't load the API key into the password field here because browsers
+    // often block programmatic password field population on page load for security.
+    // Instead, we load it when the settings panel is opened (see toggleSettings())
 
     // Generate random suggestion chips and initialize home map
     generateSuggestionChips();
@@ -584,8 +589,12 @@ function toggleSettings() {
     // Update API key status and load key into input field when opening
     if (panel.classList.contains('open')) {
         const apiKeyInput = document.getElementById('apiKeyInput');
+        // Always try to load the saved API key (if not using default)
         if (!isUsingDefaultKey() && AppState.apiKey) {
             apiKeyInput.value = AppState.apiKey;
+            console.log('API key loaded into settings field');
+        } else {
+            console.log('Using default key or no custom key saved');
         }
         updateApiKeyStatus();
     }
