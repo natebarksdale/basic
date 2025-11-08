@@ -156,22 +156,45 @@ const SUGGESTION_POOLS = {
     nature: ['Grand Canyon', 'Mount Fuji', 'Santorini', 'Yosemite', 'Banff', 'Patagonia', 'Serengeti', 'Great Barrier Reef']
 };
 
-// Image API helper (using Lorem Picsum for reliable, free images)
-async function fetchPlaceholderImage(query, orientation = 'landscape') {
+// Fetch relevant image from Wikipedia/Wikimedia
+async function fetchWikipediaImage(query) {
     try {
-        // Using Lorem Picsum for reliable placeholder images
-        // 16:9 aspect ratio
-        const width = 1600;
-        const height = 900;
+        // First, search Wikipedia for the page
+        const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1`;
+        const searchResponse = await fetch(searchUrl);
+        const searchData = await searchResponse.json();
 
-        // Add random seed based on query to get consistent but varied images
-        const seed = Math.abs(query.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+        if (!searchData.query || !searchData.query.search || searchData.query.search.length === 0) {
+            return null;
+        }
 
-        return `https://picsum.photos/seed/${seed}/${width}/${height}`;
+        const pageTitle = searchData.query.search[0].title;
+
+        // Get the page's main image
+        const imageUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=original&titles=${encodeURIComponent(pageTitle)}`;
+        const imageResponse = await fetch(imageUrl);
+        const imageData = await imageResponse.json();
+
+        const pages = imageData.query.pages;
+        const pageId = Object.keys(pages)[0];
+
+        if (pages[pageId].original) {
+            return pages[pageId].original.source;
+        }
+
+        return null;
     } catch (error) {
-        console.error('Error fetching image:', error);
+        console.error('Error fetching Wikipedia image:', error);
         return null;
     }
+}
+
+// Fallback to placeholder image
+async function fetchPlaceholderImage(query) {
+    const width = 1600;
+    const height = 900;
+    const seed = Math.abs(query.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+    return `https://picsum.photos/seed/${seed}/${width}/${height}`;
 }
 
 // Load hero image for a place
@@ -179,14 +202,29 @@ async function loadPlaceHeroImage(locationName) {
     const heroContainer = document.getElementById('placeHero');
     const heroImage = document.getElementById('placeHeroImage');
 
-    // Get image URL
-    const imageUrl = await fetchPlaceholderImage(locationName);
+    // Try to get Wikipedia image first, fallback to placeholder
+    let imageUrl = await fetchWikipediaImage(locationName);
+
+    if (!imageUrl) {
+        imageUrl = await fetchPlaceholderImage(locationName);
+    }
 
     if (imageUrl) {
-        // Add error handler to hide hero if image fails to load
-        heroImage.onerror = () => {
-            heroContainer.style.display = 'none';
-            heroImage.style.display = 'none';
+        // Add error handler to try fallback if image fails to load
+        heroImage.onerror = async () => {
+            // If Wikipedia image fails, try placeholder
+            if (imageUrl.includes('wikipedia')) {
+                const fallbackUrl = await fetchPlaceholderImage(locationName);
+                if (fallbackUrl && fallbackUrl !== heroImage.src) {
+                    heroImage.src = fallbackUrl;
+                } else {
+                    heroContainer.style.display = 'none';
+                    heroImage.style.display = 'none';
+                }
+            } else {
+                heroContainer.style.display = 'none';
+                heroImage.style.display = 'none';
+            }
         };
 
         // Add load handler to show hero when image loads successfully
@@ -208,16 +246,33 @@ async function loadHomeHeroImage() {
     const heroContainer = document.getElementById('homeHero');
     const heroImage = document.getElementById('homeHeroImage');
 
-    const randomDestinations = ['travel', 'adventure', 'wanderlust', 'explore', 'journey', 'destination', 'vacation', 'landmark'];
-    const randomQuery = randomDestinations[Math.floor(Math.random() * randomDestinations.length)];
+    // Pick a random well-known destination for the home hero
+    const famousPlaces = ['Eiffel Tower', 'Taj Mahal', 'Great Wall of China', 'Colosseum',
+                          'Machu Picchu', 'Santorini', 'Grand Canyon', 'Angkor Wat'];
+    const randomPlace = famousPlaces[Math.floor(Math.random() * famousPlaces.length)];
 
-    const imageUrl = await fetchPlaceholderImage(randomQuery);
+    // Try Wikipedia image first, fallback to placeholder
+    let imageUrl = await fetchWikipediaImage(randomPlace);
+
+    if (!imageUrl) {
+        imageUrl = await fetchPlaceholderImage(randomPlace);
+    }
 
     if (imageUrl) {
-        // Add error handler to hide hero if image fails to load
-        heroImage.onerror = () => {
-            heroContainer.style.display = 'none';
-            heroImage.style.display = 'none';
+        // Add error handler with fallback
+        heroImage.onerror = async () => {
+            if (imageUrl.includes('wikipedia')) {
+                const fallbackUrl = await fetchPlaceholderImage(randomPlace);
+                if (fallbackUrl && fallbackUrl !== heroImage.src) {
+                    heroImage.src = fallbackUrl;
+                } else {
+                    heroContainer.style.display = 'none';
+                    heroImage.style.display = 'none';
+                }
+            } else {
+                heroContainer.style.display = 'none';
+                heroImage.style.display = 'none';
+            }
         };
 
         // Add load handler to show hero when image loads successfully
@@ -971,7 +1026,6 @@ function revealItem(itemEl, isLie) {
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-        showNotification('+10', 'success');
 
         // Add varied voiced commentary to the badge
         const messages = badgeMessages.correctLie;
@@ -985,7 +1039,6 @@ function revealItem(itemEl, isLie) {
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-        showNotification('-5', 'error');
 
         // Add varied voiced commentary to the badge
         const messages = badgeMessages.wrongTruth;
@@ -1004,10 +1057,10 @@ function updateScore(delta) {
     AppState.score += delta;
     if (AppState.score < 0) AppState.score = 0;
     localStorage.setItem('travel_guide_score', AppState.score);
-    updateScoreDisplay();
+    updateScoreDisplay(delta);
 }
 
-function updateScoreDisplay() {
+function updateScoreDisplay(delta = 0) {
     document.getElementById('scoreValue').textContent = AppState.score;
 
     // Update header score indicator
@@ -1016,7 +1069,18 @@ function updateScoreDisplay() {
 
     if (AppState.score > 0) {
         headerScoreValue.textContent = AppState.score;
-        headerScore.style.display = 'block';
+        headerScore.style.display = 'flex';
+
+        // Add animation class based on delta
+        if (delta > 0) {
+            headerScore.classList.remove('score-decrease');
+            headerScore.classList.add('score-increase');
+            setTimeout(() => headerScore.classList.remove('score-increase'), 500);
+        } else if (delta < 0) {
+            headerScore.classList.remove('score-increase');
+            headerScore.classList.add('score-decrease');
+            setTimeout(() => headerScore.classList.remove('score-decrease'), 500);
+        }
     } else {
         headerScore.style.display = 'none';
     }
