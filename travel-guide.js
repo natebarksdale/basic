@@ -581,8 +581,12 @@ function toggleSettings() {
     panel.classList.toggle('open');
     toggle.classList.toggle('active');
 
-    // Update API key status when opening
+    // Update API key status and load key into input field when opening
     if (panel.classList.contains('open')) {
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        if (!isUsingDefaultKey() && AppState.apiKey) {
+            apiKeyInput.value = AppState.apiKey;
+        }
         updateApiKeyStatus();
     }
 
@@ -640,7 +644,8 @@ function resetToDefaultKey() {
 }
 
 function isUsingDefaultKey() {
-    return !localStorage.getItem('openrouter_api_key') || AppState.apiKey === DEFAULT_API_KEY;
+    // User is using default key if they haven't saved a custom one in localStorage
+    return !localStorage.getItem('openrouter_api_key');
 }
 
 function updateApiKeyStatus() {
