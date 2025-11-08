@@ -48,14 +48,14 @@ const WRITING_STYLES = {
     }
 };
 
-// Voice Icons (SVG paths)
+// Voice Icons (Emoji)
 const VOICE_ICONS = {
-    book: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
-    steamboat: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 17h18M5 17v-4M9 17V9M15 17V9M19 17v-4M7 9h10M7 9l5-5m0 0l5 5m-5-5v5"/>',
-    bird: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 12c0-1 0-2 1-3 1-1 2-1 3-1h6c1 0 2 0 3 1 1 1 1 2 1 3 0 1 0 2-1 3-1 1-2 1-3 1h-2l-2 4v-4H9c-1 0-2 0-3-1-1-1-1-2-1-3zm7-4v4m-3-1l3-2 3 2"/>',
-    compass: '<circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
-    pen: '<path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
-    sunglasses: '<path stroke-linecap="round" stroke-linejoin="round" d="M2 10s2-3 5-3 5 3 5 3m0 0s2-3 5-3 5 3 5 3m-20 0v1c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-1m8 0v1c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-1"/>',
+    book: '📖',
+    steamboat: '🚢',
+    bird: '🦅',
+    compass: '🧭',
+    pen: '✍️',
+    sunglasses: '🕶️',
 };
 
 // Category Templates by Location Type
@@ -262,7 +262,7 @@ function updateVoiceIcon() {
     const iconKey = currentStyle.icon;
 
     if (VOICE_ICONS[iconKey]) {
-        iconElement.innerHTML = VOICE_ICONS[iconKey];
+        iconElement.textContent = VOICE_ICONS[iconKey];
     }
 }
 
@@ -342,6 +342,16 @@ async function handleExplore() {
     await loadPlace(location, true);
 }
 
+// Strip parenthetical content from location name
+function stripParenthetical(locationName) {
+    // Remove everything from the first opening parenthesis onwards
+    const index = locationName.indexOf('(');
+    if (index !== -1) {
+        return locationName.substring(0, index).trim();
+    }
+    return locationName;
+}
+
 // Load Place
 async function loadPlace(location, addToHistory = true) {
     AppState.isGenerating = true;
@@ -358,8 +368,10 @@ async function loadPlace(location, addToHistory = true) {
 
     // Update history and breadcrumb immediately
     if (addToHistory) {
-        AppState.history.push(location);
-        history.pushState({ location }, '', `#${encodeURIComponent(location)}`);
+        // Strip parenthetical content before adding to history to avoid nested parentheses
+        const cleanLocationName = stripParenthetical(location);
+        AppState.history.push(cleanLocationName);
+        history.pushState({ location: cleanLocationName }, '', `#${encodeURIComponent(cleanLocationName)}`);
     }
     updateBreadcrumb();
 
@@ -415,11 +427,14 @@ async function generatePlaceContent(location) {
 
 For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
 
-CRITICAL: Format text like a travel guide by wrapping important place names, landmarks, neighborhoods, restaurants, museums, and key nouns/phrases in <strong> tags. These should be words that would typically be boldfaced in a travel guide. Include 1-2 strong-tagged phrases per item.
+CRITICAL: Format text like a travel guide by wrapping important place names, landmarks, neighborhoods, restaurants, museums, and key nouns/phrases in <strong> tags. These should be words that would typically be boldfaced in a travel guide.
+
+REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
 
 Examples:
 - "Visit <strong>Café de Flore</strong> in the heart of <strong>Saint-Germain-des-Prés</strong> for authentic Parisian atmosphere."
 - "The <strong>Louvre Museum</strong> houses over 35,000 works of art across <strong>eight curatorial departments</strong>."
+- "Head to <strong>Le Marais</strong> for vintage shopping at <strong>Free'P'Star</strong> and grab dinner at <strong>L'As du Fallafel</strong>."
 
 Categories: ${categories.join(', ')}
 
@@ -433,8 +448,8 @@ Return ONLY valid JSON:
       "name": "Category Name",
       "items": [
         {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
-        {"text": "Another with <strong>Notable Landmark</strong>.", "isLie": true},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong>.", "isLie": false}
+        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false}
       ]
     }
   ]
