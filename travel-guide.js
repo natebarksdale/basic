@@ -1,8 +1,8 @@
 // Two Truths & A Lie - Gamified Travel Guide
 // Main Application Logic
 
-// Default Free-Tier API Key (with $0 spend limit - free models only)
-const DEFAULT_API_KEY = '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';
+// Default Free-Tier API Key (injected at build time from GitHub Secrets)
+const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
 
 // Application State
 const AppState = {
