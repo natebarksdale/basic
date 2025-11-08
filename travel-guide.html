@@ -49,15 +49,22 @@
                 <div class="setting-group">
                     <label for="modelSelect">Model</label>
                     <select id="modelSelect">
+                        <optgroup label="Free Models">
+                            <option value="meta-llama/llama-3.2-3b-instruct:free" selected>Llama 3.2 3B (Free)</option>
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Free)</option>
+                            <option value="google/gemma-2-9b-it:free">Gemma 2 9B (Free)</option>
+                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</option>
+                        </optgroup>
                         <optgroup label="Fast & Cheap">
-                            <option value="google/gemini-flash-1.5" selected>Gemini Flash 1.5</option>
                             <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
                             <option value="anthropic/claude-3-haiku">Claude Haiku</option>
+                            <option value="google/gemini-flash-1.5-8b">Gemini Flash 8B</option>
                         </optgroup>
                         <optgroup label="Balanced">
-                            <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+                            <option value="google/gemini-flash-1.5">Gemini Flash 1.5</option>
                             <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
                             <option value="anthropic/claude-3.5-sonnet">Claude Sonnet</option>
+                            <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
                         </optgroup>
                         <optgroup label="Premium">
                             <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
