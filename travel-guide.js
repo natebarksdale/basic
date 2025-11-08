@@ -21,7 +21,7 @@ function getValidApiKey() {
 const AppState = {
     apiKey: getValidApiKey(),
     currentLocation: null,
-    currentModel: 'google/gemini-2.5-flash-lite',
+    currentModel: 'google/gemini-2.5-pro-exp-03-25:free',
     writingStyle: 'parker',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
@@ -192,8 +192,8 @@ async function loadPlaceHeroImage(locationName) {
 
 // Initialize home map with draggable marker
 function initializeHomeMap() {
-    // Create map centered on Paris (default)
-    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 3);
+    // Create map centered on Paris (default) - zoomed way out for world view
+    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 2);
 
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
