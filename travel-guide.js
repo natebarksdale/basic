@@ -88,11 +88,17 @@ function initializeApp() {
 
     // Update score display and load API key
     updateScoreDisplay();
+
+    // Load existing API key into input field
+    const apiKeyInput = document.getElementById('apiKeyInput');
     if (AppState.apiKey) {
-        document.getElementById('apiKeyInput').value = AppState.apiKey;
+        apiKeyInput.value = AppState.apiKey;
+        // Don't open settings if we have a key
     } else {
-        // Open settings if no API key
-        setTimeout(() => toggleSettings(), 500);
+        // Open settings if no API key after a short delay
+        setTimeout(() => {
+            toggleSettings();
+        }, 500);
     }
 
     // Handle browser back/forward
@@ -126,9 +132,17 @@ function saveApiKey() {
         showNotification('Please enter a valid API key', 'error');
         return;
     }
+
+    // Save to both AppState and localStorage
     AppState.apiKey = apiKey;
     localStorage.setItem('openrouter_api_key', apiKey);
+
     showNotification('API key saved!', 'success');
+
+    // Close settings panel after short delay
+    setTimeout(() => {
+        closeSettings();
+    }, 1000);
 }
 
 // Handle Explore
