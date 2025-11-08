@@ -148,6 +148,99 @@ const CATEGORY_TEMPLATES = {
     default: ['Introduction', 'Background', 'Where to Go', 'What to Eat', 'What to Do', 'Practical Information']
 };
 
+// Diverse suggestion pools for dynamic generation
+const SUGGESTION_POOLS = {
+    cities: ['Paris', 'Tokyo', 'Rome', 'Barcelona', 'Istanbul', 'Cairo', 'Bangkok', 'Rio de Janeiro', 'Sydney', 'New York', 'London', 'Dubai', 'Singapore', 'Amsterdam', 'Prague'],
+    landmarks: ['The Louvre', 'Machu Picchu', 'Taj Mahal', 'Colosseum', 'Eiffel Tower', 'Great Wall of China', 'Petra', 'Angkor Wat', 'Sagrada Familia', 'Stonehenge'],
+    museums: ['British Museum', 'Metropolitan Museum of Art', 'Uffizi Gallery', 'Hermitage Museum', 'Prado Museum', 'Vatican Museums', 'Smithsonian'],
+    nature: ['Grand Canyon', 'Mount Fuji', 'Santorini', 'Yosemite', 'Banff', 'Patagonia', 'Serengeti', 'Great Barrier Reef']
+};
+
+// Unsplash API helper (using free public API - no auth needed for basic usage)
+async function fetchUnsplashImage(query, orientation = 'landscape') {
+    try {
+        // Using Unsplash Source API for simplicity (no API key required)
+        const width = orientation === 'landscape' ? 1200 : 800;
+        const height = orientation === 'landscape' ? 600 : 1000;
+
+        // Add random seed to get different images each time
+        const randomSeed = Math.random().toString(36).substring(7);
+
+        return `https://source.unsplash.com/${width}x${height}/?${encodeURIComponent(query)}&sig=${randomSeed}`;
+    } catch (error) {
+        console.error('Error fetching Unsplash image:', error);
+        return null;
+    }
+}
+
+// Load hero image for a place
+async function loadPlaceHeroImage(locationName) {
+    const heroContainer = document.getElementById('placeHero');
+    const heroImage = document.getElementById('placeHeroImage');
+
+    // Get image URL from Unsplash
+    const imageUrl = await fetchUnsplashImage(locationName);
+
+    if (imageUrl) {
+        heroImage.src = imageUrl;
+        heroImage.alt = locationName;
+        heroImage.style.display = 'block';
+        heroContainer.style.display = 'block';
+    }
+}
+
+// Load random travel hero image for home view
+async function loadHomeHeroImage() {
+    const heroContainer = document.getElementById('homeHero');
+    const heroImage = document.getElementById('homeHeroImage');
+
+    const randomDestinations = ['travel', 'adventure', 'wanderlust', 'explore', 'journey', 'destination', 'vacation', 'landmark'];
+    const randomQuery = randomDestinations[Math.floor(Math.random() * randomDestinations.length)];
+
+    const imageUrl = await fetchUnsplashImage(randomQuery);
+
+    if (imageUrl) {
+        heroImage.src = imageUrl;
+        heroImage.style.display = 'block';
+        heroContainer.style.display = 'block';
+    }
+}
+
+// Generate random suggestion chips
+function generateSuggestionChips() {
+    const container = document.getElementById('quickSuggestions');
+
+    // Clear existing chips (except label)
+    const label = container.querySelector('.suggestion-label');
+    container.innerHTML = '';
+    container.appendChild(label);
+
+    // Pick 2 random cities
+    const cities = [...SUGGESTION_POOLS.cities].sort(() => 0.5 - Math.random()).slice(0, 2);
+
+    // Pick 1 random landmark
+    const landmark = SUGGESTION_POOLS.landmarks[Math.floor(Math.random() * SUGGESTION_POOLS.landmarks.length)];
+
+    // Pick 1 random museum or nature spot
+    const extraPool = Math.random() > 0.5 ? SUGGESTION_POOLS.museums : SUGGESTION_POOLS.nature;
+    const extra = extraPool[Math.floor(Math.random() * extraPool.length)];
+
+    // Combine and create chips
+    const suggestions = [...cities, landmark, extra];
+
+    suggestions.forEach(location => {
+        const chip = document.createElement('button');
+        chip.className = 'suggestion-chip';
+        chip.dataset.location = location;
+        chip.textContent = location;
+        chip.addEventListener('click', () => {
+            document.getElementById('locationInput').value = location;
+            handleExplore();
+        });
+        container.appendChild(chip);
+    });
+}
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -212,6 +305,10 @@ function initializeApp() {
 
     // Update API key status indicator
     updateApiKeyStatus();
+
+    // Generate random suggestion chips and load home hero image
+    generateSuggestionChips();
+    loadHomeHeroImage();
 
     // Note: We always have a key now (default key), so don't auto-open settings
 
@@ -358,12 +455,16 @@ function updateActiveVoiceOption() {
 
 function updateVoiceIcon() {
     const iconElement = document.getElementById('voiceIcon');
+    const toggleElement = document.getElementById('voiceToggle');
     const currentStyle = WRITING_STYLES[AppState.writingStyle];
     const iconKey = currentStyle.icon;
 
     if (VOICE_ICONS[iconKey]) {
         iconElement.textContent = VOICE_ICONS[iconKey];
     }
+
+    // Update data-voice attribute for background color
+    toggleElement.setAttribute('data-voice', AppState.writingStyle);
 }
 
 // Settings Panel Management
@@ -499,6 +600,9 @@ async function loadPlace(location, addToHistory = true) {
         history.pushState({ location: cleanLocationName }, '', `#${encodeURIComponent(cleanLocationName)}`);
     }
     updateBreadcrumb();
+
+    // Load hero image for this place
+    loadPlaceHeroImage(location);
 
     try {
         // Generate content
@@ -969,10 +1073,14 @@ function navigateToBreadcrumb(index) {
 
 // Show Search Section
 function showSearchSection() {
-    document.getElementById('searchSection').style.display = 'block';
+    document.getElementById('searchSection').style.display = 'flex';
     document.getElementById('placeSection').style.display = 'none';
     AppState.history = [];
     history.pushState({}, '', '#');
+
+    // Regenerate suggestions and hero image on return to home
+    generateSuggestionChips();
+    loadHomeHeroImage();
 }
 
 // Show Notification

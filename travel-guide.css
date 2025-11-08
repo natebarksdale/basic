@@ -115,11 +115,11 @@ body {
     justify-content: center;
     color: var(--color-accent);
     transition: var(--transition);
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 .voice-toggle:hover {
-    background: var(--color-bg);
+    opacity: 0.8;
 }
 
 .voice-icon {
@@ -127,6 +127,34 @@ body {
     line-height: 1;
     font-family: 'Noto Emoji', sans-serif;
     font-weight: 400;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+/* Voice-specific background colors */
+.voice-toggle[data-voice="standard"] .voice-icon {
+    background: rgba(139, 69, 19, 0.1); /* Warm brown for book */
+}
+
+.voice-toggle[data-voice="twain"] .voice-icon {
+    background: rgba(65, 105, 225, 0.1); /* Royal blue for steamboat */
+}
+
+.voice-toggle[data-voice="bird"] .voice-icon {
+    background: rgba(34, 139, 34, 0.1); /* Forest green for bird */
+}
+
+.voice-toggle[data-voice="battuta"] .voice-icon {
+    background: rgba(184, 134, 11, 0.1); /* Dark goldenrod for compass */
+}
+
+.voice-toggle[data-voice="west"] .voice-icon {
+    background: rgba(128, 0, 128, 0.1); /* Purple for pen */
+}
+
+.voice-toggle[data-voice="thompson"] .voice-icon {
+    background: rgba(220, 20, 60, 0.1); /* Crimson for sunglasses */
 }
 
 /* Hamburger Menu */
@@ -417,14 +445,70 @@ input, select, textarea {
 /* Search Section */
 .search-section {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 60vh;
+    position: relative;
+}
+
+/* Home Hero Image */
+.home-hero {
+    width: 100%;
+    max-width: 1200px;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.home-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+}
+
+/* Place Hero Image */
+.place-hero {
+    width: 100%;
+    height: 350px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.place-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.place-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
 }
 
 .search-card {
     text-align: center;
     max-width: 600px;
+    z-index: 1;
 }
 
 .search-card h2 {

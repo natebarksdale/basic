@@ -152,6 +152,12 @@
             <div class="container">
                 <!-- Search Section -->
                 <section id="searchSection" class="search-section">
+                    <!-- Hero Image for Home View -->
+                    <div class="home-hero" id="homeHero">
+                        <img id="homeHeroImage" src="" alt="Random travel destination" style="display: none;">
+                        <div class="home-hero-overlay"></div>
+                    </div>
+
                     <div class="search-card">
                         <h2>Explore Any Destination</h2>
                         <p class="search-description">Enter a city, landmark, museum, or any place you'd like to explore. Each guide presents facts as "Two Truths and a Lie" - can you spot the fiction?</p>
@@ -161,19 +167,21 @@
                             <button id="exploreBtn" class="btn-explore">Explore</button>
                         </div>
 
-                        <div class="quick-suggestions">
+                        <div class="quick-suggestions" id="quickSuggestions">
                             <span class="suggestion-label">Try these:</span>
-                            <button class="suggestion-chip" data-location="Paris">Paris</button>
-                            <button class="suggestion-chip" data-location="Tokyo">Tokyo</button>
-                            <button class="suggestion-chip" data-location="Rome">Rome</button>
-                            <button class="suggestion-chip" data-location="The Louvre">The Louvre</button>
-                            <button class="suggestion-chip" data-location="Machu Picchu">Machu Picchu</button>
+                            <!-- Dynamically generated suggestion chips will appear here -->
                         </div>
                     </div>
                 </section>
 
                 <!-- Place Content Section -->
                 <section id="placeSection" class="place-section" style="display: none;">
+                    <!-- Hero Image for Place -->
+                    <div class="place-hero" id="placeHero">
+                        <img id="placeHeroImage" src="" alt="" style="display: none;">
+                        <div class="place-hero-overlay"></div>
+                    </div>
+
                     <div class="place-nav">
                         <button id="backBtn" class="btn-back">
                             <svg viewBox="0 0 24 24" fill="currentColor">
