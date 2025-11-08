@@ -162,6 +162,106 @@ body {
     transform: translateY(-6px) rotate(-45deg);
 }
 
+/* Voice Menu Panel */
+.voice-menu-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    max-height: 100vh;
+    background: var(--color-card);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: var(--transition);
+    z-index: 200;
+    overflow-y: auto;
+}
+
+.voice-menu-panel.open {
+    transform: translateX(0);
+}
+
+.voice-menu-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.voice-menu-header h3 {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.close-voice-menu {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--color-text-light);
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voice-menu-body {
+    padding: 0.5rem;
+}
+
+.voice-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.voice-option:hover {
+    border-color: var(--color-accent);
+    background: var(--color-bg);
+}
+
+.voice-option.active {
+    border-color: var(--color-accent);
+    background: #fef5f3;
+}
+
+.voice-option-icon {
+    width: 2rem;
+    height: 2rem;
+    stroke-width: 1.5;
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.voice-option-text {
+    flex: 1;
+}
+
+.voice-option-name {
+    font-weight: 500;
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+}
+
+.voice-option-desc {
+    font-size: 0.813rem;
+    color: var(--color-text-light);
+    line-height: 1.4;
+}
+
 /* Settings Panel */
 .settings-panel {
     position: fixed;

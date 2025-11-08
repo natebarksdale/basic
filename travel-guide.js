@@ -86,21 +86,22 @@ function initializeApp() {
     document.getElementById('logoHome').addEventListener('click', showSearchSection);
 
     // Voice toggle
-    document.getElementById('voiceToggle').addEventListener('click', cycleVoice);
+    document.getElementById('voiceToggle').addEventListener('click', toggleVoiceMenu);
+
+    // Voice menu
+    document.getElementById('closeVoiceMenu').addEventListener('click', closeVoiceMenu);
+    document.querySelectorAll('.voice-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const voice = option.dataset.voice;
+            selectVoice(voice);
+        });
+    });
 
     // Settings panel
     document.getElementById('menuToggle').addEventListener('click', toggleSettings);
     document.getElementById('closeSettings').addEventListener('click', closeSettings);
     document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
 
-    document.getElementById('writingStyle').addEventListener('change', (e) => {
-        AppState.writingStyle = e.target.value;
-        updateVoiceIcon();
-        // Refresh current page if viewing one
-        if (AppState.currentLocation) {
-            regenerateCurrentPage();
-        }
-    });
     document.getElementById('modelSelect').addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
         // Refresh current page if viewing one
@@ -184,22 +185,75 @@ function regenerateCurrentPage() {
     closeSettings();
 }
 
-// Voice Toggle Functions
-function cycleVoice() {
-    const voices = ['standard', 'twain', 'bird', 'battuta', 'west', 'thompson'];
-    const currentIndex = voices.indexOf(AppState.writingStyle);
-    const nextIndex = (currentIndex + 1) % voices.length;
-    AppState.writingStyle = voices[nextIndex];
+// Voice Menu Functions
+function toggleVoiceMenu() {
+    const panel = document.getElementById('voiceMenuPanel');
+    const settingsPanel = document.getElementById('settingsPanel');
 
-    // Update dropdown
-    document.getElementById('writingStyle').value = AppState.writingStyle;
+    // Close settings if open
+    if (settingsPanel.classList.contains('open')) {
+        closeSettings();
+        setTimeout(() => {
+            openVoiceMenu();
+        }, 200);
+    } else {
+        if (panel.style.display === 'none') {
+            openVoiceMenu();
+        } else {
+            closeVoiceMenu();
+        }
+    }
+}
+
+function openVoiceMenu() {
+    const panel = document.getElementById('voiceMenuPanel');
+    panel.style.display = 'block';
+    panel.offsetHeight; // Force reflow
+    panel.classList.add('open');
+
+    // Update active voice option
+    updateActiveVoiceOption();
+}
+
+function closeVoiceMenu() {
+    const panel = document.getElementById('voiceMenuPanel');
+    panel.classList.remove('open');
+
+    setTimeout(() => {
+        panel.style.display = 'none';
+    }, 200);
+}
+
+function selectVoice(voice) {
+    AppState.writingStyle = voice;
 
     // Update icon
     updateVoiceIcon();
 
+    // Update active state
+    updateActiveVoiceOption();
+
     // Show notification
-    const styleName = WRITING_STYLES[AppState.writingStyle].name;
+    const styleName = WRITING_STYLES[voice].name;
     showNotification(`Writing style: ${styleName}`, 'info');
+
+    // Refresh current page if viewing one
+    if (AppState.currentLocation) {
+        regenerateCurrentPage();
+    }
+
+    // Close menu
+    closeVoiceMenu();
+}
+
+function updateActiveVoiceOption() {
+    document.querySelectorAll('.voice-option').forEach(option => {
+        if (option.dataset.voice === AppState.writingStyle) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
 }
 
 function updateVoiceIcon() {
@@ -361,7 +415,11 @@ async function generatePlaceContent(location) {
 
 For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
 
-IMPORTANT: Each item MUST include 1-2 specific, clickable place names (restaurants, museums, neighborhoods, landmarks, streets, etc.). Use proper capitalized names that readers can explore further.
+CRITICAL: Format text like a travel guide by wrapping important place names, landmarks, neighborhoods, restaurants, museums, and key nouns/phrases in <strong> tags. These should be words that would typically be boldfaced in a travel guide. Include 1-2 strong-tagged phrases per item.
+
+Examples:
+- "Visit <strong>Café de Flore</strong> in the heart of <strong>Saint-Germain-des-Prés</strong> for authentic Parisian atmosphere."
+- "The <strong>Louvre Museum</strong> houses over 35,000 works of art across <strong>eight curatorial departments</strong>."
 
 Categories: ${categories.join(', ')}
 
@@ -374,9 +432,9 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with specific place names like Café de Flore and Le Marais.", "isLie": false},
-        {"text": "Another description with Notre Dame Cathedral.", "isLie": true},
-        {"text": "Third description mentioning Louvre Museum.", "isLie": false}
+        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
+        {"text": "Another with <strong>Notable Landmark</strong>.", "isLie": true},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong>.", "isLie": false}
       ]
     }
   ]
@@ -598,25 +656,13 @@ function createItemElement(item, categoryIndex, itemIndex) {
 }
 
 // Convert place names to clickable links
+// Now expects text with <strong> tags from LLM
 function convertPlaceNamesToLinks(text) {
-    // Match multi-word capitalized phrases (at least 2 words)
-    // This avoids partial word matches and single capitalized words at sentence start
-    return text.replace(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g, (match) => {
-        const words = match.split(' ');
-        const firstWord = words[0];
-
-        // Skip common phrases
-        if (['The', 'A', 'An', 'In', 'On', 'At', 'For', 'To', 'From', 'This', 'That',
-             'These', 'Those', 'It', 'Its', 'Many', 'Most', 'Some', 'Each', 'Every'].includes(firstWord)) {
-            return match;
-        }
-
-        // Only link if it looks like a place (2+ words or contains place keywords)
-        if (words.length >= 2 || match.match(/(Museum|Park|Palace|Tower|Cathedral|Castle|Temple|Square|Street|Avenue|Beach|Mountain|River|Lake|City|Plaza|Hall|Center|Centre)/)) {
-            return `<a href="#" class="place-link" onclick="handlePlaceLink(event, '${match.replace(/'/g, "\\'")}')">${match}</a>`;
-        }
-
-        return match;
+    // Convert <strong>text</strong> to <strong><a href="..." class="place-link">text</a></strong>
+    return text.replace(/<strong>(.*?)<\/strong>/g, (match, content) => {
+        // Escape single quotes in content for onclick handler
+        const escapedContent = content.replace(/'/g, "\\'");
+        return `<strong><a href="#" class="place-link" onclick="handlePlaceLink(event, '${escapedContent}')">${content}</a></strong>`;
     });
 }
 
