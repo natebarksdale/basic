@@ -666,19 +666,22 @@ input, select, textarea {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-    height: 2em;
+    height: 3.5rem;
     background: var(--color-card);
     position: relative;
+    padding: 0.75rem;
 }
 
 .search-input {
     flex: 1;
     height: 100%;
-    padding: 0 3.5rem 0 1.5rem;
+    padding: 0 4rem 0 1rem;
     border: none;
     font-size: 16px;
     transition: var(--transition);
     background: transparent;
+    position: relative;
+    z-index: 1;
 }
 
 .search-input:focus {
@@ -687,25 +690,27 @@ input, select, textarea {
 
 .btn-explore {
     position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    padding: 0 1.25rem;
-    background: transparent;
-    color: var(--color-accent);
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: var(--color-accent);
+    color: white;
     border: none;
-    border-radius: 0;
-    font-size: 1rem;
-    font-weight: 600;
+    border-radius: 50%;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
 }
 
 .btn-explore:hover {
-    color: var(--color-accent-hover);
+    background: var(--color-accent-hover);
+    transform: translateY(-50%) scale(1.05);
 }
 
 .quick-suggestions {
