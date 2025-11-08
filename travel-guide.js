@@ -237,8 +237,8 @@ function initializeBottomMap(lat, lng) {
     // Update coordinates
     AppState.bottomMapCoords = { lat, lng };
 
-    // Create map centered on place coordinates
-    AppState.bottomMap = L.map('bottomMap').setView([lat, lng], 12);
+    // Create map centered on place coordinates (zoomed out to show city level)
+    AppState.bottomMap = L.map('bottomMap').setView([lat, lng], 9);
 
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1164,12 +1164,12 @@ function revealItem(itemEl, item) {
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
-        pointsMessage = '🎉 You spotted the lie! +10 points';
+        pointsMessage = 'Correct! +10';
         fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
-        pointsMessage = '❌ This was actually true. -5 points';
+        pointsMessage = 'Wrong. -5';
         fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
     }
 
