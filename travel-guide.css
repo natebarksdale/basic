@@ -66,6 +66,12 @@ body {
     font-weight: 500;
     letter-spacing: -0.02em;
     color: var(--color-text);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    color: var(--color-accent);
 }
 
 .logo-icon {
@@ -521,6 +527,7 @@ input, select, textarea {
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: var(--transition);
+    font-weight: 600;
 }
 
 .place-link:hover {
