@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Two Truths & A Lie - Travel Guide</title>
+    <title>True/False Travel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="travel-guide.css?v=1762620769">
+    <link rel="stylesheet" href="travel-guide.css?v=1762621952">
 </head>
 <body>
     <div class="app-container">
@@ -21,7 +21,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="logo-icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            Two Truths & A Lie
+                            True/False Travel
                         </h1>
                     </div>
                     <div class="header-controls">
@@ -90,13 +90,6 @@
                     <div class="voice-option-text">
                         <div class="voice-option-name">P.G. Wodehouse</div>
                         <div class="voice-option-desc">Absurd charm & British wit</div>
-                    </div>
-                </button>
-                <button class="voice-option" data-voice="laotzu">
-                    <div class="voice-option-emoji">☯️</div>
-                    <div class="voice-option-text">
-                        <div class="voice-option-name">Lao Tzu</div>
-                        <div class="voice-option-desc">Simple, profound wisdom</div>
                     </div>
                 </button>
                 <button class="voice-option" data-voice="keys">
@@ -233,7 +226,7 @@
 
                     <div id="loadingState" class="loading-state" style="display: none;">
                         <div class="spinner"></div>
-                        <p>Generating your travel guide...</p>
+                        <p id="loadingText">Generating your travel guide...</p>
                     </div>
 
                     <!-- Bottom Map for Exploration -->
@@ -254,13 +247,13 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
-                <p>Two Truths & A Lie Travel Guide</p>
+                <p>True/False Travel</p>
                 <p>AI-generated content for entertainment</p>
             </div>
         </footer>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="travel-guide.js?v=1762620769"></script>
+    <script src="travel-guide.js?v=1762621952"></script>
 </body>
 </html>

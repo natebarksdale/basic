@@ -22,7 +22,7 @@ const AppState = {
     apiKey: getValidApiKey(),
     currentLocation: null,
     currentModel: 'google/gemini-2.5-flash-lite',
-    writingStyle: 'twain',
+    writingStyle: 'parker',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
     map: null,
@@ -68,11 +68,6 @@ const WRITING_STYLES = {
         prompt: "Write in the style of P.G. Wodehouse - delightfully absurd, charming, and whimsical prose with impeccable comedic timing. Use elaborate metaphors, British wit, and cheerfully convoluted sentences.",
         icon: "tophat"
     },
-    laotzu: {
-        name: "Lao Tzu",
-        prompt: "Write in the style of Lao Tzu - simple, profound wisdom with paradoxical observations. Use brief, meditative prose that finds deeper meaning in everyday experiences. Focus on harmony, balance, and the natural way.",
-        icon: "yin-yang"
-    },
     keys: {
         name: "Man Who Lost His Keys",
         prompt: "Write in the style of a man desperately trying to remember where he left his keys - distracted, scattered thoughts that keep veering off topic. Obsessively mention checking pockets, retracing steps, and sudden false epiphanies about key locations. Frequently lose train of thought mid-sentence.",
@@ -87,7 +82,6 @@ const VOICE_ICONS = {
     compass: '🧭',
     cocktail: '🍸',
     tophat: '🎩',
-    'yin-yang': '☯️',
     key: '🔑',
     sunglasses: '🕶️',
 };
@@ -767,6 +761,10 @@ async function loadPlace(location, addToHistory = true) {
     document.getElementById('loadingState').style.display = 'flex';
     document.getElementById('categoriesContainer').innerHTML = '';
 
+    // Update loading text with current voice
+    const voiceName = WRITING_STYLES[AppState.writingStyle].name;
+    document.getElementById('loadingText').textContent = `Generating your travel guide in the style of ${voiceName}...`;
+
     // Update header immediately with the new location
     document.getElementById('placeName').textContent = location;
     document.getElementById('placeType').textContent = 'Loading...';
@@ -801,10 +799,31 @@ async function loadPlace(location, addToHistory = true) {
         document.getElementById('loadingState').style.display = 'none';
     } catch (error) {
         console.error('Error loading place:', error);
-        // Show the actual error message instead of generic one
-        const errorMessage = error.message || 'Failed to generate content. Please try again.';
+        // Show helpful error message with actionable suggestions
+        let errorMessage = error.message || 'Failed to generate content';
+
+        // Add actionable suggestions based on error type
+        if (errorMessage.includes('parse')) {
+            errorMessage = 'Unable to generate content for this location. Try a different search term or tap the logo to start over.';
+        } else if (errorMessage.includes('API')) {
+            errorMessage += ' Please check your connection or try again.';
+        } else {
+            errorMessage += ' Pull down to reload or tap the logo to start over.';
+        }
+
         showNotification(errorMessage, 'error');
         document.getElementById('loadingState').style.display = 'none';
+
+        // Show a helpful message on the page
+        document.getElementById('categoriesContainer').innerHTML = `
+            <div style="text-align: center; padding: 3rem 1rem; color: var(--color-text-light);">
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">Unable to generate content</p>
+                <p style="margin-bottom: 1.5rem;">Try searching for a different location or tap the logo to start over.</p>
+                <button onclick="showSearchSection()" style="padding: 0.75rem 1.5rem; background: var(--color-accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                    Start Over
+                </button>
+            </div>
+        `;
     } finally {
         AppState.isGenerating = false;
     }
@@ -1218,7 +1237,7 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
     }
 
     // Update title bar with score
-    document.title = `(${AppState.score}) Two Truths & A Lie`;
+    document.title = `(${AppState.score}) True/False Travel`;
 }
 
 // Animate score ticker
