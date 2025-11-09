@@ -38,7 +38,8 @@ const AppState = {
     selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
     markers: [],
     isGenerating: false,
-    guesses: {} // Track user guesses: { 'cat-item': true/false }
+    guesses: {}, // Track user guesses: { 'cat-item': true/false }
+    pageAwarded: false // Track if page bonus has been awarded
 };
 
 // Writing Style Personas
@@ -1141,6 +1142,7 @@ async function geocodePlace(placeName) {
 function displayPlaceContent(placeData) {
     AppState.currentLocation = placeData;
     AppState.guesses = {}; // Reset guesses for new page
+    AppState.pageAwarded = false; // Reset page bonus
 
     // Update header
     document.getElementById('placeName').textContent = placeData.name;
@@ -1154,15 +1156,6 @@ function displayPlaceContent(placeData) {
         const categoryEl = createCategoryElement(category, categoryIndex);
         container.appendChild(categoryEl);
     });
-
-    // Add check answers button
-    const checkBtn = document.createElement('button');
-    checkBtn.id = 'checkAnswersBtn';
-    checkBtn.className = 'check-answers-btn';
-    checkBtn.textContent = 'Check My Guesses';
-    checkBtn.style.display = 'none'; // Hidden until guesses are made
-    checkBtn.onclick = checkAllAnswers;
-    container.appendChild(checkBtn);
 
     // Show and initialize bottom map
     const bottomMapContainer = document.getElementById('bottomMapContainer');
@@ -1296,120 +1289,17 @@ function handlePlaceLink(event, placeName) {
 
 // Make a guess on a tile
 function makeGuess(itemEl, itemId, guessIsLie) {
-    // Store guess
+    // Store guess and mark as revealed
     AppState.guesses[itemId] = guessIsLie;
-
-    // Update visual state
-    itemEl.classList.remove('guessed-true', 'guessed-false');
-    itemEl.classList.add(guessIsLie ? 'guessed-false' : 'guessed-true');
-
-    // Update button states
-    const buttons = itemEl.querySelectorAll('.guess-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-
-    if (guessIsLie) {
-        itemEl.querySelector('.guess-false').classList.add('active');
-    } else {
-        itemEl.querySelector('.guess-true').classList.add('active');
-    }
-
-    // Show check button if we have any guesses
-    updateCheckButton();
-}
-
-// Update check button visibility
-function updateCheckButton() {
-    const checkBtn = document.getElementById('checkAnswersBtn');
-    if (checkBtn) {
-        const hasGuesses = Object.keys(AppState.guesses).length > 0;
-        checkBtn.style.display = hasGuesses ? 'block' : 'none';
-    }
-}
-
-// Check all answers and calculate score
-function checkAllAnswers() {
-    if (Object.keys(AppState.guesses).length === 0) {
-        showNotification('Make some guesses first!', 'info');
-        return;
-    }
-
-    const items = document.querySelectorAll('.item');
-    const categories = AppState.currentLocation.categories;
-
-    let totalCorrect = 0;
-    let totalGuessed = Object.keys(AppState.guesses).length;
-    let categoryScores = {}; // Track correct per category
-
-    // Score individual tiles
-    items.forEach(itemEl => {
-        const itemId = itemEl.dataset.itemId;
-        const actualIsLie = itemEl.dataset.isLie === 'true';
-        const guessedIsLie = AppState.guesses[itemId];
-
-        if (guessedIsLie !== undefined) {
-            const correct = guessedIsLie === actualIsLie;
-            const categoryIndex = itemEl.dataset.categoryIndex;
-
-            if (correct) {
-                totalCorrect++;
-                categoryScores[categoryIndex] = (categoryScores[categoryIndex] || 0) + 1;
-            }
-
-            // Reveal with result
-            revealItem(itemEl, correct);
-        }
-    });
-
-    // Calculate base score
-    let score = totalCorrect - (totalGuessed - totalCorrect);
-    let breakdown = `${totalCorrect} correct, ${totalGuessed - totalCorrect} wrong: ${score > 0 ? '+' : ''}${score}`;
-
-    // Trio bonuses (all 3 in a category correct)
-    let trioBonus = 0;
-    Object.entries(categoryScores).forEach(([catIndex, correctCount]) => {
-        if (correctCount === 3) {
-            trioBonus += 5;
-        }
-    });
-
-    if (trioBonus > 0) {
-        breakdown += `\n${Object.values(categoryScores).filter(c => c === 3).length} perfect trio${Object.values(categoryScores).filter(c => c === 3).length > 1 ? 's' : ''}: +${trioBonus}`;
-        score += trioBonus;
-    }
-
-    // Perfect page bonus
-    let pageBonus = 0;
-    const allItems = AppState.currentLocation.categories.reduce((sum, cat) => sum + cat.items.length, 0);
-    if (totalGuessed === allItems && totalCorrect === allItems) {
-        pageBonus = 10;
-        breakdown += `\nPerfect page: +${pageBonus}`;
-        score += pageBonus;
-    } else if (totalGuessed === allItems && totalCorrect === 0) {
-        pageBonus = -10;
-        breakdown += `\nAll wrong: ${pageBonus}`;
-        score += pageBonus;
-    }
-
-    // Update score
-    updateScore(score);
-
-    // Show detailed feedback
-    showNotification(breakdown, score > 0 ? 'success' : 'error');
-
-    // Hide check button
-    const checkBtn = document.getElementById('checkAnswersBtn');
-    if (checkBtn) {
-        checkBtn.style.display = 'none';
-    }
-}
-
-// Reveal if item is truth or lie
-function revealItem(itemEl, correct) {
-    if (itemEl.classList.contains('revealed')) return;
-
     itemEl.classList.add('revealed');
 
     const actualIsLie = itemEl.dataset.isLie === 'true';
+    const correct = guessIsLie === actualIsLie;
+    const categoryIndex = itemEl.dataset.categoryIndex;
+
+    // Award immediate points
+    const points = correct ? 1 : -1;
+    updateScore(points);
 
     // Add visual state for correct/incorrect and truth/lie
     if (actualIsLie) {
@@ -1433,11 +1323,11 @@ function revealItem(itemEl, correct) {
     if (correct) {
         const messages = actualIsLie ? badgeMessages.correctLie : badgeMessages.wrongTruth;
         voiceMessage = messages[Math.floor(Math.random() * messages.length)];
-        resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct</div><div>${voiceMessage}</div>`;
+        resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
     } else {
         const messages = actualIsLie ? badgeMessages.wrongTruth : badgeMessages.correctLie;
         voiceMessage = messages[Math.floor(Math.random() * messages.length)];
-        resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong</div><div>${voiceMessage}</div>`;
+        resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
     }
 
     // Create and show overlay with feedback
@@ -1452,6 +1342,94 @@ function revealItem(itemEl, correct) {
     // Disable guess buttons
     const buttons = itemEl.querySelectorAll('.guess-btn');
     buttons.forEach(btn => btn.disabled = true);
+
+    // Check for trio completion
+    checkTrioCompletion(categoryIndex);
+
+    // Check for page completion
+    checkPageCompletion();
+}
+
+// Check if a category trio is complete
+function checkTrioCompletion(categoryIndex) {
+    const categoryItems = document.querySelectorAll(`.item[data-category-index="${categoryIndex}"]`);
+
+    // Check if all 3 items in this category are revealed
+    const allRevealed = Array.from(categoryItems).every(item => item.classList.contains('revealed'));
+
+    if (!allRevealed) return;
+
+    // Check if already awarded bonus for this category
+    if (categoryItems[0].dataset.trioAwarded === 'true') return;
+
+    // Count correct guesses in this category
+    let correctCount = 0;
+    categoryItems.forEach(item => {
+        if (item.classList.contains('guess-correct')) {
+            correctCount++;
+        }
+    });
+
+    // Award trio bonus
+    let bonus = 0;
+    let message = '';
+
+    if (correctCount === 3) {
+        bonus = 5;
+        message = '🎯 Perfect Trio! +5';
+        updateScore(bonus);
+    } else if (correctCount === 0) {
+        bonus = -5;
+        message = '💥 All Wrong -5';
+        updateScore(bonus);
+    }
+
+    // Mark trio as awarded
+    categoryItems.forEach(item => {
+        item.dataset.trioAwarded = 'true';
+    });
+
+    if (bonus !== 0) {
+        showNotification(message, bonus > 0 ? 'success' : 'error');
+    }
+}
+
+// Check if entire page is complete
+function checkPageCompletion() {
+    const allItems = document.querySelectorAll('.item');
+    const allRevealed = Array.from(allItems).every(item => item.classList.contains('revealed'));
+
+    if (!allRevealed) return;
+
+    // Check if already awarded page bonus
+    if (AppState.pageAwarded) return;
+
+    // Count correct guesses
+    let correctCount = 0;
+    allItems.forEach(item => {
+        if (item.classList.contains('guess-correct')) {
+            correctCount++;
+        }
+    });
+
+    // Award page bonus
+    let bonus = 0;
+    let message = '';
+
+    if (correctCount === allItems.length) {
+        bonus = 10;
+        message = '🏆 Perfect Page! +10';
+        updateScore(bonus);
+    } else if (correctCount === 0) {
+        bonus = -10;
+        message = '😬 All Wrong -10';
+        updateScore(bonus);
+    }
+
+    if (bonus !== 0) {
+        AppState.pageAwarded = true;
+        showNotification(message, bonus > 0 ? 'success' : 'error');
+    }
 }
 
 // Update Score
