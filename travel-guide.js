@@ -4,7 +4,7 @@
 // Default Free-Tier API Key (with $0 spend limit - free models only)
 // Note: In production, this gets replaced via GitHub Actions from secrets
 // For local dev, we use the hardcoded key with rate limits
-const DEFAULT_API_KEY = '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';
+const DEFAULT_API_KEY = '';
 
 // Check if we have a valid API key (not a placeholder)
 function getValidApiKey() {
@@ -73,7 +73,7 @@ const WRITING_STYLES = {
         icon: "tophat"
     },
     keys: {
-        name: "Man Who Lost His Keys",
+        name: "A Man Who Lost His Keys",
         prompt: "Write in the style of a man desperately trying to remember where he left his keys - distracted, scattered thoughts that keep veering off topic. Obsessively mention checking pockets, retracing steps, and sudden false epiphanies about key locations. Frequently lose train of thought mid-sentence.",
         icon: "key"
     }
