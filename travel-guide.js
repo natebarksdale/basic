@@ -79,6 +79,94 @@ const WRITING_STYLES = {
     }
 };
 
+// Voice-matched static feedback messages for reveals
+const VOICE_BADGE_MESSAGES = {
+    parker: {
+        correctLie: [
+            "A delightful fiction",
+            "Pure fabrication, darling",
+            "A charming lie"
+        ],
+        wrongTruth: [
+            "Actually true, unfortunately",
+            "The depressing truth",
+            "Genuine, I'm afraid"
+        ]
+    },
+    thompson: {
+        correctLie: [
+            "Total BS, baby!",
+            "Lies and propaganda!",
+            "Fake news, pure fiction"
+        ],
+        wrongTruth: [
+            "The ugly truth!",
+            "Real as it gets",
+            "Hard truth, kid"
+        ]
+    },
+    twain: {
+        correctLie: [
+            "A bald-faced lie, I tell you!",
+            "Pure fabrication, friend",
+            "The tall tale revealed"
+        ],
+        wrongTruth: [
+            "Ah, but this tale is true!",
+            "The honest truth, surprisingly",
+            "This yarn is genuine"
+        ]
+    },
+    bird: {
+        correctLie: [
+            "A fabrication, I'm afraid",
+            "This observation is false",
+            "Not as I witnessed it"
+        ],
+        wrongTruth: [
+            "Quite authentic, dear reader",
+            "This is true, as I observed",
+            "A genuine account"
+        ]
+    },
+    battuta: {
+        correctLie: [
+            "A falsehood, praise be!",
+            "This is untrue",
+            "Not as witnessed by this traveler"
+        ],
+        wrongTruth: [
+            "True, as Allah is my witness",
+            "An authentic account",
+            "This is the truth"
+        ]
+    },
+    wodehouse: {
+        correctLie: [
+            "Utter poppycock, what!",
+            "A fabrication of the first water",
+            "Balderdash, pure and simple"
+        ],
+        wrongTruth: [
+            "The genuine article, by Jove!",
+            "Quite true, old bean",
+            "The absolute truth, what ho!"
+        ]
+    },
+    keys: {
+        correctLie: [
+            "Wait, no, that's not right...",
+            "Huh? No, that's false. Keys aren't there either.",
+            "False! Like my memory of where I left my keys."
+        ],
+        wrongTruth: [
+            "Oh! That's true. Not my keys though.",
+            "Actually true. Unlike finding my keys.",
+            "True! Wait, did I check there for my keys?"
+        ]
+    }
+};
+
 // Voice Icons (Emoji)
 const VOICE_ICONS = {
     steamboat: '🚢',
@@ -883,13 +971,6 @@ CRITICAL: Format text like a travel guide by wrapping important place names, lan
 
 REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
 
-FEEDBACK: For each item, provide a SHORT contextual feedback message (1 sentence max) that reveals whether it's true or false. IMPORTANT: Write the feedback in the EXACT SAME VOICE AND STYLE as the main content. Be specific to the content, not generic. Match the tone, vocabulary, and personality of your chosen writing style.
-
-Examples for different voices:
-- Standard: "Indeed, this legendary café has been serving intellectuals since 1887."
-- Mark Twain: "Ah, but this tale is true, friend - the café's been there longer than most governments!"
-- Hunter S. Thompson: "Wrong, kid - that's pure fiction designed to separate tourists from their money."
-
 Categories: ${categories.join(', ')}
 
 Return ONLY valid JSON:
@@ -901,15 +982,15 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false, "feedback": "Contextual message in the SAME VOICE confirming this is true"},
-        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true, "feedback": "Contextual message in the SAME VOICE revealing why this is false"},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false, "feedback": "Contextual message in the SAME VOICE about this truth"}
+        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
+        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true},
+        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false}
       ]
     }
   ]
 }`;
 
-    const response = await callLLM(prompt, 3000);
+    const response = await callLLM(prompt, 2500);
 
     // Parse JSON response
     let placeData;
@@ -1181,27 +1262,38 @@ function revealItem(itemEl, item) {
     itemEl.classList.add('revealed');
 
     const isLie = item.isLie;
-    const baseFeedback = item.feedback || (isLie ? 'This was the lie!' : 'This is actually true.');
+
+    // Get voice-specific badge messages
+    const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.parker;
 
     let pointsMessage = '';
+    let voiceMessage = '';
     let fullFeedback = '';
 
     if (isLie) {
         itemEl.classList.add('is-lie');
         updateScore(10);
         pointsMessage = 'Correct! +10';
-        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
+
+        // Pick random voice-matched message
+        const messages = badgeMessages.correctLie;
+        voiceMessage = messages[Math.floor(Math.random() * messages.length)];
+        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${voiceMessage}</div>`;
     } else {
         itemEl.classList.add('is-truth');
         updateScore(-5);
         pointsMessage = 'Wrong. -5';
-        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${baseFeedback}</div>`;
+
+        // Pick random voice-matched message
+        const messages = badgeMessages.wrongTruth;
+        voiceMessage = messages[Math.floor(Math.random() * messages.length)];
+        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${voiceMessage}</div>`;
     }
 
     // Create and show overlay with feedback
     const overlay = document.createElement('div');
     overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
-    overlay.innerHTML = fullFeedback; // Use innerHTML to support <strong> tags
+    overlay.innerHTML = fullFeedback;
     itemEl.appendChild(overlay);
 
     // Trigger animation
