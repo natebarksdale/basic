@@ -82,89 +82,356 @@ const WRITING_STYLES = {
 };
 
 // Voice-matched static feedback messages for reveals
+// 4 scenarios: guessedTrue_correct, guessedTrue_wrong, guessedFalse_correct, guessedFalse_wrong
 const VOICE_BADGE_MESSAGES = {
     parker: {
-        correctLie: [
+        guessedTrue_correct: [
+            "Well spotted, darling",
+            "How terribly perceptive",
+            "Indeed. Genuine, sadly",
+            "The truth, unfortunately",
+            "Quite authentic, I'm afraid",
+            "Depressingly accurate",
+            "True, though dull",
+            "Correct. How tedious",
+            "The truth, for once",
+            "Authentic, regrettably"
+        ],
+        guessedTrue_wrong: [
+            "A charming mistake, dear",
+            "Wrong, but delightfully so",
+            "Actually false, sweetie",
+            "Not quite, darling",
+            "Incorrect, I'm afraid",
+            "That was the lie, dear",
+            "Fooled you beautifully",
+            "Pure fiction, actually",
+            "Wrong, but so am I usually",
+            "The lie got you, dear"
+        ],
+        guessedFalse_correct: [
             "A delightful fiction",
             "Pure fabrication, darling",
-            "A charming lie"
+            "Entirely false, well done",
+            "The lie revealed",
+            "Fake as my smile",
+            "Utterly untrue, dear",
+            "Fiction at its finest",
+            "A charming falsehood",
+            "The lie, spotted",
+            "False as a flatterer"
         ],
-        wrongTruth: [
+        guessedFalse_wrong: [
             "Actually true, unfortunately",
             "The depressing truth",
-            "Genuine, I'm afraid"
+            "Genuine, I'm afraid",
+            "True, sadly",
+            "Wrong, dear. It's real",
+            "Authentic after all",
+            "The truth, alas",
+            "Real, surprisingly",
+            "True, though boring",
+            "Genuine, regrettably"
         ]
     },
     thompson: {
-        correctLie: [
-            "Total BS, baby!",
-            "Lies and propaganda!",
-            "Fake news, pure fiction"
-        ],
-        wrongTruth: [
+        guessedTrue_correct: [
+            "Right on, brother!",
             "The ugly truth!",
             "Real as it gets",
-            "Hard truth, kid"
+            "Hard truth, kid",
+            "Damn straight!",
+            "Truth hurts, baby!",
+            "You got it!",
+            "Reality bites!",
+            "The real deal!",
+            "Nailed it, man!"
+        ],
+        guessedTrue_wrong: [
+            "Wrong, kid!",
+            "Fell for the lies!",
+            "They got you!",
+            "Pure propaganda!",
+            "You bought the BS!",
+            "Fake news got you!",
+            "Conned, baby!",
+            "Fiction, man!",
+            "The lie wins!",
+            "Fooled again!"
+        ],
+        guessedFalse_correct: [
+            "Total BS, baby!",
+            "Lies and propaganda!",
+            "Fake news, pure fiction",
+            "Caught the lie!",
+            "Called their bluff!",
+            "Fiction exposed!",
+            "Bull detected!",
+            "Saw through it!",
+            "Lie busted!",
+            "Fake as hell!"
+        ],
+        guessedFalse_wrong: [
+            "Actually real, man!",
+            "Truth, believe it!",
+            "No lie here, kid!",
+            "Real deal!",
+            "Legit truth!",
+            "Straight facts!",
+            "The actual truth!",
+            "Real as pain!",
+            "Genuine article!",
+            "True story, baby!"
         ]
     },
     twain: {
-        correctLie: [
+        guessedTrue_correct: [
+            "Ah, but this tale is true!",
+            "The honest truth, friend",
+            "Genuine as they come",
+            "True, I reckon",
+            "The real McCoy",
+            "Fact, not fiction",
+            "True as gospel",
+            "Authentic, friend",
+            "The truth, surprisingly",
+            "Real as rain"
+        ],
+        guessedTrue_wrong: [
+            "Fooled you, friend!",
+            "A whopper, I'm afraid",
+            "False as a politician's promise",
+            "You bit on the lie",
+            "Got you there, friend",
+            "A tall tale indeed",
+            "Fiction pure and simple",
+            "The lie caught you",
+            "Wrong, old friend",
+            "Bamboozled!"
+        ],
+        guessedFalse_correct: [
             "A bald-faced lie, I tell you!",
             "Pure fabrication, friend",
-            "The tall tale revealed"
+            "The tall tale revealed",
+            "Fiction spotted!",
+            "A whopper indeed",
+            "Caught the fib",
+            "False as fool's gold",
+            "The lie exposed",
+            "Fabrication confirmed",
+            "Untrue as they come"
         ],
-        wrongTruth: [
-            "Ah, but this tale is true!",
-            "The honest truth, surprisingly",
-            "This yarn is genuine"
+        guessedFalse_wrong: [
+            "Actually true, friend",
+            "The truth, believe it",
+            "Genuine, surprisingly",
+            "Real, I'm afraid",
+            "The honest truth",
+            "Authentic indeed",
+            "True after all",
+            "Fact, not fancy",
+            "The real deal",
+            "Truth be told"
         ]
     },
     bird: {
-        correctLie: [
+        guessedTrue_correct: [
+            "Quite authentic, dear reader",
+            "True, as I observed",
+            "A genuine account",
+            "Most certainly true",
+            "Authentic indeed",
+            "I witnessed this truth",
+            "Accurate, I assure you",
+            "The truth, observed",
+            "Genuine in every way",
+            "True by my account"
+        ],
+        guessedTrue_wrong: [
+            "I fear you're mistaken",
+            "Not as I witnessed",
+            "False, dear reader",
+            "A fabrication, alas",
+            "Untrue, I'm afraid",
+            "This is false",
+            "Not authentic",
+            "Incorrect, my dear",
+            "The falsehood prevailed",
+            "Not as it was"
+        ],
+        guessedFalse_correct: [
             "A fabrication, I'm afraid",
             "This observation is false",
-            "Not as I witnessed it"
+            "Not as I witnessed it",
+            "Untrue entirely",
+            "False indeed",
+            "A falsehood spotted",
+            "Not authentic",
+            "Fiction, I fear",
+            "False by my account",
+            "Untrue, correctly noted"
         ],
-        wrongTruth: [
-            "Quite authentic, dear reader",
-            "This is true, as I observed",
-            "A genuine account"
+        guessedFalse_wrong: [
+            "True, as I observed",
+            "Authentic, dear reader",
+            "I witnessed this",
+            "Genuine, I assure you",
+            "Quite true indeed",
+            "The truth stands",
+            "Real and observed",
+            "True by all accounts",
+            "Authentic entirely",
+            "The truth prevails"
         ]
     },
     battuta: {
-        correctLie: [
-            "A falsehood, praise be!",
-            "This is untrue",
-            "Not as witnessed by this traveler"
-        ],
-        wrongTruth: [
+        guessedTrue_correct: [
             "True, as Allah is my witness",
             "An authentic account",
-            "This is the truth"
+            "This is the truth",
+            "By the grace of God, true",
+            "Genuine, praise be",
+            "The truth, inshallah",
+            "Authentic indeed",
+            "True by Allah's will",
+            "The truth stands",
+            "Genuine account"
+        ],
+        guessedTrue_wrong: [
+            "False, dear traveler",
+            "Not as witnessed",
+            "A falsehood, sadly",
+            "Untrue, I fear",
+            "Incorrect, friend",
+            "Not authentic",
+            "The lie prevailed",
+            "False by my account",
+            "Not the truth",
+            "A fabrication"
+        ],
+        guessedFalse_correct: [
+            "A falsehood, praise be!",
+            "This is untrue",
+            "Not as witnessed by this traveler",
+            "False indeed",
+            "Untrue, correctly spotted",
+            "A fabrication exposed",
+            "Not authentic",
+            "The lie revealed",
+            "False, well noted",
+            "Untrue entirely"
+        ],
+        guessedFalse_wrong: [
+            "True, as I witnessed",
+            "Authentic account",
+            "The truth, friend",
+            "Genuine, by Allah",
+            "True indeed",
+            "The truth stands",
+            "Authentic entirely",
+            "True by witness",
+            "The genuine account",
+            "Truth prevails"
         ]
     },
     wodehouse: {
-        correctLie: [
-            "Utter poppycock, what!",
-            "A fabrication of the first water",
-            "Balderdash, pure and simple"
-        ],
-        wrongTruth: [
+        guessedTrue_correct: [
             "The genuine article, by Jove!",
             "Quite true, old bean",
-            "The absolute truth, what ho!"
+            "The absolute truth, what ho!",
+            "Authentic, what!",
+            "True as taxes!",
+            "The real thing, by gad!",
+            "Spot on, old fruit!",
+            "Genuine, don't you know!",
+            "Right as rain!",
+            "True blue, what!"
+        ],
+        guessedTrue_wrong: [
+            "Wrong, old chap!",
+            "Fooled, what!",
+            "Bamboozled, by Jove!",
+            "Not quite, old bean",
+            "False, I'm afraid!",
+            "The lie got you!",
+            "Incorrect, what ho!",
+            "Hoodwinked!",
+            "Wrong as wrong!",
+            "The fib prevailed!"
+        ],
+        guessedFalse_correct: [
+            "Utter poppycock, what!",
+            "A fabrication of the first water",
+            "Balderdash, pure and simple",
+            "Complete rot!",
+            "Absolute tosh!",
+            "Piffle spotted!",
+            "Total bunkum!",
+            "The lie exposed!",
+            "Tommyrot, correctly noted!",
+            "Pure codswallop!"
+        ],
+        guessedFalse_wrong: [
+            "True, old bean!",
+            "The real McCoy!",
+            "Genuine, what!",
+            "Authentic, by gad!",
+            "True blue!",
+            "The truth, what ho!",
+            "Real as real!",
+            "Quite genuine!",
+            "The actual thing!",
+            "True, don't you know!"
         ]
     },
     keys: {
-        correctLie: [
-            "Wait, no, that's not right...",
-            "Huh? No, that's false. Keys aren't there either.",
-            "False! Like my memory of where I left my keys."
-        ],
-        wrongTruth: [
+        guessedTrue_correct: [
             "Oh! That's true. Not my keys though.",
             "Actually true. Unlike finding my keys.",
-            "True! Wait, did I check there for my keys?"
+            "True! Wait, did I check there for my keys?",
+            "Right! But where are my keys?",
+            "Correct. Keys aren't here either.",
+            "True. Still no keys.",
+            "Yes! Wait, what about my keys?",
+            "True! Did I check my pockets?",
+            "Right! Maybe keys are... no.",
+            "Correct! Keys though... where?"
+        ],
+        guessedTrue_wrong: [
+            "Wrong! Like my memory of my keys.",
+            "False. Just like thinking my keys are here.",
+            "No, that's... wait, my keys!",
+            "Wrong. Where are my keys?",
+            "False! Keys aren't... wait.",
+            "No, that's the lie. Keys?",
+            "Wrong. Did I check for keys?",
+            "False. My keys... where?",
+            "No! Wait, my keys though...",
+            "Wrong! Keys... checked there?"
+        ],
+        guessedFalse_correct: [
+            "Wait, no, that's not right...",
+            "Huh? No, that's false. Keys aren't there either.",
+            "False! Like my memory of where I left my keys.",
+            "Right! That's false. Keys though?",
+            "Yeah, false. Where are keys?",
+            "Lie spotted! Still no keys.",
+            "False! Did I check... keys?",
+            "Yes, a lie! Keys where?",
+            "Fake! My keys are... where?",
+            "False! Keys in my pocket?"
+        ],
+        guessedFalse_wrong: [
+            "No, that's true! Keys though?",
+            "Actually true. Keys aren't.",
+            "Wrong! It's true. My keys...",
+            "No, real! Where are keys?",
+            "True! But my keys?",
+            "That's true. Keys aren't.",
+            "Actually real! Keys though?",
+            "No, genuine! My keys where?",
+            "True! Did I check... keys?",
+            "Real! But where are keys?"
         ]
     }
 };
@@ -1314,27 +1581,45 @@ function makeGuess(itemEl, itemId, guessIsLie) {
         itemEl.classList.add('guess-incorrect');
     }
 
-    // Get voice-specific badge messages
+    // Get voice-specific badge messages based on 4 scenarios
     const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.parker;
 
     let resultMessage = '';
     let voiceMessage = '';
+    let scenario = '';
+
+    // Determine which scenario we're in
+    if (!guessIsLie && !actualIsLie) {
+        // Guessed TRUE, was TRUE
+        scenario = 'guessedTrue_correct';
+    } else if (!guessIsLie && actualIsLie) {
+        // Guessed TRUE, was FALSE (lie)
+        scenario = 'guessedTrue_wrong';
+    } else if (guessIsLie && actualIsLie) {
+        // Guessed FALSE, was FALSE (lie)
+        scenario = 'guessedFalse_correct';
+    } else {
+        // Guessed FALSE, was TRUE
+        scenario = 'guessedFalse_wrong';
+    }
+
+    const messages = badgeMessages[scenario];
+    voiceMessage = messages[Math.floor(Math.random() * messages.length)];
 
     if (correct) {
-        const messages = actualIsLie ? badgeMessages.correctLie : badgeMessages.wrongTruth;
-        voiceMessage = messages[Math.floor(Math.random() * messages.length)];
         resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
     } else {
-        const messages = actualIsLie ? badgeMessages.wrongTruth : badgeMessages.correctLie;
-        voiceMessage = messages[Math.floor(Math.random() * messages.length)];
         resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
     }
 
-    // Create and show overlay with feedback
+    // Create and show overlay with feedback (only over buttons area)
     const overlay = document.createElement('div');
     overlay.className = `item-overlay ${correct ? 'overlay-correct' : 'overlay-incorrect'}`;
     overlay.innerHTML = resultMessage;
-    itemEl.appendChild(overlay);
+
+    // Append to guess buttons container instead of whole item
+    const guessButtons = itemEl.querySelector('.guess-buttons');
+    guessButtons.appendChild(overlay);
 
     // Trigger animation
     setTimeout(() => overlay.classList.add('show'), 10);
