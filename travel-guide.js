@@ -37,7 +37,8 @@ const AppState = {
     bottomMapCoords: { lat: 48.8566, lng: 2.3522 },
     selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
     markers: [],
-    isGenerating: false
+    isGenerating: false,
+    guesses: {} // Track user guesses: { 'cat-item': true/false }
 };
 
 // Writing Style Personas
@@ -1139,6 +1140,7 @@ async function geocodePlace(placeName) {
 // Display Place Content
 function displayPlaceContent(placeData) {
     AppState.currentLocation = placeData;
+    AppState.guesses = {}; // Reset guesses for new page
 
     // Update header
     document.getElementById('placeName').textContent = placeData.name;
@@ -1152,6 +1154,15 @@ function displayPlaceContent(placeData) {
         const categoryEl = createCategoryElement(category, categoryIndex);
         container.appendChild(categoryEl);
     });
+
+    // Add check answers button
+    const checkBtn = document.createElement('button');
+    checkBtn.id = 'checkAnswersBtn';
+    checkBtn.className = 'check-answers-btn';
+    checkBtn.textContent = 'Check My Guesses';
+    checkBtn.style.display = 'none'; // Hidden until guesses are made
+    checkBtn.onclick = checkAllAnswers;
+    container.appendChild(checkBtn);
 
     // Show and initialize bottom map
     const bottomMapContainer = document.getElementById('bottomMapContainer');
@@ -1198,6 +1209,8 @@ function createCategoryElement(category, categoryIndex) {
 function createItemElement(item, categoryIndex, itemIndex) {
     const itemEl = document.createElement('div');
     itemEl.className = 'item';
+    const itemId = `${categoryIndex}-${itemIndex}`;
+    itemEl.dataset.itemId = itemId;
     itemEl.dataset.categoryIndex = categoryIndex;
     itemEl.dataset.itemIndex = itemIndex;
     itemEl.dataset.isLie = item.isLie;
@@ -1211,13 +1224,39 @@ function createItemElement(item, categoryIndex, itemIndex) {
 
     itemEl.appendChild(textEl);
 
-    // Make entire item clickable
-    itemEl.addEventListener('click', (e) => {
-        // Don't reveal if clicking on a place link
-        if (e.target.classList.contains('place-link')) {
-            return;
+    // Add guess buttons
+    const guessButtons = document.createElement('div');
+    guessButtons.className = 'guess-buttons';
+
+    const trueBtn = document.createElement('button');
+    trueBtn.className = 'guess-btn guess-true';
+    trueBtn.innerHTML = '✓ True';
+    trueBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (!itemEl.classList.contains('revealed')) {
+            makeGuess(itemEl, itemId, false); // false = not a lie = true
         }
-        revealItem(itemEl, item);
+    };
+
+    const falseBtn = document.createElement('button');
+    falseBtn.className = 'guess-btn guess-false';
+    falseBtn.innerHTML = '✗ False';
+    falseBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (!itemEl.classList.contains('revealed')) {
+            makeGuess(itemEl, itemId, true); // true = is a lie = false
+        }
+    };
+
+    guessButtons.appendChild(trueBtn);
+    guessButtons.appendChild(falseBtn);
+    itemEl.appendChild(guessButtons);
+
+    // Click on text to navigate to place links only
+    textEl.addEventListener('click', (e) => {
+        if (e.target.classList.contains('place-link')) {
+            return; // Let the link handle it
+        }
     });
 
     return itemEl;
@@ -1255,57 +1294,164 @@ function handlePlaceLink(event, placeName) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Make a guess on a tile
+function makeGuess(itemEl, itemId, guessIsLie) {
+    // Store guess
+    AppState.guesses[itemId] = guessIsLie;
+
+    // Update visual state
+    itemEl.classList.remove('guessed-true', 'guessed-false');
+    itemEl.classList.add(guessIsLie ? 'guessed-false' : 'guessed-true');
+
+    // Update button states
+    const buttons = itemEl.querySelectorAll('.guess-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    if (guessIsLie) {
+        itemEl.querySelector('.guess-false').classList.add('active');
+    } else {
+        itemEl.querySelector('.guess-true').classList.add('active');
+    }
+
+    // Show check button if we have any guesses
+    updateCheckButton();
+}
+
+// Update check button visibility
+function updateCheckButton() {
+    const checkBtn = document.getElementById('checkAnswersBtn');
+    if (checkBtn) {
+        const hasGuesses = Object.keys(AppState.guesses).length > 0;
+        checkBtn.style.display = hasGuesses ? 'block' : 'none';
+    }
+}
+
+// Check all answers and calculate score
+function checkAllAnswers() {
+    if (Object.keys(AppState.guesses).length === 0) {
+        showNotification('Make some guesses first!', 'info');
+        return;
+    }
+
+    const items = document.querySelectorAll('.item');
+    const categories = AppState.currentLocation.categories;
+
+    let totalCorrect = 0;
+    let totalGuessed = Object.keys(AppState.guesses).length;
+    let categoryScores = {}; // Track correct per category
+
+    // Score individual tiles
+    items.forEach(itemEl => {
+        const itemId = itemEl.dataset.itemId;
+        const actualIsLie = itemEl.dataset.isLie === 'true';
+        const guessedIsLie = AppState.guesses[itemId];
+
+        if (guessedIsLie !== undefined) {
+            const correct = guessedIsLie === actualIsLie;
+            const categoryIndex = itemEl.dataset.categoryIndex;
+
+            if (correct) {
+                totalCorrect++;
+                categoryScores[categoryIndex] = (categoryScores[categoryIndex] || 0) + 1;
+            }
+
+            // Reveal with result
+            revealItem(itemEl, correct);
+        }
+    });
+
+    // Calculate base score
+    let score = totalCorrect - (totalGuessed - totalCorrect);
+    let breakdown = `${totalCorrect} correct, ${totalGuessed - totalCorrect} wrong: ${score > 0 ? '+' : ''}${score}`;
+
+    // Trio bonuses (all 3 in a category correct)
+    let trioBonus = 0;
+    Object.entries(categoryScores).forEach(([catIndex, correctCount]) => {
+        if (correctCount === 3) {
+            trioBonus += 5;
+        }
+    });
+
+    if (trioBonus > 0) {
+        breakdown += `\n${Object.values(categoryScores).filter(c => c === 3).length} perfect trio${Object.values(categoryScores).filter(c => c === 3).length > 1 ? 's' : ''}: +${trioBonus}`;
+        score += trioBonus;
+    }
+
+    // Perfect page bonus
+    let pageBonus = 0;
+    const allItems = AppState.currentLocation.categories.reduce((sum, cat) => sum + cat.items.length, 0);
+    if (totalGuessed === allItems && totalCorrect === allItems) {
+        pageBonus = 10;
+        breakdown += `\nPerfect page: +${pageBonus}`;
+        score += pageBonus;
+    } else if (totalGuessed === allItems && totalCorrect === 0) {
+        pageBonus = -10;
+        breakdown += `\nAll wrong: ${pageBonus}`;
+        score += pageBonus;
+    }
+
+    // Update score
+    updateScore(score);
+
+    // Show detailed feedback
+    showNotification(breakdown, score > 0 ? 'success' : 'error');
+
+    // Hide check button
+    const checkBtn = document.getElementById('checkAnswersBtn');
+    if (checkBtn) {
+        checkBtn.style.display = 'none';
+    }
+}
+
 // Reveal if item is truth or lie
-function revealItem(itemEl, item) {
+function revealItem(itemEl, correct) {
     if (itemEl.classList.contains('revealed')) return;
 
     itemEl.classList.add('revealed');
 
-    const isLie = item.isLie;
+    const actualIsLie = itemEl.dataset.isLie === 'true';
+
+    // Add visual state for correct/incorrect and truth/lie
+    if (actualIsLie) {
+        itemEl.classList.add('is-lie');
+    } else {
+        itemEl.classList.add('is-truth');
+    }
+
+    if (correct) {
+        itemEl.classList.add('guess-correct');
+    } else {
+        itemEl.classList.add('guess-incorrect');
+    }
 
     // Get voice-specific badge messages
     const badgeMessages = VOICE_BADGE_MESSAGES[AppState.writingStyle] || VOICE_BADGE_MESSAGES.parker;
 
-    let pointsMessage = '';
+    let resultMessage = '';
     let voiceMessage = '';
-    let fullFeedback = '';
 
-    if (isLie) {
-        itemEl.classList.add('is-lie');
-        updateScore(10);
-        pointsMessage = 'Correct! +10';
-
-        // Pick random voice-matched message
-        const messages = badgeMessages.correctLie;
+    if (correct) {
+        const messages = actualIsLie ? badgeMessages.correctLie : badgeMessages.wrongTruth;
         voiceMessage = messages[Math.floor(Math.random() * messages.length)];
-        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${voiceMessage}</div>`;
+        resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct</div><div>${voiceMessage}</div>`;
     } else {
-        itemEl.classList.add('is-truth');
-        updateScore(-5);
-        pointsMessage = 'Wrong. -5';
-
-        // Pick random voice-matched message
-        const messages = badgeMessages.wrongTruth;
+        const messages = actualIsLie ? badgeMessages.wrongTruth : badgeMessages.correctLie;
         voiceMessage = messages[Math.floor(Math.random() * messages.length)];
-        fullFeedback = `<div style="font-weight: 600; margin-bottom: 0.5rem;">${pointsMessage}</div><div>${voiceMessage}</div>`;
+        resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong</div><div>${voiceMessage}</div>`;
     }
 
     // Create and show overlay with feedback
     const overlay = document.createElement('div');
-    overlay.className = `item-overlay ${isLie ? 'overlay-lie' : 'overlay-truth'}`;
-    overlay.innerHTML = fullFeedback;
+    overlay.className = `item-overlay ${correct ? 'overlay-correct' : 'overlay-incorrect'}`;
+    overlay.innerHTML = resultMessage;
     itemEl.appendChild(overlay);
 
     // Trigger animation
     setTimeout(() => overlay.classList.add('show'), 10);
 
-    // Add click handler to dismiss overlay
-    overlay.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent tile click
-        overlay.classList.remove('show');
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.remove(), 300);
-    });
+    // Disable guess buttons
+    const buttons = itemEl.querySelectorAll('.guess-btn');
+    buttons.forEach(btn => btn.disabled = true);
 }
 
 // Update Score
