@@ -364,6 +364,95 @@ body {
     line-height: 1.4;
 }
 
+/* Custom Voice Options */
+.custom-voice-option {
+    position: relative;
+}
+
+.delete-voice-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: var(--transition);
+}
+
+.delete-voice-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Custom Voice Input */
+.custom-voice-input {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--color-border);
+}
+
+.custom-voice-label {
+    font-size: 0.9rem;
+    color: var(--color-text);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.custom-voice-field {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+}
+
+.custom-voice-field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.btn-create-voice {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-create-voice:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+.btn-create-voice:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.custom-voice-status {
+    margin-top: 0.5rem;
+    font-size: 0.813rem;
+    text-align: center;
+    min-height: 1.2rem;
+}
+
 /* Settings Panel */
 .settings-panel {
     position: fixed;
