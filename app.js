@@ -1,6 +1,7 @@
 // Diplomatic Plate Decoder - Premium Edition
 let diplomaticData = null;
 let svgMapInstance = null;
+let lookedUpCountries = new Set(); // Track all countries that have been looked up
 
 // ISO country code mapping for svgMap
 const isoCodeMap = {
@@ -184,6 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadDiplomaticData();
     initializeEventListeners();
     loadRecentLookups();
+    initializeMap();
 });
 
 // Load diplomatic data
@@ -284,7 +286,37 @@ function displayResults(plateCode, staffCode, staffInfo, countryCode, countryInf
     updateMap(countryInfo);
 }
 
-// Update map
+// Initialize map once
+function initializeMap() {
+    try {
+        svgMapInstance = new svgMap({
+            targetElementID: 'svgMap',
+            data: {
+                data: {
+                    count: {
+                        name: 'Decoded Plates',
+                        format: '{0}',
+                        thousandSeparator: ',',
+                        thresholdMax: 100,
+                        thresholdMin: 1
+                    }
+                },
+                applyData: 'count',
+                values: {}
+            },
+            colorMax: '#3B82F6',
+            colorMin: '#3B82F6',
+            colorNoData: '#F1F5F9',
+            flagType: 'emoji',
+            hideFlag: false,
+            noDataText: 'Not yet decoded'
+        });
+    } catch (error) {
+        console.error('Error initializing map:', error);
+    }
+}
+
+// Update map with new country
 function updateMap(countryInfo) {
     const isoCode = isoCodeMap[countryInfo.country];
 
@@ -293,30 +325,34 @@ function updateMap(countryInfo) {
         return;
     }
 
-    // Destroy existing map instance if it exists
+    // Add to the set of looked-up countries
+    lookedUpCountries.add(isoCode);
+
+    // Rebuild map data with all looked-up countries
+    const mapData = {};
+    lookedUpCountries.forEach(code => {
+        mapData[code] = { count: 1 };
+    });
+
+    // Destroy and recreate the map with updated data
     if (svgMapInstance) {
         document.getElementById('svgMap').innerHTML = '';
     }
 
-    // Create map data
-    const mapData = {};
-    mapData[isoCode] = { value: 1 };
-
-    // Initialize svgMap
     try {
         svgMapInstance = new svgMap({
             targetElementID: 'svgMap',
             data: {
                 data: {
-                    value: {
-                        name: countryInfo.country,
+                    count: {
+                        name: 'Decoded Plates',
                         format: '{0}',
                         thousandSeparator: ',',
-                        thresholdMax: 1,
+                        thresholdMax: 100,
                         thresholdMin: 1
                     }
                 },
-                applyData: 'value',
+                applyData: 'count',
                 values: mapData
             },
             colorMax: '#3B82F6',
@@ -324,10 +360,10 @@ function updateMap(countryInfo) {
             colorNoData: '#F1F5F9',
             flagType: 'emoji',
             hideFlag: false,
-            noDataText: 'No data'
+            noDataText: 'Not yet decoded'
         });
     } catch (error) {
-        console.error('Error initializing map:', error);
+        console.error('Error updating map:', error);
     }
 }
 
