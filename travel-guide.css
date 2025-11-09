@@ -933,6 +933,100 @@ input, select, textarea {
     border-color: var(--color-error);
 }
 
+/* Guess Buttons */
+.guess-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.guess-btn {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    border: 2px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.guess-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+}
+
+.guess-btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+}
+
+.guess-btn.guess-true.active {
+    background: var(--color-success);
+    border-color: var(--color-success);
+}
+
+.guess-btn.guess-false.active {
+    background: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.guess-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Guessed States */
+.item.guessed-true {
+    border-color: var(--color-success);
+    border-width: 2px;
+}
+
+.item.guessed-false {
+    border-color: var(--color-error);
+    border-width: 2px;
+}
+
+/* Result States */
+.item.guess-correct {
+    background: #f3f9f6;
+    border-color: var(--color-success);
+}
+
+.item.guess-incorrect {
+    background: #fef5f3;
+    border-color: var(--color-error);
+}
+
+/* Check Answers Button */
+.check-answers-btn {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 1rem 2rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(193, 125, 92, 0.2);
+}
+
+.check-answers-btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(193, 125, 92, 0.3);
+}
+
 /* Feedback Overlay */
 .item-overlay {
     position: absolute;
@@ -975,6 +1069,14 @@ input, select, textarea {
 }
 
 .item-overlay.overlay-truth {
+    background: linear-gradient(135deg, var(--color-error) 0%, #b85849 100%);
+}
+
+.item-overlay.overlay-correct {
+    background: linear-gradient(135deg, var(--color-success) 0%, #3d8a5d 100%);
+}
+
+.item-overlay.overlay-incorrect {
     background: linear-gradient(135deg, var(--color-error) 0%, #b85849 100%);
 }
 
@@ -1115,6 +1217,8 @@ input, select, textarea {
     transform: translateX(500px);
     opacity: 0;
     transition: var(--transition);
+    white-space: pre-line;
+    line-height: 1.5;
 }
 
 .notification.show {
