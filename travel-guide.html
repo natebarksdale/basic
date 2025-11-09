@@ -71,13 +71,6 @@
                         <div class="voice-option-desc">Witty, satirical observations</div>
                     </div>
                 </button>
-                <button class="voice-option" data-voice="bird">
-                    <div class="voice-option-emoji">🦅</div>
-                    <div class="voice-option-text">
-                        <div class="voice-option-name">Isabella Bird</div>
-                        <div class="voice-option-desc">Vivid, detailed observations</div>
-                    </div>
-                </button>
                 <button class="voice-option" data-voice="battuta">
                     <div class="voice-option-emoji">🧭</div>
                     <div class="voice-option-text">
@@ -99,6 +92,17 @@
                         <div class="voice-option-desc">Distracted, scattered thoughts</div>
                     </div>
                 </button>
+
+                <!-- Custom Voices Section -->
+                <div id="customVoicesContainer"></div>
+
+                <!-- Custom Voice Input -->
+                <div class="custom-voice-input">
+                    <div class="custom-voice-label">Or create your own voice:</div>
+                    <input type="text" id="customVoiceInput" placeholder='e.g., "David Foster Wallace" or "1920s gangster"' class="custom-voice-field">
+                    <button id="createVoiceBtn" class="btn-create-voice">Generate Voice</button>
+                    <div id="customVoiceStatus" class="custom-voice-status"></div>
+                </div>
             </div>
         </div>
 

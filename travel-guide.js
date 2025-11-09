@@ -25,8 +25,8 @@ function getValidApiKey() {
 const AppState = {
     apiKey: getValidApiKey(),
     currentLocation: null,
-    currentModel: 'google/gemini-2.0-flash-exp:free',
-    writingStyle: 'parker',
+    currentModel: localStorage.getItem('travel_guide_model') || 'google/gemini-2.0-flash-exp:free',
+    writingStyle: localStorage.getItem('travel_guide_voice') || 'parker',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
     map: null,
@@ -39,7 +39,8 @@ const AppState = {
     markers: [],
     isGenerating: false,
     guesses: {}, // Track user guesses: { 'cat-item': true/false }
-    pageAwarded: false // Track if page bonus has been awarded
+    pageAwarded: false, // Track if page bonus has been awarded
+    customVoices: JSON.parse(localStorage.getItem('travel_guide_custom_voices') || '{}') // Custom user-defined voices
 };
 
 // Writing Style Personas
@@ -58,11 +59,6 @@ const WRITING_STYLES = {
         name: "Mark Twain",
         prompt: "Write in the style of Mark Twain - witty, satirical observations with folksy wisdom and humorous exaggeration. Use colorful storytelling with sharp social commentary and a conversational tone.",
         icon: "steamboat"
-    },
-    bird: {
-        name: "Isabella Bird",
-        prompt: "Write in the style of Isabella Bird - vivid, detailed, personal observations with a focus on daily life, natural beauty, and the human experience. Use engaging first-person narrative with rich sensory details.",
-        icon: "bird"
     },
     battuta: {
         name: "Ibn Battuta",
@@ -232,56 +228,6 @@ const VOICE_BADGE_MESSAGES = {
             "Fact, not fancy",
             "The real deal",
             "Truth be told"
-        ]
-    },
-    bird: {
-        guessedTrue_correct: [
-            "Quite authentic, dear reader",
-            "True, as I observed",
-            "A genuine account",
-            "Most certainly true",
-            "Authentic indeed",
-            "I witnessed this truth",
-            "Accurate, I assure you",
-            "The truth, observed",
-            "Genuine in every way",
-            "True by my account"
-        ],
-        guessedTrue_wrong: [
-            "I fear you're mistaken",
-            "Not as I witnessed",
-            "False, dear reader",
-            "A fabrication, alas",
-            "Untrue, I'm afraid",
-            "This is false",
-            "Not authentic",
-            "Incorrect, my dear",
-            "The falsehood prevailed",
-            "Not as it was"
-        ],
-        guessedFalse_correct: [
-            "A fabrication, I'm afraid",
-            "This observation is false",
-            "Not as I witnessed it",
-            "Untrue entirely",
-            "False indeed",
-            "A falsehood spotted",
-            "Not authentic",
-            "Fiction, I fear",
-            "False by my account",
-            "Untrue, correctly noted"
-        ],
-        guessedFalse_wrong: [
-            "True, as I observed",
-            "Authentic, dear reader",
-            "I witnessed this",
-            "Genuine, I assure you",
-            "Quite true indeed",
-            "The truth stands",
-            "Real and observed",
-            "True by all accounts",
-            "Authentic entirely",
-            "The truth prevails"
         ]
     },
     battuta: {
@@ -740,8 +686,13 @@ function initializeApp() {
     document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
     document.getElementById('resetApiKey').addEventListener('click', resetToDefaultKey);
 
-    document.getElementById('modelSelect').addEventListener('change', (e) => {
+    // Set model select to persisted value
+    const modelSelect = document.getElementById('modelSelect');
+    modelSelect.value = AppState.currentModel;
+
+    modelSelect.addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
+        localStorage.setItem('travel_guide_model', e.target.value); // Persist model choice
         // Refresh current page if viewing one
         if (AppState.currentLocation) {
             regenerateCurrentPage();
@@ -772,6 +723,15 @@ function initializeApp() {
     // Generate random suggestion chips and initialize home map
     generateSuggestionChips();
     initializeHomeMap();
+
+    // Load custom voices
+    loadCustomVoices();
+
+    // Custom voice generation
+    document.getElementById('createVoiceBtn').addEventListener('click', generateCustomVoice);
+    document.getElementById('customVoiceInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') generateCustomVoice();
+    });
 
     // Note: We always have a key now (default key), so don't auto-open settings
 
@@ -886,6 +846,7 @@ function closeVoiceMenu() {
 
 function selectVoice(voice) {
     AppState.writingStyle = voice;
+    localStorage.setItem('travel_guide_voice', voice); // Persist voice choice
 
     // Update icon
     updateVoiceIcon();
@@ -894,7 +855,7 @@ function selectVoice(voice) {
     updateActiveVoiceOption();
 
     // Show notification
-    const styleName = WRITING_STYLES[voice].name;
+    const styleName = WRITING_STYLES[voice]?.name || AppState.customVoices[voice]?.name || voice;
     showNotification(`Writing style: ${styleName}`, 'info');
 
     // Refresh current page if viewing one
@@ -919,16 +880,205 @@ function updateActiveVoiceOption() {
 function updateVoiceIcon() {
     const iconElement = document.getElementById('voiceIcon');
     const toggleElement = document.getElementById('voiceToggle');
-    const currentStyle = WRITING_STYLES[AppState.writingStyle];
+    const currentStyle = WRITING_STYLES[AppState.writingStyle] || AppState.customVoices[AppState.writingStyle];
+
+    if (!currentStyle) return;
+
     const iconKey = currentStyle.icon;
 
     if (VOICE_ICONS[iconKey]) {
         iconElement.textContent = VOICE_ICONS[iconKey];
+    } else {
+        // For custom voices, show first emoji from name or default
+        iconElement.textContent = currentStyle.icon || '✍️';
     }
 
     // Update data-voice attribute for background color
     toggleElement.setAttribute('data-voice', AppState.writingStyle);
 }
+
+// Load custom voices on initialization
+function loadCustomVoices() {
+    // Load custom voices from localStorage
+    const customVoices = JSON.parse(localStorage.getItem('travel_guide_custom_voices') || '{}');
+    AppState.customVoices = customVoices;
+
+    // Add custom voices to WRITING_STYLES dynamically
+    Object.keys(customVoices).forEach(voiceKey => {
+        WRITING_STYLES[voiceKey] = customVoices[voiceKey].style;
+        VOICE_BADGE_MESSAGES[voiceKey] = customVoices[voiceKey].messages;
+    });
+
+    // Render custom voice buttons
+    renderCustomVoices();
+}
+
+// Render custom voice buttons in the UI
+function renderCustomVoices() {
+    const container = document.getElementById('customVoicesContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    Object.keys(AppState.customVoices).forEach(voiceKey => {
+        const voice = AppState.customVoices[voiceKey];
+        const button = document.createElement('button');
+        button.className = 'voice-option custom-voice-option';
+        button.dataset.voice = voiceKey;
+        button.innerHTML = `
+            <div class="voice-option-emoji">${voice.style.icon || '✍️'}</div>
+            <div class="voice-option-text">
+                <div class="voice-option-name">${voice.style.name}</div>
+                <div class="voice-option-desc">Custom voice</div>
+            </div>
+            <button class="delete-voice-btn" onclick="deleteCustomVoice(event, '${voiceKey}')" title="Delete this voice">×</button>
+        `;
+
+        button.addEventListener('click', () => {
+            selectVoice(voiceKey);
+        });
+
+        container.appendChild(button);
+    });
+}
+
+// Delete a custom voice
+function deleteCustomVoice(event, voiceKey) {
+    event.stopPropagation();
+
+    if (!confirm(`Delete the "${AppState.customVoices[voiceKey].style.name}" voice?`)) {
+        return;
+    }
+
+    delete AppState.customVoices[voiceKey];
+    delete WRITING_STYLES[voiceKey];
+    delete VOICE_BADGE_MESSAGES[voiceKey];
+
+    localStorage.setItem('travel_guide_custom_voices', JSON.stringify(AppState.customVoices));
+
+    // If currently using this voice, switch to parker
+    if (AppState.writingStyle === voiceKey) {
+        selectVoice('parker');
+    }
+
+    renderCustomVoices();
+    showNotification('Custom voice deleted', 'info');
+}
+
+// Generate custom voice using LLM
+async function generateCustomVoice() {
+    const input = document.getElementById('customVoiceInput');
+    const statusEl = document.getElementById('customVoiceStatus');
+    const createBtn = document.getElementById('createVoiceBtn');
+
+    const voiceDescription = input.value.trim();
+
+    if (!voiceDescription) {
+        showNotification('Please enter a voice description', 'error');
+        return;
+    }
+
+    // Check API key
+    if (!AppState.apiKey) {
+        showNotification('Please add your OpenRouter API key in settings', 'error');
+        toggleSettings();
+        return;
+    }
+
+    // Show loading state
+    createBtn.disabled = true;
+    createBtn.textContent = 'Generating...';
+    statusEl.textContent = 'Generating voice feedback messages...';
+    statusEl.style.color = '#2196F3';
+
+    try {
+        const prompt = `Create a unique writing voice based on: "${voiceDescription}"
+
+Generate feedback messages for a True/False travel game in this voice. Return ONLY valid JSON with this exact structure:
+
+{
+  "name": "Voice Name",
+  "prompt": "Write in the style of [description] - [key characteristics]. Use [distinctive features].",
+  "icon": "🎭",
+  "messages": {
+    "guessedTrue_correct": [10 short phrases confirming truth in this voice],
+    "guessedTrue_wrong": [10 short phrases revealing it was false in this voice],
+    "guessedFalse_correct": [10 short phrases confirming it was false in this voice],
+    "guessedFalse_wrong": [10 short phrases revealing it was true in this voice]
+  }
+}
+
+Each message should be 3-8 words, capture the voice's personality, and be appropriate for the scenario.
+Make "name" a short, memorable name for this voice (2-4 words).
+Make "prompt" detailed instructions for writing in this style (20-40 words).
+Choose an appropriate emoji for "icon".`;
+
+        const response = await callLLM(prompt, 2000);
+
+        // Parse JSON response
+        let voiceData;
+        try {
+            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                voiceData = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('No JSON found in response');
+            }
+        } catch (error) {
+            console.error('Failed to parse JSON:', error);
+            throw new Error('Failed to generate voice - try again');
+        }
+
+        // Validate structure
+        if (!voiceData.name || !voiceData.prompt || !voiceData.messages) {
+            throw new Error('Invalid voice data structure');
+        }
+
+        // Create unique voice key
+        const voiceKey = 'custom_' + Date.now();
+
+        // Store custom voice
+        AppState.customVoices[voiceKey] = {
+            style: {
+                name: voiceData.name,
+                prompt: voiceData.prompt,
+                icon: voiceData.icon || '✍️'
+            },
+            messages: voiceData.messages
+        };
+
+        // Add to global style/message collections
+        WRITING_STYLES[voiceKey] = AppState.customVoices[voiceKey].style;
+        VOICE_BADGE_MESSAGES[voiceKey] = voiceData.messages;
+
+        // Save to localStorage
+        localStorage.setItem('travel_guide_custom_voices', JSON.stringify(AppState.customVoices));
+
+        // Render and select the new voice
+        renderCustomVoices();
+        selectVoice(voiceKey);
+
+        // Clear input and show success
+        input.value = '';
+        statusEl.textContent = `Created: ${voiceData.name}`;
+        statusEl.style.color = '#4CAF50';
+
+        setTimeout(() => {
+            statusEl.textContent = '';
+        }, 3000);
+
+    } catch (error) {
+        console.error('Error generating custom voice:', error);
+        statusEl.textContent = error.message || 'Failed to generate voice';
+        statusEl.style.color = '#f44336';
+    } finally {
+        createBtn.disabled = false;
+        createBtn.textContent = 'Generate Voice';
+    }
+}
+
+// Make globally available
+window.deleteCustomVoice = deleteCustomVoice;
 
 // Settings Panel Management
 function toggleSettings() {
