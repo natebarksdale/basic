@@ -9,7 +9,7 @@
 // Set this to your Cloudflare Worker URL after deploying (see cloudflare-worker/CLOUDFLARE_SETUP.md)
 // Example: 'https://travel-guide-api-proxy.your-username.workers.dev'
 // When set, the API key is handled server-side and never exposed to the browser
-const CLOUDFLARE_WORKER_URL = null; // Set to your worker URL or null to use direct API calls
+const CLOUDFLARE_WORKER_URL = travel-guide-api-proxy.natebarksdale.workers.dev; // Set to your worker URL or null to use direct API calls
 
 // Option 2: Direct API Calls with Client-Side API Key (Fallback)
 // This is used if CLOUDFLARE_WORKER_URL is not set
