@@ -12,13 +12,16 @@ This directory contains a Cloudflare Worker that acts as a secure proxy between 
 
 - **`worker.js`** - The Cloudflare Worker code (proxy logic)
 - **`wrangler.toml`** - Configuration for deploying the worker
-- **`QUICKSTART.md`** - 5-minute setup guide (start here!)
+- **`MOBILE_SETUP.md`** - 📱 Web-only setup (no command line needed!)
+- **`QUICKSTART.md`** - Command-line setup (requires Node.js)
 - **`CLOUDFLARE_SETUP.md`** - Complete documentation
 - **`README.md`** - This file
 
 ## 🚀 Getting Started
 
-**New to Cloudflare Workers?** Start with [QUICKSTART.md](./QUICKSTART.md)
+**📱 On mobile or prefer web interfaces?** Start with [MOBILE_SETUP.md](./MOBILE_SETUP.md) - No command line needed!
+
+**💻 Have command line access?** Use [QUICKSTART.md](./QUICKSTART.md) for faster setup
 
 **Want all the details?** Read [CLOUDFLARE_SETUP.md](./CLOUDFLARE_SETUP.md)
 
