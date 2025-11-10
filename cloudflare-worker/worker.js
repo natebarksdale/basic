@@ -75,8 +75,33 @@ export default {
         body: JSON.stringify(body)
       });
 
-      // Get the response
-      const data = await openrouterResponse.json();
+      // Get the response - handle both JSON and non-JSON responses
+      let data;
+      const contentType = openrouterResponse.headers.get('content-type');
+
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          data = await openrouterResponse.json();
+        } else {
+          // Non-JSON response - get as text
+          const text = await openrouterResponse.text();
+          data = {
+            error: {
+              message: `OpenRouter returned non-JSON response: ${text.substring(0, 200)}`,
+              status: openrouterResponse.status
+            }
+          };
+        }
+      } catch (parseError) {
+        // Failed to parse response
+        console.error('Failed to parse OpenRouter response:', parseError);
+        data = {
+          error: {
+            message: 'Failed to parse OpenRouter API response',
+            details: parseError.message
+          }
+        };
+      }
 
       // Return the response with CORS headers
       return new Response(JSON.stringify(data), {

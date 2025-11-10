@@ -1598,12 +1598,30 @@ async function callLLM(prompt, maxTokens = 2000) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-            const errorMessage = errorData.error?.message || errorData.error || 'API request failed';
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (parseError) {
+                // If we can't parse the error response, get it as text
+                const errorText = await response.text().catch(() => 'Unknown error');
+                throw new Error(`API Error (${response.status}): ${errorText}`);
+            }
+
+            // Extract error message from various possible error formats
+            const errorMessage = errorData.error?.message ||
+                                errorData.message ||
+                                errorData.error ||
+                                JSON.stringify(errorData);
             throw new Error(`API Error (${response.status}): ${errorMessage}`);
         }
 
         const data = await response.json();
+
+        // Check if response has an error field (even with 200 status)
+        if (data.error) {
+            const errorMessage = data.error.message || data.error.code || JSON.stringify(data.error);
+            throw new Error(`API Error: ${errorMessage}`);
+        }
 
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
             throw new Error('Invalid response format from API');
