@@ -113,11 +113,6 @@ const WRITING_STYLES = {
         prompt: "Write in the style of Hunter S. Thompson - gonzo journalism with wild imagery, sharp cultural criticism, dark humor, and surreal observations. Use punchy, irreverent prose with vivid metaphors.",
         icon: "sunglasses"
     },
-    twain: {
-        name: "Mark Twain",
-        prompt: "Write in the style of Mark Twain - witty, satirical observations with folksy wisdom and humorous exaggeration. Use colorful storytelling with sharp social commentary and a conversational tone.",
-        icon: "steamboat"
-    },
     battuta: {
         name: "Ibn Battuta",
         prompt: "Write in the style of Ibn Battuta - focus on Islamic culture, trade routes, scholarly encounters, and the hospitality of rulers. Include observations about religious practices and social customs with reverence and wonder.",
@@ -236,56 +231,6 @@ const VOICE_BADGE_MESSAGES = {
             "Real as pain!",
             "Genuine article!",
             "True story, baby!"
-        ]
-    },
-    twain: {
-        guessedTrue_correct: [
-            "Ah, but this tale is true!",
-            "The honest truth, friend",
-            "Genuine as they come",
-            "True, I reckon",
-            "The real McCoy",
-            "Fact, not fiction",
-            "True as gospel",
-            "Authentic, friend",
-            "The truth, surprisingly",
-            "Real as rain"
-        ],
-        guessedTrue_wrong: [
-            "Fooled you, friend!",
-            "A whopper, I'm afraid",
-            "False as a politician's promise",
-            "You bit on the lie",
-            "Got you there, friend",
-            "A tall tale indeed",
-            "Fiction pure and simple",
-            "The lie caught you",
-            "Wrong, old friend",
-            "Bamboozled!"
-        ],
-        guessedFalse_correct: [
-            "A bald-faced lie, I tell you!",
-            "Pure fabrication, friend",
-            "The tall tale revealed",
-            "Fiction spotted!",
-            "A whopper indeed",
-            "Caught the fib",
-            "False as fool's gold",
-            "The lie exposed",
-            "Fabrication confirmed",
-            "Untrue as they come"
-        ],
-        guessedFalse_wrong: [
-            "Actually true, friend",
-            "The truth, believe it",
-            "Genuine, surprisingly",
-            "Real, I'm afraid",
-            "The honest truth",
-            "Authentic indeed",
-            "True after all",
-            "Fact, not fancy",
-            "The real deal",
-            "Truth be told"
         ]
     },
     battuta: {
