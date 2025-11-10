@@ -4,7 +4,7 @@
 // Default Free-Tier API Key (with $0 spend limit - free models only)
 // Note: In production, this gets replaced via GitHub Actions from secrets
 // For local dev, we use the hardcoded key with rate limits
-const DEFAULT_API_KEY = '';
+const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
 
 // Check if we have a valid API key (not a placeholder)
 function getValidApiKey() {
@@ -689,12 +689,57 @@ function initializeApp() {
 
     // Set model select to persisted value
     const modelSelect = document.getElementById('modelSelect');
-    modelSelect.value = AppState.currentModel;
+    const customModelInput = document.getElementById('customModelInput');
+    const customModelField = document.getElementById('customModelField');
+
+    // Check if current model is custom (not in dropdown options)
+    const isCustomModel = AppState.currentModel && !Array.from(modelSelect.options).some(opt => opt.value === AppState.currentModel);
+
+    if (isCustomModel) {
+        modelSelect.value = '__custom__';
+        customModelField.value = AppState.currentModel;
+        customModelInput.style.display = 'block';
+    } else {
+        modelSelect.value = AppState.currentModel;
+    }
 
     modelSelect.addEventListener('change', (e) => {
-        AppState.currentModel = e.target.value;
-        localStorage.setItem('travel_guide_model', e.target.value); // Persist model choice
+        if (e.target.value === '__custom__') {
+            // Show custom model input
+            customModelInput.style.display = 'block';
+            customModelField.focus();
+        } else {
+            // Hide custom model input and use dropdown selection
+            customModelInput.style.display = 'none';
+            AppState.currentModel = e.target.value;
+            localStorage.setItem('travel_guide_model', e.target.value);
+            updateFooterModelName();
+            // Refresh current page if viewing one
+            if (AppState.currentLocation) {
+                regenerateCurrentPage();
+            }
+        }
+    });
+
+    // Custom model save button
+    document.getElementById('saveCustomModel').addEventListener('click', () => {
+        const customModel = customModelField.value.trim();
+        if (!customModel) {
+            showNotification('Please enter a model name', 'error');
+            return;
+        }
+
+        // Basic validation for OpenRouter model format
+        if (!customModel.includes('/')) {
+            showNotification('Model should be in format: provider/model-name', 'error');
+            return;
+        }
+
+        AppState.currentModel = customModel;
+        localStorage.setItem('travel_guide_model', customModel);
         updateFooterModelName();
+        showNotification('Custom model saved', 'success');
+
         // Refresh current page if viewing one
         if (AppState.currentLocation) {
             regenerateCurrentPage();
@@ -1913,7 +1958,6 @@ function checkPageCompletion() {
 function updateScore(delta) {
     const oldScore = AppState.score;
     AppState.score += delta;
-    if (AppState.score < 0) AppState.score = 0;
     localStorage.setItem('travel_guide_score', AppState.score);
     updateScoreDisplay(delta, oldScore);
 }
@@ -1958,7 +2002,7 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
     const headerScore = document.getElementById('headerScore');
     const headerScoreValue = document.getElementById('headerScoreValue');
 
-    if (AppState.score > 0) {
+    if (AppState.score !== 0) {
         headerScore.style.display = 'flex';
 
         // Add animation class based on delta
@@ -2005,7 +2049,12 @@ function updateFooterModelName() {
     const selectedOption = modelSelect?.options[modelSelect.selectedIndex];
 
     if (selectedOption) {
-        footerModelEl.textContent = selectedOption.textContent;
+        if (selectedOption.value === '__custom__') {
+            // Show the actual custom model name
+            footerModelEl.textContent = AppState.currentModel || 'Custom Model';
+        } else {
+            footerModelEl.textContent = selectedOption.textContent;
+        }
     }
 }
 

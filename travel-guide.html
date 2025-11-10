@@ -151,7 +151,19 @@
                             <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
                             <option value="anthropic/claude-3-opus">Claude Opus</option>
                         </optgroup>
+                        <optgroup label="Custom">
+                            <option value="__custom__">Custom Model...</option>
+                        </optgroup>
                     </select>
+
+                    <div id="customModelInput" class="custom-model-input" style="display: none;">
+                        <label for="customModelField" style="font-size: 0.875rem; margin-top: 0.75rem; display: block;">Custom OpenRouter Model</label>
+                        <input type="text" id="customModelField" placeholder="e.g., google/gemini-2.0-flash-001" class="custom-model-field">
+                        <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">
+                            Find models at <a href="https://openrouter.ai/models" target="_blank" style="color: #2196F3;">openrouter.ai/models</a>
+                        </div>
+                        <button class="btn-save" id="saveCustomModel" style="margin-top: 8px;">Use Custom Model</button>
+                    </div>
                 </div>
 
                 <div class="score-display">
