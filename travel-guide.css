@@ -108,6 +108,19 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dynamic background colors based on score */
+.header-score.score-positive {
+    background: var(--color-success);
+}
+
+.header-score.score-negative {
+    background: var(--color-error);
+}
+
+.header-score.score-neutral {
+    background: #6b6b6b;
+}
+
 /* Score animations */
 .header-score.score-increase {
     animation: scoreIncrease 0.5s ease, scoreTicker 0.5s ease;
@@ -397,7 +410,9 @@ body {
 /* Custom Voice Input */
 .custom-voice-input {
     margin-top: 1.5rem;
+    margin-bottom: 3rem; /* Extra spacing for mobile Safari toolbar */
     padding-top: 1.5rem;
+    padding-bottom: 1rem;
     border-top: 2px solid var(--color-border);
 }
 
@@ -1168,6 +1183,15 @@ input, select, textarea {
 
 .item-overlay.overlay-incorrect {
     background: linear-gradient(135deg, var(--color-error) 0%, #b85849 100%);
+}
+
+/* Lighter text for better contrast - 70% white overlay effect */
+.item-overlay > div:first-child {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.item-overlay > div:last-child {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* Loading State */

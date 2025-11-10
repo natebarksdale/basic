@@ -25,7 +25,7 @@ function getValidApiKey() {
 const AppState = {
     apiKey: getValidApiKey(),
     currentLocation: null,
-    currentModel: localStorage.getItem('travel_guide_model') || 'google/gemini-2.0-flash-exp:free',
+    currentModel: localStorage.getItem('travel_guide_model') || 'google/gemini-2.5-flash-lite',
     writingStyle: localStorage.getItem('travel_guide_voice') || 'parker',
     score: parseInt(localStorage.getItem('travel_guide_score')) || 0,
     history: [],
@@ -1915,6 +1915,16 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
             headerScore.classList.remove('score-increase');
             headerScore.classList.add('score-decrease');
             setTimeout(() => headerScore.classList.remove('score-decrease'), 500);
+        }
+
+        // Update background color class based on score
+        headerScore.classList.remove('score-positive', 'score-negative', 'score-neutral');
+        if (AppState.score > 0) {
+            headerScore.classList.add('score-positive');
+        } else if (AppState.score < 0) {
+            headerScore.classList.add('score-negative');
+        } else {
+            headerScore.classList.add('score-neutral');
         }
 
         // Animate header score
