@@ -5,7 +5,7 @@
 // Note: In production, this gets replaced via GitHub Actions from secrets
 // The key is obfuscated (reversed + base64) to prevent casual scraping
 // Real security comes from OpenRouter's site locking + spending limits
-const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
+const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__'; // Replaced during deployment
 
 // Decode the obfuscated API key
 function decodeApiKey(obfuscated) {
