@@ -484,6 +484,29 @@ body {
     transition: var(--transition);
 }
 
+/* Custom Model Input */
+.custom-model-input {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.custom-model-field {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    background: var(--color-bg);
+    transition: var(--transition);
+}
+
+.custom-model-field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
 .btn-create-voice:hover:not(:disabled) {
     background: var(--color-accent-hover);
 }
