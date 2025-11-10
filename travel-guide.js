@@ -740,10 +740,9 @@ function initializeApp() {
     // Logo home click
     document.getElementById('logoHome').addEventListener('click', showSearchSection);
 
-    // Info modal
-    document.getElementById('infoBtn').addEventListener('click', openInfoModal);
-    document.getElementById('closeInfoModal').addEventListener('click', closeInfoModal);
-    document.getElementById('infoModalOverlay').addEventListener('click', closeInfoModal);
+    // Info panel
+    document.getElementById('infoBtn').addEventListener('click', toggleInfoPanel);
+    document.getElementById('closeInfoPanel').addEventListener('click', closeInfoPanel);
 
     // Voice toggle
     document.getElementById('voiceToggle').addEventListener('click', toggleVoiceMenu);
@@ -1268,15 +1267,38 @@ Choose an appropriate emoji for "icon".`;
 // Make globally available
 window.deleteCustomVoice = deleteCustomVoice;
 
-// Info Modal Functions
-function openInfoModal() {
-    const modal = document.getElementById('infoModal');
-    modal.style.display = 'flex';
+// Info Panel Functions
+function toggleInfoPanel() {
+    const panel = document.getElementById('infoPanel');
+    const voicePanel = document.getElementById('voiceMenuPanel');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    // Close other panels if open
+    if (voicePanel.classList.contains('open')) {
+        closeVoiceMenu();
+    }
+    if (settingsPanel.classList.contains('open')) {
+        closeSettings();
+    }
+
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        panel.offsetHeight; // Force reflow
+        setTimeout(() => {
+            panel.classList.add('open');
+        }, 10);
+    } else {
+        closeInfoPanel();
+    }
 }
 
-function closeInfoModal() {
-    const modal = document.getElementById('infoModal');
-    modal.style.display = 'none';
+function closeInfoPanel() {
+    const panel = document.getElementById('infoPanel');
+    panel.classList.remove('open');
+
+    setTimeout(() => {
+        panel.style.display = 'none';
+    }, 200);
 }
 
 // Settings Panel Management
