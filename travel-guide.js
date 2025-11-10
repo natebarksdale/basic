@@ -79,6 +79,31 @@ const GLOBAL_DESTINATIONS = [
 // Select a random starting destination
 const randomDestination = GLOBAL_DESTINATIONS[Math.floor(Math.random() * GLOBAL_DESTINATIONS.length)];
 
+// Educational Loading Messages
+// These rotate randomly during content generation to help users discover features
+const LOADING_MESSAGES = [
+    "Tip: Click the voice icon to choose different writing styles like Dorothy Parker or Hunter S. Thompson",
+    "Did you know? You can create custom voices by describing any writing style you want",
+    "Try the 'Near Me' button to explore places close to your current location",
+    "Tip: Drag the map marker to explore any location in the world",
+    "Click any blue place name in the guide to instantly travel there",
+    "Your score increases when you guess correctly - can you complete a whole page?",
+    "Tip: Use the settings gear to change AI models or manage your API key",
+    "The breadcrumb trail at the top lets you quickly jump back to previous locations",
+    "Tip: Each trio has one lie - guess all three correctly for bonus points!",
+    "Try exploring different neighborhoods, landmarks, and cities by clicking links",
+    "Did you know? You can use your browser's back button to retrace your journey",
+    "Tip: The map shows nearby places you can explore with a single click",
+    "Complete all trios on a page correctly to earn a 10-point bonus",
+    "Five unique voices are built-in - each adds personality to your travel guide",
+    "Tip: Search for any city, landmark, or neighborhood to start exploring",
+    "The bottom map always shows a new random destination to discover",
+    "Did you know? Your guesses and score are saved automatically",
+    "Tip: Click suggestion chips for quick access to popular destinations",
+    "Custom voices are generated on-demand and saved for future use",
+    "Try switching voices mid-journey to see familiar places in new ways"
+];
+
 // Application State
 const AppState = {
     apiKey: getValidApiKey(),
@@ -1469,9 +1494,9 @@ async function loadPlace(location, addToHistory = true) {
     document.getElementById('loadingState').style.display = 'flex';
     document.getElementById('categoriesContainer').innerHTML = '';
 
-    // Update loading text with current voice
-    const voiceName = WRITING_STYLES[AppState.writingStyle].name;
-    document.getElementById('loadingText').textContent = `Generating your travel guide in the style of ${voiceName}...`;
+    // Update loading text with a random educational message
+    const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+    document.getElementById('loadingText').textContent = randomMessage;
 
     // Update header immediately with the new location
     document.getElementById('placeName').textContent = location;
