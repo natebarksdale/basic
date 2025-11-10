@@ -894,6 +894,12 @@ function initializeApp() {
             // This will trigger a page refresh which we want to intercept
         }
     }, { passive: true });
+
+    // Add pulsing hint to voice button for first-time users
+    const hasOpenedVoiceMenu = localStorage.getItem('travel_guide_voice_menu_opened');
+    if (!hasOpenedVoiceMenu) {
+        document.getElementById('voiceToggle').classList.add('pulse-hint');
+    }
 }
 
 // Regenerate Current Page
@@ -941,6 +947,13 @@ function openVoiceMenu() {
 
     // Update active voice option
     updateActiveVoiceOption();
+
+    // Remove pulse hint on first open and mark as opened
+    const voiceToggle = document.getElementById('voiceToggle');
+    if (voiceToggle.classList.contains('pulse-hint')) {
+        voiceToggle.classList.remove('pulse-hint');
+        localStorage.setItem('travel_guide_voice_menu_opened', 'true');
+    }
 }
 
 function closeVoiceMenu() {
