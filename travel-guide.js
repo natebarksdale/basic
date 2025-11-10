@@ -1,7 +1,18 @@
 // Two Truths & A Lie - Gamified Travel Guide
 // Main Application Logic
 
-// Default Free-Tier API Key (with $0 spend limit - free models only)
+// ==========================================
+// API CONFIGURATION
+// ==========================================
+
+// Option 1: Use Cloudflare Worker Proxy (RECOMMENDED - Real Security)
+// Set this to your Cloudflare Worker URL after deploying (see cloudflare-worker/CLOUDFLARE_SETUP.md)
+// Example: 'https://travel-guide-api-proxy.your-username.workers.dev'
+// When set, the API key is handled server-side and never exposed to the browser
+const CLOUDFLARE_WORKER_URL = null; // Set to your worker URL or null to use direct API calls
+
+// Option 2: Direct API Calls with Client-Side API Key (Fallback)
+// This is used if CLOUDFLARE_WORKER_URL is not set
 // Note: In production, this gets replaced via GitHub Actions from secrets
 // The key is obfuscated (reversed + base64) to prevent casual scraping
 // Real security comes from OpenRouter's site locking + spending limits
@@ -1553,17 +1564,30 @@ Return ONLY valid JSON:
     return placeData;
 }
 
-// Call OpenRouter LLM
+// Call OpenRouter LLM (via Cloudflare Worker or direct)
 async function callLLM(prompt, maxTokens = 2000) {
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        // Determine which endpoint to use
+        const useProxy = CLOUDFLARE_WORKER_URL && CLOUDFLARE_WORKER_URL !== null;
+        const endpoint = useProxy
+            ? CLOUDFLARE_WORKER_URL
+            : 'https://openrouter.ai/api/v1/chat/completions';
+
+        // Build headers
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // Add Authorization header only for direct API calls
+        if (!useProxy) {
+            headers['Authorization'] = `Bearer ${AppState.apiKey}`;
+            headers['HTTP-Referer'] = window.location.origin;
+            headers['X-Title'] = 'Two Truths & A Lie Travel Guide';
+        }
+
+        const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${AppState.apiKey}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Two Truths & A Lie Travel Guide'
-            },
+            headers: headers,
             body: JSON.stringify({
                 model: AppState.currentModel,
                 messages: [

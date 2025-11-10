@@ -1,0 +1,17 @@
+# Cloudflare Worker Configuration
+# This file is used by wrangler to deploy your worker
+
+name = "travel-guide-api-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Account details - you'll need to add your account_id after creating a Cloudflare account
+# account_id = "your-account-id-here"
+
+# Workers are free up to 100,000 requests per day
+# https://developers.cloudflare.com/workers/platform/pricing/
+
+# Environment variables (secrets)
+# You'll set OPENROUTER_API_KEY using: wrangler secret put OPENROUTER_API_KEY
+# [env.production]
+# vars = { ENVIRONMENT = "production" }
