@@ -508,15 +508,9 @@ function initializeHomeMap() {
         maxZoom: 19
     }).addTo(AppState.homeMap);
 
-    // Add draggable marker
+    // Add draggable marker with default pin icon
     AppState.homeMarker = L.marker([AppState.selectedCoords.lat, AppState.selectedCoords.lng], {
-        draggable: true,
-        icon: L.divIcon({
-            className: 'custom-marker home-marker',
-            html: '<div class="marker-pin-large"></div>',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-        })
+        draggable: true
     }).addTo(AppState.homeMap);
 
     // Update coordinates when marker is dragged
@@ -553,15 +547,9 @@ function initializeBottomMap(lat, lng) {
         maxZoom: 19
     }).addTo(AppState.bottomMap);
 
-    // Add draggable marker
+    // Add draggable marker with default pin icon
     AppState.bottomMarker = L.marker([lat, lng], {
-        draggable: true,
-        icon: L.divIcon({
-            className: 'custom-marker home-marker',
-            html: '<div class="marker-pin-large"></div>',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-        })
+        draggable: true
     }).addTo(AppState.bottomMap);
 
     // Update coordinates when marker is dragged
