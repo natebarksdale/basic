@@ -36,6 +36,39 @@ For local development without the secret:
 
 ### Security Notes
 
-- The API key used should have appropriate spending limits
-- Consider using OpenRouter's free tier or a key with $0 spend limit for the default
-- Users can always provide their own API key through the app interface
+**IMPORTANT: Configure OpenRouter API Key Protection**
+
+While the API key is obfuscated in the code (reversed + base64), this is NOT real security - anyone can extract it from the browser. The actual protection comes from OpenRouter's built-in features:
+
+#### 1. **Site Locking** (CRITICAL - Do This First!)
+   - Go to [OpenRouter API Keys](https://openrouter.ai/keys)
+   - Find your API key for this project
+   - Click "Edit" → "Site Lock"
+   - Add your GitHub Pages domain: `https://yourusername.github.io`
+   - This prevents the key from working on any other website
+
+   **Even if someone extracts your key, they cannot use it elsewhere!**
+
+#### 2. **Spending Limits** (Recommended)
+   - Set a monthly spending limit (e.g., $5/month)
+   - Go to [OpenRouter Settings](https://openrouter.ai/settings/limits)
+   - This caps the maximum damage if the key is misused
+
+#### 3. **Use Free/Cheap Models**
+   - The default model is `google/gemini-2.5-flash-lite` (free tier)
+   - Free models have no cost even if heavily used
+   - See [OpenRouter Models](https://openrouter.ai/models?order=newest&supported_parameters=tools&max_price=0) for free options
+
+#### Why Obfuscation?
+- Prevents automated bots from scraping API keys via regex
+- Won't trigger GitHub secret scanning alerts
+- Filters out the laziest attackers
+- **Not a security measure** - just a speed bump
+
+#### Defense in Depth Strategy:
+1. **Site Lock** = Real protection (key only works on your domain)
+2. **Spending Limits** = Damage control (caps maximum cost)
+3. **Free Models** = Zero risk (no cost to misuse)
+4. **Obfuscation** = Prevents casual scraping (minor benefit)
+
+**Bottom Line:** The key WILL be visible to determined users, but site locking makes it useless to them.
