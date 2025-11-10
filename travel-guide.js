@@ -47,6 +47,16 @@ function getValidApiKey() {
     return decodeApiKey(DEFAULT_API_KEY);
 }
 
+// Check if we have API access (either via key or Cloudflare Worker)
+function hasApiAccess() {
+    // If using Cloudflare Worker, we have API access regardless of client-side key
+    if (CLOUDFLARE_WORKER_URL && CLOUDFLARE_WORKER_URL !== null && CLOUDFLARE_WORKER_URL.trim() !== '') {
+        return true;
+    }
+    // Otherwise, check if we have a valid client-side API key
+    return AppState.apiKey && AppState.apiKey.trim() !== '';
+}
+
 // Application State
 const AppState = {
     apiKey: getValidApiKey(),
@@ -756,6 +766,12 @@ function initializeApp() {
             updateFooterModelName();
             // Refresh current page if viewing one
             if (AppState.currentLocation) {
+                // Check if we have API access before regenerating
+                if (!hasApiAccess()) {
+                    showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
+                    toggleSettings();
+                    return;
+                }
                 regenerateCurrentPage();
             }
         }
@@ -782,6 +798,12 @@ function initializeApp() {
 
         // Refresh current page if viewing one
         if (AppState.currentLocation) {
+            // Check if we have API access before regenerating
+            if (!hasApiAccess()) {
+                showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
+                toggleSettings();
+                return;
+            }
             regenerateCurrentPage();
         }
     });
@@ -950,6 +972,13 @@ function selectVoice(voice) {
 
     // Refresh current page if viewing one
     if (AppState.currentLocation) {
+        // Check if we have API access before regenerating
+        if (!hasApiAccess()) {
+            showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
+            toggleSettings();
+            closeVoiceMenu();
+            return;
+        }
         regenerateCurrentPage();
     }
 
@@ -1105,8 +1134,8 @@ async function generateCustomVoice() {
         return;
     }
 
-    // Check API key
-    if (!AppState.apiKey) {
+    // Check if we have API access (via key or Cloudflare Worker)
+    if (!hasApiAccess()) {
         showNotification('Please add your OpenRouter API key in settings', 'error');
         toggleSettings();
         return;
@@ -1313,6 +1342,13 @@ function updateApiKeyStatus() {
 
 // Handle Explore Map Location
 async function handleExploreMap() {
+    // Check if we have API access before proceeding
+    if (!hasApiAccess()) {
+        showNotification('Please add your OpenRouter API key in settings', 'error');
+        toggleSettings();
+        return;
+    }
+
     const locationName = await reverseGeocode(AppState.selectedCoords.lat, AppState.selectedCoords.lng);
 
     // Cancel any ongoing generation
@@ -1325,6 +1361,13 @@ async function handleExploreMap() {
 
 // Handle Explore Bottom Map Location
 async function handleExploreBottomMap() {
+    // Check if we have API access before proceeding
+    if (!hasApiAccess()) {
+        showNotification('Please add your OpenRouter API key in settings', 'error');
+        toggleSettings();
+        return;
+    }
+
     const locationName = await reverseGeocode(AppState.bottomMapCoords.lat, AppState.bottomMapCoords.lng);
 
     // Cancel any ongoing generation
@@ -1390,8 +1433,8 @@ async function handleExplore() {
         return;
     }
 
-    // Check if we have a valid API key
-    if (!AppState.apiKey) {
+    // Check if we have API access (via key or Cloudflare Worker)
+    if (!hasApiAccess()) {
         showNotification('Please add your OpenRouter API key in settings', 'error');
         toggleSettings();
         return;
