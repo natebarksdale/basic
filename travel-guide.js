@@ -685,6 +685,7 @@ function initializeApp() {
     document.getElementById('closeSettings').addEventListener('click', closeSettings);
     document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
     document.getElementById('resetApiKey').addEventListener('click', resetToDefaultKey);
+    document.getElementById('resetScoreBtn').addEventListener('click', resetScore);
 
     // Set model select to persisted value
     const modelSelect = document.getElementById('modelSelect');
@@ -693,6 +694,7 @@ function initializeApp() {
     modelSelect.addEventListener('change', (e) => {
         AppState.currentModel = e.target.value;
         localStorage.setItem('travel_guide_model', e.target.value); // Persist model choice
+        updateFooterModelName();
         // Refresh current page if viewing one
         if (AppState.currentLocation) {
             regenerateCurrentPage();
@@ -712,6 +714,9 @@ function initializeApp() {
 
     // Initialize voice icon
     updateVoiceIcon();
+
+    // Initialize footer model name
+    updateFooterModelName();
 
     // Update API key status indicator
     updateApiKeyStatus();
@@ -895,6 +900,13 @@ function updateVoiceIcon() {
 
     // Update data-voice attribute for background color
     toggleElement.setAttribute('data-voice', AppState.writingStyle);
+
+    // Apply custom color for custom voices (inline style)
+    if (AppState.writingStyle.startsWith('custom_') && AppState.customVoices[AppState.writingStyle]?.style?.color) {
+        iconElement.style.background = AppState.customVoices[AppState.writingStyle].style.color;
+    } else {
+        iconElement.style.background = '';  // Clear inline style for built-in voices
+    }
 }
 
 // Load custom voices on initialization
@@ -925,8 +937,10 @@ function renderCustomVoices() {
         const button = document.createElement('button');
         button.className = 'voice-option custom-voice-option';
         button.dataset.voice = voiceKey;
+
+        const bgColor = voice.style.color || 'rgba(128, 128, 128, 0.15)';
         button.innerHTML = `
-            <div class="voice-option-emoji">${voice.style.icon || '✍️'}</div>
+            <div class="voice-option-emoji" style="background: ${bgColor};">${voice.style.icon || '✍️'}</div>
             <div class="voice-option-text">
                 <div class="voice-option-name">${voice.style.name}</div>
                 <div class="voice-option-desc">Custom voice</div>
@@ -940,6 +954,29 @@ function renderCustomVoices() {
 
         container.appendChild(button);
     });
+}
+
+// Convert HSL to RGB
+function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 // Delete a custom voice
@@ -1037,12 +1074,17 @@ Choose an appropriate emoji for "icon".`;
         // Create unique voice key
         const voiceKey = 'custom_' + Date.now();
 
+        // Generate random pastel color for custom voice
+        const hue = Math.floor(Math.random() * 360);
+        const customColor = `rgba(${hslToRgb(hue / 360, 0.7, 0.6).join(', ')}, 0.15)`;
+
         // Store custom voice
         AppState.customVoices[voiceKey] = {
             style: {
                 name: voiceData.name,
                 prompt: voiceData.prompt,
-                icon: voiceData.icon || '✍️'
+                icon: voiceData.icon || '✍️',
+                color: customColor
             },
             messages: voiceData.messages
         };
@@ -1876,6 +1918,19 @@ function updateScore(delta) {
     updateScoreDisplay(delta, oldScore);
 }
 
+// Reset Score
+function resetScore() {
+    if (!confirm('Are you sure you want to reset your score to 0?')) {
+        return;
+    }
+
+    const oldScore = AppState.score;
+    AppState.score = 0;
+    localStorage.setItem('travel_guide_score', 0);
+    updateScoreDisplay(0 - oldScore, oldScore);
+    showNotification('Score reset to 0', 'info');
+}
+
 function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
     // Animate the score ticker
     if (delta !== 0) {
@@ -1939,6 +1994,19 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
 
     // Update title bar with score
     document.title = `(${AppState.score}) True/False Travel`;
+}
+
+// Update footer with current model name
+function updateFooterModelName() {
+    const footerModelEl = document.getElementById('footerModelName');
+    if (!footerModelEl) return;
+
+    const modelSelect = document.getElementById('modelSelect');
+    const selectedOption = modelSelect?.options[modelSelect.selectedIndex];
+
+    if (selectedOption) {
+        footerModelEl.textContent = selectedOption.textContent;
+    }
 }
 
 // Animate score ticker

@@ -206,28 +206,28 @@ body {
 }
 
 /* Voice-specific background colors */
-.voice-toggle[data-voice="standard"] .voice-icon {
-    background: rgba(139, 69, 19, 0.1); /* Warm brown for book */
-}
-
-.voice-toggle[data-voice="twain"] .voice-icon {
-    background: rgba(65, 105, 225, 0.1); /* Royal blue for steamboat */
-}
-
-.voice-toggle[data-voice="bird"] .voice-icon {
-    background: rgba(34, 139, 34, 0.1); /* Forest green for bird */
-}
-
-.voice-toggle[data-voice="battuta"] .voice-icon {
-    background: rgba(184, 134, 11, 0.1); /* Dark goldenrod for compass */
-}
-
-.voice-toggle[data-voice="west"] .voice-icon {
-    background: rgba(128, 0, 128, 0.1); /* Purple for pen */
+.voice-toggle[data-voice="parker"] .voice-icon {
+    background: rgba(255, 105, 180, 0.15); /* Hot pink for cocktail */
 }
 
 .voice-toggle[data-voice="thompson"] .voice-icon {
-    background: rgba(220, 20, 60, 0.1); /* Crimson for sunglasses */
+    background: rgba(220, 20, 60, 0.15); /* Crimson for sunglasses */
+}
+
+.voice-toggle[data-voice="twain"] .voice-icon {
+    background: rgba(65, 105, 225, 0.15); /* Royal blue for steamboat */
+}
+
+.voice-toggle[data-voice="battuta"] .voice-icon {
+    background: rgba(184, 134, 11, 0.15); /* Dark goldenrod for compass */
+}
+
+.voice-toggle[data-voice="wodehouse"] .voice-icon {
+    background: rgba(138, 43, 226, 0.15); /* Blue violet for tophat */
+}
+
+.voice-toggle[data-voice="keys"] .voice-icon {
+    background: rgba(255, 165, 0, 0.15); /* Orange for key */
 }
 
 /* Hamburger Menu */
@@ -358,6 +358,38 @@ body {
     font-family: 'Noto Color Emoji', 'Noto Emoji', sans-serif;
     font-weight: 400;
     color: #000;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+/* Voice-specific backgrounds for menu options */
+.voice-option[data-voice="parker"] .voice-option-emoji {
+    background: rgba(255, 105, 180, 0.15); /* Hot pink for cocktail */
+}
+
+.voice-option[data-voice="thompson"] .voice-option-emoji {
+    background: rgba(220, 20, 60, 0.15); /* Crimson for sunglasses */
+}
+
+.voice-option[data-voice="twain"] .voice-option-emoji {
+    background: rgba(65, 105, 225, 0.15); /* Royal blue for steamboat */
+}
+
+.voice-option[data-voice="battuta"] .voice-option-emoji {
+    background: rgba(184, 134, 11, 0.15); /* Dark goldenrod for compass */
+}
+
+.voice-option[data-voice="wodehouse"] .voice-option-emoji {
+    background: rgba(138, 43, 226, 0.15); /* Blue violet for tophat */
+}
+
+.voice-option[data-voice="keys"] .voice-option-emoji {
+    background: rgba(255, 165, 0, 0.15); /* Orange for key */
 }
 
 .voice-option-text {
@@ -576,6 +608,23 @@ input, select, textarea {
 
 .btn-save:hover {
     background: var(--color-accent-hover);
+}
+
+.btn-reset-score {
+    width: 100%;
+    padding: 0.75rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-reset-score:hover {
+    background: #d32f2f;
 }
 
 .score-display {
@@ -1413,6 +1462,24 @@ input, select, textarea {
     font-size: 0.813rem;
     color: var(--color-text-light);
     margin-bottom: 0.25rem;
+}
+
+.footer-model {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.footer-model #footerModelName {
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+.footer-credits {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    font-style: italic;
 }
 
 /* Responsive */
