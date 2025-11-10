@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .pass {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .fail {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+        #testModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border: 2px solid #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Diagnostic Test</h1>
+
+    <div id="results"></div>
+
+    <h2>Interactive Tests</h2>
+    <button id="testBtn">Click Me to Test Event Listener</button>
+    <button id="modalBtn">Test Modal</button>
+    <div id="clickResult"></div>
+
+    <div id="overlay"></div>
+    <div id="testModal">
+        <h3>Modal Works!</h3>
+        <p>If you see this, modals are working correctly.</p>
+        <button id="closeModal">Close</button>
+    </div>
+
+    <script>
+        const results = [];
+
+        function addResult(test, passed, details = '') {
+            results.push({ test, passed, details });
+            displayResults();
+        }
+
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = '<h2>Test Results</h2>';
+            results.forEach(r => {
+                const div = document.createElement('div');
+                div.className = `test-result ${r.passed ? 'pass' : 'fail'}`;
+                div.innerHTML = `<strong>${r.test}:</strong> ${r.passed ? '✓ PASS' : '✗ FAIL'} ${r.details ? `<br><small>${r.details}</small>` : ''}`;
+                container.appendChild(div);
+            });
+        }
+
+        // Test 1: JavaScript is running
+        addResult('JavaScript Execution', true, 'This script is running');
+
+        // Test 2: DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            addResult('DOM Content Loaded', true, 'DOMContentLoaded event fired');
+        });
+
+        // Test 3: Can access the travel-guide.js file
+        const script = document.createElement('script');
+        script.src = 'travel-guide.js?v=' + Date.now();
+        script.onload = () => {
+            addResult('travel-guide.js loaded', true, 'File loaded successfully');
+
+            // Test 4: Check CLOUDFLARE_WORKER_URL
+            if (typeof CLOUDFLARE_WORKER_URL !== 'undefined') {
+                const isString = typeof CLOUDFLARE_WORKER_URL === 'string';
+                const hasHttps = CLOUDFLARE_WORKER_URL && CLOUDFLARE_WORKER_URL.startsWith('https://');
+                addResult('CLOUDFLARE_WORKER_URL', isString && hasHttps,
+                    `Value: ${CLOUDFLARE_WORKER_URL} | Type: ${typeof CLOUDFLARE_WORKER_URL}`);
+            } else {
+                addResult('CLOUDFLARE_WORKER_URL', false, 'Variable not defined');
+            }
+
+            // Test 5: Check if AppState exists
+            if (typeof AppState !== 'undefined') {
+                addResult('AppState object', true, 'AppState is defined');
+            } else {
+                addResult('AppState object', false, 'AppState not found');
+            }
+        };
+        script.onerror = () => {
+            addResult('travel-guide.js loaded', false, 'Failed to load file');
+        };
+        document.head.appendChild(script);
+
+        // Test 6: Event listeners
+        document.getElementById('testBtn').addEventListener('click', () => {
+            document.getElementById('clickResult').innerHTML = '<div class="test-result pass">✓ Event listener works!</div>';
+            addResult('Button Click Event', true, 'Event listener attached and fired successfully');
+        });
+
+        // Test 7: Modal functionality
+        const modalBtn = document.getElementById('modalBtn');
+        const modal = document.getElementById('testModal');
+        const overlay = document.getElementById('overlay');
+        const closeBtn = document.getElementById('closeModal');
+
+        modalBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+            addResult('Modal Open', true, 'Modal opened successfully');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        overlay.addEventListener('click', () => {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        // Test 8: LocalStorage
+        try {
+            localStorage.setItem('test', 'value');
+            const value = localStorage.getItem('test');
+            localStorage.removeItem('test');
+            addResult('LocalStorage', value === 'value', 'LocalStorage is accessible');
+        } catch(e) {
+            addResult('LocalStorage', false, 'LocalStorage error: ' + e.message);
+        }
+    </script>
+</body>
+</html>
