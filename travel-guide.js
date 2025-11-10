@@ -1913,7 +1913,6 @@ function checkPageCompletion() {
 function updateScore(delta) {
     const oldScore = AppState.score;
     AppState.score += delta;
-    if (AppState.score < 0) AppState.score = 0;
     localStorage.setItem('travel_guide_score', AppState.score);
     updateScoreDisplay(delta, oldScore);
 }
@@ -1958,7 +1957,7 @@ function updateScoreDisplay(delta = 0, oldScore = AppState.score) {
     const headerScore = document.getElementById('headerScore');
     const headerScoreValue = document.getElementById('headerScoreValue');
 
-    if (AppState.score > 0) {
+    if (AppState.score !== 0) {
         headerScore.style.display = 'flex';
 
         // Add animation class based on delta
