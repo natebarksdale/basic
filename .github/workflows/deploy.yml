@@ -29,7 +29,8 @@ jobs:
         run: |
           # Obfuscate the API key (reverse + base64) to prevent casual scraping
           # Note: This is NOT real security - the key is site-locked on OpenRouter
-          OBFUSCATED=$(echo "${{ secrets.OPENROUTER_API_KEY }}" | rev | base64 -w 0)
+          # Use printf instead of echo to avoid adding newline
+          OBFUSCATED=$(printf '%s' "${{ secrets.OPENROUTER_API_KEY }}" | rev | base64 -w 0)
           sed -i "s|__OPENROUTER_API_KEY__|$OBFUSCATED|g" travel-guide.js
           echo "API key obfuscated and injected successfully"
 
