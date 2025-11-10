@@ -634,12 +634,35 @@ async function reverseGeocode(lat, lng) {
         const data = await response.json();
 
         if (data && data.address) {
-            // Try to get a meaningful location name
+            // Build a more specific location name with context to avoid ambiguity
             const addr = data.address;
-            const locationName = addr.city || addr.town || addr.village ||
-                               addr.county || addr.state || addr.country ||
-                               `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-            return locationName;
+
+            // Get the primary location name
+            const primaryName = addr.city || addr.town || addr.village ||
+                               addr.county || addr.municipality || addr.suburb;
+
+            // Get contextual information (state/country)
+            const state = addr.state;
+            const country = addr.country;
+
+            // Build the location string with context
+            if (primaryName) {
+                if (state && country === 'United States') {
+                    // For US locations, include state (e.g., "Clark County, Washington")
+                    return `${primaryName}, ${state}`;
+                } else if (state) {
+                    // For locations with states/provinces in other countries
+                    return `${primaryName}, ${state}, ${country}`;
+                } else if (country) {
+                    // For locations without state (e.g., small countries)
+                    return `${primaryName}, ${country}`;
+                }
+                return primaryName;
+            }
+
+            // Fallback to state or country if no primary name
+            if (state) return `${state}, ${country || ''}`.trim().replace(/,$/, '');
+            if (country) return country;
         }
 
         return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
@@ -1395,7 +1418,7 @@ async function handleExploreMap() {
         AppState.isGenerating = false;
     }
 
-    await loadPlace(locationName, true);
+    await loadPlace(locationName, true, AppState.selectedCoords);
 }
 
 // Handle Explore Bottom Map Location
@@ -1417,7 +1440,7 @@ async function handleExploreBottomMap() {
     // Clear breadcrumb history for fresh exploration
     AppState.history = [];
 
-    await loadPlace(locationName, true);
+    await loadPlace(locationName, true, AppState.bottomMapCoords);
 }
 
 // Handle Near Me
@@ -1498,7 +1521,7 @@ function stripParenthetical(locationName) {
 }
 
 // Load Place
-async function loadPlace(location, addToHistory = true) {
+async function loadPlace(location, addToHistory = true, coords = null) {
     AppState.isGenerating = true;
 
     // Show place section and update UI immediately
@@ -1529,7 +1552,7 @@ async function loadPlace(location, addToHistory = true) {
 
     try {
         // Generate content
-        const placeData = await generatePlaceContent(location);
+        const placeData = await generatePlaceContent(location, coords);
 
         // Check if still generating (not cancelled)
         if (!AppState.isGenerating) {
@@ -1576,7 +1599,7 @@ async function loadPlace(location, addToHistory = true) {
 }
 
 // Generate Place Content using LLM
-async function generatePlaceContent(location) {
+async function generatePlaceContent(location, coords = null) {
     const writingStyle = WRITING_STYLES[AppState.writingStyle];
 
     // Determine location type - use a simpler heuristic to save an API call
@@ -1595,8 +1618,14 @@ async function generatePlaceContent(location) {
 
     const categories = CATEGORY_TEMPLATES[locationType] || CATEGORY_TEMPLATES.default;
 
+    // Build location context string for disambiguation
+    let locationContext = `"${location}"`;
+    if (coords) {
+        locationContext += ` (coordinates: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
+    }
+
     // Generate content - optimized prompt for speed
-    const prompt = `Travel guide for "${location}". ${writingStyle.prompt}
+    const prompt = `Travel guide for ${locationContext}. ${writingStyle.prompt}
 
 For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
 
