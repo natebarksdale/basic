@@ -12,7 +12,9 @@ function decodeApiKey(obfuscated) {
     try {
         // Decode base64 and reverse the string
         const decoded = atob(obfuscated);
-        return decoded.split('').reverse().join('');
+        const reversed = decoded.split('').reverse().join('');
+        // Trim any whitespace that might have been inadvertently encoded
+        return reversed.trim();
     } catch (e) {
         return null; // Invalid obfuscation
     }
