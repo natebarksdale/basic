@@ -230,52 +230,6 @@ body {
     background: rgba(255, 165, 0, 0.15); /* Orange for key */
 }
 
-/* Hamburger Menu */
-.menu-toggle {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-light);
-    transition: var(--transition);
-    width: 40px;
-    height: 40px;
-}
-
-.menu-toggle:hover {
-    color: var(--color-text);
-}
-
-.hamburger {
-    width: 20px;
-    height: 14px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.hamburger span {
-    width: 100%;
-    height: 2px;
-    background: currentColor;
-    transition: var(--transition);
-}
-
-.menu-toggle.active .hamburger span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
-}
-
-.menu-toggle.active .hamburger span:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-toggle.active .hamburger span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-}
-
 /* Voice Menu Panel */
 .voice-menu-panel {
     position: fixed;
@@ -1464,6 +1418,35 @@ input, select, textarea {
     padding: 2rem 0;
     text-align: center;
     margin-top: 0;
+}
+
+.footer-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(193, 125, 92, 0.2);
+}
+
+.footer-settings-btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(193, 125, 92, 0.3);
+}
+
+.footer-settings-btn .settings-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    stroke-width: 2;
 }
 
 .footer p {

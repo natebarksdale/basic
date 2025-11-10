@@ -57,6 +57,28 @@ function hasApiAccess() {
     return AppState.apiKey && AppState.apiKey.trim() !== '';
 }
 
+// Global destination starting points for the home map
+const GLOBAL_DESTINATIONS = [
+    { name: 'Paris', lat: 48.8566, lng: 2.3522 },
+    { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
+    { name: 'New York', lat: 40.7128, lng: -74.0060 },
+    { name: 'London', lat: 51.5074, lng: -0.1278 },
+    { name: 'Sydney', lat: -33.8688, lng: 151.2093 },
+    { name: 'Rio de Janeiro', lat: -22.9068, lng: -43.1729 },
+    { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
+    { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    { name: 'Istanbul', lat: 41.0082, lng: 28.9784 },
+    { name: 'Bangkok', lat: 13.7563, lng: 100.5018 },
+    { name: 'Cairo', lat: 30.0444, lng: 31.2357 },
+    { name: 'Mexico City', lat: 19.4326, lng: -99.1332 },
+    { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+    { name: 'Cape Town', lat: -33.9249, lng: 18.4241 },
+    { name: 'Buenos Aires', lat: -34.6037, lng: -58.3816 }
+];
+
+// Select a random starting destination
+const randomDestination = GLOBAL_DESTINATIONS[Math.floor(Math.random() * GLOBAL_DESTINATIONS.length)];
+
 // Application State
 const AppState = {
     apiKey: getValidApiKey(),
@@ -70,8 +92,8 @@ const AppState = {
     homeMarker: null,
     bottomMap: null,
     bottomMarker: null,
-    bottomMapCoords: { lat: 48.8566, lng: 2.3522 },
-    selectedCoords: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
+    bottomMapCoords: { lat: randomDestination.lat, lng: randomDestination.lng },
+    selectedCoords: { lat: randomDestination.lat, lng: randomDestination.lng },
     markers: [],
     isGenerating: false,
     guesses: {}, // Track user guesses: { 'cat-item': true/false }
@@ -535,8 +557,8 @@ async function loadPlaceHeroImage(locationName) {
 
 // Initialize home map with draggable marker
 function initializeHomeMap() {
-    // Create map centered on Paris (default) - zoomed way out for world view
-    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 2);
+    // Create map centered on random global destination with city-level zoom
+    AppState.homeMap = L.map('homeMap').setView([AppState.selectedCoords.lat, AppState.selectedCoords.lng], 6);
 
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -730,8 +752,8 @@ function initializeApp() {
         });
     });
 
-    // Settings panel
-    document.getElementById('menuToggle').addEventListener('click', toggleSettings);
+    // Settings panel - using footer button instead of hamburger menu
+    document.getElementById('footerSettingsBtn').addEventListener('click', toggleSettings);
     document.getElementById('closeSettings').addEventListener('click', closeSettings);
     document.getElementById('saveApiKey').addEventListener('click', saveApiKey);
     document.getElementById('resetApiKey').addEventListener('click', resetToDefaultKey);
@@ -1244,7 +1266,6 @@ window.deleteCustomVoice = deleteCustomVoice;
 // Settings Panel Management
 function toggleSettings() {
     const panel = document.getElementById('settingsPanel');
-    const toggle = document.getElementById('menuToggle');
 
     // Show panel if hidden
     if (panel.style.display === 'none') {
@@ -1254,7 +1275,6 @@ function toggleSettings() {
     }
 
     panel.classList.toggle('open');
-    toggle.classList.toggle('active');
 
     // Update API key status and load key into input field when opening
     if (panel.classList.contains('open')) {
@@ -1279,9 +1299,7 @@ function toggleSettings() {
 
 function closeSettings() {
     const panel = document.getElementById('settingsPanel');
-    const toggle = document.getElementById('menuToggle');
     panel.classList.remove('open');
-    toggle.classList.remove('active');
 
     // Hide panel after animation
     setTimeout(() => {
