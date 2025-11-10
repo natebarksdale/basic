@@ -98,14 +98,16 @@ body {
 .info-icon {
     font-size: 1.125rem;
     line-height: 1;
-    font-family: 'Noto Color Emoji', 'Noto Emoji', sans-serif;
+    font-family: 'Noto Emoji', sans-serif;
     font-weight: 400;
     filter: grayscale(100%);
-    opacity: 0.7;
+    opacity: 0.6;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: var(--transition);
+    -webkit-font-smoothing: antialiased;
+    font-variant-emoji: text;
 }
 
 .logo-icon {
@@ -1461,7 +1463,8 @@ input, select, textarea {
     font-weight: 600;
     color: var(--color-text);
     margin-bottom: 0.625rem;
-    font-family: 'Noto Color Emoji', 'Noto Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Noto Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-variant-emoji: text;
 }
 
 .info-section p {
@@ -1507,7 +1510,8 @@ input, select, textarea {
 
 .info-disclaimer h4 {
     font-size: 0.875rem;
-    font-family: 'Noto Color Emoji', 'Noto Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Noto Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-variant-emoji: text;
 }
 
 .info-disclaimer p {
