@@ -1,5 +1,5 @@
 // Two Truths & A Lie - Gamified Travel Guide
-// Main Application Logic
+// Main Application Logic !
 
 // ==========================================
 // API CONFIGURATION
