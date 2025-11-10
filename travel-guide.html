@@ -31,13 +31,6 @@
                         <button class="voice-toggle" id="voiceToggle" title="Change writing style">
                             <div class="voice-icon" id="voiceIcon">📖</div>
                         </button>
-                        <button class="menu-toggle" id="menuToggle">
-                            <div class="hamburger">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -129,31 +122,8 @@
                 <div class="setting-group">
                     <label for="modelSelect">Model</label>
                     <select id="modelSelect">
-                        <optgroup label="Free Models">
-                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
-                            <option value="google/gemini-2.5-flash-lite" selected>Gemini 2.5 Flash Lite</option>
-                            <option value="openai/gpt-oss-120b:exacto">GPT OSS 120B (Free)</option>
-                            <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (Free)</option>
-                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (Free)</option>
-                            <option value="google/gemma-2-9b-it:free">Gemma 2 9B (Free)</option>
-                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</option>
-                        </optgroup>
-                        <optgroup label="Fast & Cheap">
-                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="anthropic/claude-3-haiku">Claude Haiku</option>
-                        </optgroup>
-                        <optgroup label="Balanced">
-                            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-                            <option value="anthropic/claude-3.5-sonnet">Claude Sonnet</option>
-                            <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
-                        </optgroup>
-                        <optgroup label="Premium">
-                            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-                            <option value="anthropic/claude-3-opus">Claude Opus</option>
-                        </optgroup>
-                        <optgroup label="Custom">
-                            <option value="__custom__">Custom Model...</option>
-                        </optgroup>
+                        <option value="google/gemini-2.5-flash-lite" selected>Default (Gemini 2.5 Flash Lite)</option>
+                        <option value="__custom__">Enter Custom Model...</option>
                     </select>
 
                     <div id="customModelInput" class="custom-model-input" style="display: none;">
@@ -274,6 +244,13 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
+                <button class="footer-settings-btn" id="footerSettingsBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="settings-icon">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.36 6.36l-4.24-4.24M9.88 9.88L5.64 5.64m12.72 0l-4.24 4.24M9.88 14.12l-4.24 4.24"></path>
+                    </svg>
+                    Settings
+                </button>
                 <p>True/False Travel</p>
                 <p>AI-generated content for entertainment</p>
                 <p class="footer-model">Content generated using <span id="footerModelName">Gemini 2.5 Flash Lite</span></p>
