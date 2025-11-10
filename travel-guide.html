@@ -24,11 +24,7 @@
                             True/False Travel
                         </h1>
                         <button class="info-btn" id="infoBtn" title="How to play">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="info-icon">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
+                            <div class="info-icon">ℹ️</div>
                         </button>
                     </div>
                     <div class="header-controls">
@@ -154,42 +150,38 @@
             </div>
         </div>
 
-        <!-- Info Modal -->
-        <div class="info-modal" id="infoModal" style="display: none;">
-            <div class="info-modal-overlay" id="infoModalOverlay"></div>
-            <div class="info-modal-content">
-                <div class="info-modal-header">
-                    <h3>How to Play</h3>
-                    <button class="close-info-modal" id="closeInfoModal">×</button>
-                </div>
-                <div class="info-modal-body">
-                    <section class="info-section">
-                        <h4>🎯 The Game</h4>
-                        <p>Each destination presents facts about places, food, culture, and more. Your challenge: identify which statements are <strong>true</strong> and which are <strong>false</strong>.</p>
-                        <ul>
-                            <li>Correct guess: <strong>+1 point</strong></li>
-                            <li>Wrong guess: <strong>-1 point</strong></li>
-                            <li>Perfect trio (3/3): <strong>+5 bonus</strong></li>
-                            <li>Perfect page: <strong>+10 bonus</strong></li>
-                        </ul>
-                    </section>
+        <!-- Info Panel - Initially Hidden -->
+        <div class="info-panel" id="infoPanel" style="display: none;">
+            <div class="info-panel-header">
+                <h3>How to Play</h3>
+                <button class="close-info-panel" id="closeInfoPanel">×</button>
+            </div>
+            <div class="info-panel-body">
+                <section class="info-section">
+                    <h4>🎯 The Game</h4>
+                    <p>Guess which facts are true and which are false.</p>
+                    <ul>
+                        <li>Correct: <strong>+1</strong></li>
+                        <li>Wrong: <strong>-1</strong></li>
+                        <li>Perfect trio: <strong>+5 bonus</strong></li>
+                        <li>Perfect page: <strong>+10 bonus</strong></li>
+                    </ul>
+                </section>
 
-                    <section class="info-section">
-                        <h4>🗺️ Exploring</h4>
-                        <p><strong>Search or map:</strong> Type a destination or drag the map pin to explore anywhere in the world.</p>
-                        <p><strong>Click links:</strong> Tap any bolded place name to dive deeper into that location.</p>
-                    </section>
+                <section class="info-section">
+                    <h4>🗺️ Exploring</h4>
+                    <p>Search or drag the map pin to any destination. Tap bolded place names to explore deeper.</p>
+                </section>
 
-                    <section class="info-section">
-                        <h4>✍️ Writing Styles</h4>
-                        <p>Tap the icon in the header to choose your narrator—from Dorothy Parker's wit to Hunter S. Thompson's gonzo prose, or create your own custom voice.</p>
-                    </section>
+                <section class="info-section">
+                    <h4>✍️ Writing Styles</h4>
+                    <p>Tap the 📖 icon to choose your narrator—from Dorothy Parker to Hunter S. Thompson, or create your own.</p>
+                </section>
 
-                    <section class="info-section info-disclaimer">
-                        <h4>⚠️ Fair Warning</h4>
-                        <p>This is AI-generated content for entertainment. While we aim for accuracy, the line between truth and fiction can blur—especially when things get weird. Don't use this as a primary travel resource!</p>
-                    </section>
-                </div>
+                <section class="info-section info-disclaimer">
+                    <h4>⚠️ Disclaimer</h4>
+                    <p>AI-generated content for entertainment only. Truth and fiction blur when things get weird. Don't rely on this for actual travel planning.</p>
+                </section>
             </div>
         </div>
 
