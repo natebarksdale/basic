@@ -4,7 +4,7 @@
 // Default Free-Tier API Key (with $0 spend limit - free models only)
 // Note: In production, this gets replaced via GitHub Actions from secrets
 // For local dev, we use the hardcoded key with rate limits
-const DEFAULT_API_KEY = '';
+const DEFAULT_API_KEY = '__OPENROUTER_API_KEY__';
 
 // Check if we have a valid API key (not a placeholder)
 function getValidApiKey() {
