@@ -508,9 +508,22 @@ function initializeHomeMap() {
         maxZoom: 19
     }).addTo(AppState.homeMap);
 
-    // Add draggable marker with default pin icon
+    // Create custom marker icon with accent color
+    const customIcon = L.divIcon({
+        className: 'custom-pin-marker',
+        html: `<svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 0C7.2 0 0 7.2 0 16c0 11 16 26 16 26s16-15 16-26c0-8.8-7.2-16-16-16zm0 22c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
+                  fill="#d96b5e" stroke="white" stroke-width="2"/>
+        </svg>`,
+        iconSize: [32, 42],
+        iconAnchor: [16, 42],
+        popupAnchor: [0, -42]
+    });
+
+    // Add draggable marker with custom colored icon
     AppState.homeMarker = L.marker([AppState.selectedCoords.lat, AppState.selectedCoords.lng], {
-        draggable: true
+        draggable: true,
+        icon: customIcon
     }).addTo(AppState.homeMap);
 
     // Update coordinates when marker is dragged
@@ -547,9 +560,22 @@ function initializeBottomMap(lat, lng) {
         maxZoom: 19
     }).addTo(AppState.bottomMap);
 
-    // Add draggable marker with default pin icon
+    // Create custom marker icon with accent color
+    const customIcon = L.divIcon({
+        className: 'custom-pin-marker',
+        html: `<svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 0C7.2 0 0 7.2 0 16c0 11 16 26 16 26s16-15 16-26c0-8.8-7.2-16-16-16zm0 22c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
+                  fill="#d96b5e" stroke="white" stroke-width="2"/>
+        </svg>`,
+        iconSize: [32, 42],
+        iconAnchor: [16, 42],
+        popupAnchor: [0, -42]
+    });
+
+    // Add draggable marker with custom colored icon
     AppState.bottomMarker = L.marker([lat, lng], {
-        draggable: true
+        draggable: true,
+        icon: customIcon
     }).addTo(AppState.bottomMap);
 
     // Update coordinates when marker is dragged
@@ -978,7 +1004,12 @@ function renderCustomVoices() {
                 <div class="voice-option-name">${voice.style.name}</div>
                 <div class="voice-option-desc">Custom voice</div>
             </div>
-            <button class="delete-voice-btn" onclick="deleteCustomVoice(event, '${voiceKey}')" title="Delete this voice">×</button>
+            <button class="delete-voice-btn" onclick="deleteCustomVoice(event, '${voiceKey}')" title="Delete this voice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         `;
 
         button.addEventListener('click', () => {
