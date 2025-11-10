@@ -39,7 +39,7 @@ wrangler secret put OPENROUTER_API_KEY
 
 When prompted, paste your OpenRouter API key:
 ```
-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
+sk-or-v1-your-actual-openrouter-api-key-here
 ```
 
 ### 5. Deploy

@@ -62,7 +62,7 @@
 4. **Variable name**: `OPENROUTER_API_KEY`
 5. **Value**: Paste your OpenRouter API key:
    ```
-   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
+   sk-or-v1-your-actual-openrouter-api-key-here
    ```
 6. Check the **"Encrypt"** box (this makes it a secret)
 7. Click **"Save"**
