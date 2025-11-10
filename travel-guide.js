@@ -511,13 +511,13 @@ function initializeHomeMap() {
     // Create custom marker icon with accent color
     const customIcon = L.divIcon({
         className: 'custom-pin-marker',
-        html: `<svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+        html: `<svg width="36" height="46" viewBox="-2 -2 36 46" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 0C7.2 0 0 7.2 0 16c0 11 16 26 16 26s16-15 16-26c0-8.8-7.2-16-16-16zm0 22c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
-                  fill="#d96b5e" stroke="white" stroke-width="2"/>
+                  fill="#c17d5c" stroke="white" stroke-width="2"/>
         </svg>`,
-        iconSize: [32, 42],
-        iconAnchor: [16, 42],
-        popupAnchor: [0, -42]
+        iconSize: [36, 46],
+        iconAnchor: [18, 46],
+        popupAnchor: [0, -46]
     });
 
     // Add draggable marker with custom colored icon
@@ -563,13 +563,13 @@ function initializeBottomMap(lat, lng) {
     // Create custom marker icon with accent color
     const customIcon = L.divIcon({
         className: 'custom-pin-marker',
-        html: `<svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+        html: `<svg width="36" height="46" viewBox="-2 -2 36 46" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 0C7.2 0 0 7.2 0 16c0 11 16 26 16 26s16-15 16-26c0-8.8-7.2-16-16-16zm0 22c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
-                  fill="#d96b5e" stroke="white" stroke-width="2"/>
+                  fill="#c17d5c" stroke="white" stroke-width="2"/>
         </svg>`,
-        iconSize: [32, 42],
-        iconAnchor: [16, 42],
-        popupAnchor: [0, -42]
+        iconSize: [36, 46],
+        iconAnchor: [18, 46],
+        popupAnchor: [0, -46]
     });
 
     // Add draggable marker with custom colored icon
@@ -1260,9 +1260,9 @@ function resetToDefaultKey() {
     document.getElementById('apiKeyInput').value = '';
 
     if (AppState.apiKey) {
-        showNotification('Reset to free-tier API key', 'success');
+        showNotification('Reset to default API key', 'success');
     } else {
-        showNotification('No default API key available. Please enter your own OpenRouter API key.', 'error');
+        showNotification('No default key configured. Add your own OpenRouter API key above.', 'info');
     }
     updateApiKeyStatus();
 }
