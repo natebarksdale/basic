@@ -247,10 +247,6 @@ body {
     background: rgba(220, 20, 60, 0.15); /* Crimson for sunglasses */
 }
 
-.voice-toggle[data-voice="twain"] .voice-icon {
-    background: rgba(65, 105, 225, 0.15); /* Royal blue for steamboat */
-}
-
 .voice-toggle[data-voice="battuta"] .voice-icon {
     background: rgba(184, 134, 11, 0.15); /* Dark goldenrod for compass */
 }
@@ -361,10 +357,6 @@ body {
 
 .voice-option[data-voice="thompson"] .voice-option-emoji {
     background: rgba(220, 20, 60, 0.15); /* Crimson for sunglasses */
-}
-
-.voice-option[data-voice="twain"] .voice-option-emoji {
-    background: rgba(65, 105, 225, 0.15); /* Royal blue for steamboat */
 }
 
 .voice-option[data-voice="battuta"] .voice-option-emoji {
