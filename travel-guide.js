@@ -740,6 +740,11 @@ function initializeApp() {
     // Logo home click
     document.getElementById('logoHome').addEventListener('click', showSearchSection);
 
+    // Info modal
+    document.getElementById('infoBtn').addEventListener('click', openInfoModal);
+    document.getElementById('closeInfoModal').addEventListener('click', closeInfoModal);
+    document.getElementById('infoModalOverlay').addEventListener('click', closeInfoModal);
+
     // Voice toggle
     document.getElementById('voiceToggle').addEventListener('click', toggleVoiceMenu);
 
@@ -1262,6 +1267,17 @@ Choose an appropriate emoji for "icon".`;
 
 // Make globally available
 window.deleteCustomVoice = deleteCustomVoice;
+
+// Info Modal Functions
+function openInfoModal() {
+    const modal = document.getElementById('infoModal');
+    modal.style.display = 'flex';
+}
+
+function closeInfoModal() {
+    const modal = document.getElementById('infoModal');
+    modal.style.display = 'none';
+}
 
 // Settings Panel Management
 function toggleSettings() {
