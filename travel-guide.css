@@ -1860,4 +1860,21 @@ input, select, textarea {
     .item-text {
         font-size: 0.9375rem;
     }
+
+    /* Full-screen maps and images on mobile */
+    .place-hero {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+
+    .bottom-map-container {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .btn-explore-bottom-map {
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
 }
