@@ -101,7 +101,14 @@ const LOADING_MESSAGES = [
     "Did you know? Your guesses and score are saved automatically",
     "Tip: Click suggestion chips for quick access to popular destinations",
     "Custom voices are generated on-demand and saved for future use",
-    "Try switching voices mid-journey to see familiar places in new ways"
+    "Try switching voices mid-journey to see familiar places in new ways",
+    "Tip: Use the timeline in the voice menu to travel through time from the Big Bang to the far future",
+    "Did you know? You can visit ancient Rome, medieval Paris, or future cities by adjusting the time period",
+    "Tip: Drag the timeline handle to explore different eras, then click 'Set Time & Regenerate'",
+    "The timeline includes geological eras like the Paleozoic, Mesozoic, and Cenozoic periods",
+    "Tip: Click the ↻ button in the voice menu to quickly return to present day",
+    "Travel back to see what actually existed at your location throughout history",
+    "Tip: The timeline scrolls horizontally - explore decades near the present or geological eras in deep time"
 ];
 
 // Application State
@@ -893,20 +900,19 @@ function generateTimelineTicks() {
     });
 
     // Determine which labels to show based on spacing (prevent overlap)
-    const MIN_LABEL_SPACING = 35; // Minimum pixels between labels
+    const MIN_LABEL_SPACING = 60; // Minimum pixels between labels (increased to prevent overlap)
     let lastLabelX = -Infinity;
 
     ticks.forEach(tick => {
         if (tick.isEraLabel) {
-            tick.showLabel = true; // Always show era labels
-        } else if (tick.major) {
-            tick.showLabel = true; // Always show major tick labels
-            lastLabelX = tick.x;
+            tick.showLabel = true; // Always show era labels (positioned separately)
         } else {
-            // Show minor label only if there's enough space
+            // Check spacing for both major and minor labels
             if (tick.x - lastLabelX >= MIN_LABEL_SPACING) {
                 tick.showLabel = true;
                 lastLabelX = tick.x;
+            } else {
+                tick.showLabel = false; // Hide this label to prevent overlap
             }
         }
     });
@@ -935,6 +941,19 @@ function formatTickLabel(year) {
     if (year < 0) return `${Math.abs(year)} BCE`;
     if (year < 2000) return `${year}`;
     return `${year}`;
+}
+
+// Center the timeline on a specific year
+function centerTimelineOnYear(year) {
+    const scrollContainer = document.getElementById('timelineScrollContainer');
+    if (!scrollContainer) return; // Not yet initialized
+
+    const yearX = yearToPosition(year);
+    const containerWidth = scrollContainer.clientWidth;
+    scrollContainer.scrollTo({
+        left: yearX - containerWidth / 2,
+        behavior: 'smooth'
+    });
 }
 
 // Initialize year selector with SVG timeline
@@ -1106,6 +1125,10 @@ function initializeYearSelector() {
         const yearText = formatYearDisplay(selectedYearTemp);
         showNotification(`Time: ${yearText} • Voice: ${styleName}`, 'info');
 
+        // Close voice menu
+        closeVoiceMenu();
+
+        // Regenerate current page if viewing one
         if (AppState.currentLocation) {
             if (!hasApiAccess()) {
                 showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
@@ -1116,21 +1139,10 @@ function initializeYearSelector() {
         }
     });
 
-    // Function to center on a specific year
-    function centerOnYear(year) {
-        const scrollContainer = document.getElementById('timelineScrollContainer');
-        const yearX = yearToPosition(year);
-        const containerWidth = scrollContainer.clientWidth;
-        scrollContainer.scrollTo({
-            left: yearX - containerWidth / 2,
-            behavior: 'smooth'
-        });
-    }
-
     // Recenter button
     const recenterBtn = document.getElementById('recenterBtn');
     recenterBtn.addEventListener('click', () => {
-        centerOnYear(2025);
+        centerTimelineOnYear(2025);
     });
 
     // Initial draw
@@ -1138,7 +1150,7 @@ function initializeYearSelector() {
     yearDisplay.textContent = formatYearDisplay(AppState.selectedYear);
 
     // Scroll to show the current year centered
-    centerOnYear(AppState.selectedYear);
+    centerTimelineOnYear(AppState.selectedYear);
 }
 
 // ==========================================
@@ -1410,6 +1422,9 @@ function openVoiceMenu() {
 
     // Update active voice option
     updateActiveVoiceOption();
+
+    // Center timeline on current selected year
+    centerTimelineOnYear(AppState.selectedYear);
 
     // Remove pulse hint on first open and mark as opened
     const voiceToggle = document.getElementById('voiceToggle');
@@ -1971,11 +1986,11 @@ async function loadPlace(location, addToHistory = true) {
     document.getElementById('loadingState').style.display = 'flex';
     document.getElementById('categoriesContainer').innerHTML = '';
 
-    // Update loading text with a random educational message plus voice and year context
+    // Update loading text with voice/year description above the hint
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
     const styleName = WRITING_STYLES[AppState.writingStyle]?.name || AppState.customVoices[AppState.writingStyle]?.style?.name || 'Custom Voice';
     const yearText = formatYearDisplay(AppState.selectedYear);
-    const loadingText = `${randomMessage}\n\nGenerating with ${styleName} for ${yearText}...`;
+    const loadingText = `Generating with ${styleName} for ${yearText}...\n\n${randomMessage}`;
     document.getElementById('loadingText').textContent = loadingText;
 
     // Update header immediately with the new location
