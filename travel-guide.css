@@ -540,12 +540,36 @@ body {
     stroke-width: 2;
 }
 
+.year-display-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
 .year-display {
     text-align: center;
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-accent);
-    margin-bottom: 0.75rem;
+}
+
+.btn-recenter {
+    padding: 0.25rem 0.5rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--color-text-secondary);
+}
+
+.btn-recenter:hover {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
 }
 
 .btn-set-time {
