@@ -759,7 +759,7 @@ function formatYearDisplay(year) {
     if (year === 2025) return 'Present Day (2025)';
 
     // Far future or past (use scientific notation for billions)
-    if (Math.abs(year) > 10000000) {
+    if (Math.abs(year) >= 1000000000) {
         const billions = Math.abs(year) / 1000000000;
         if (year > 0) {
             return `${billions.toFixed(1)}B years in the future`;
@@ -769,7 +769,7 @@ function formatYearDisplay(year) {
     }
 
     // Millions of years
-    if (Math.abs(year) > 1000000) {
+    if (Math.abs(year) >= 1000000) {
         const millions = Math.abs(year) / 1000000;
         if (year > 0) {
             return `${millions.toFixed(1)}M years in the future`;
