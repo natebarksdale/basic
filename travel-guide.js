@@ -750,50 +750,80 @@ function formatYearDisplay(year) {
 // Initialize year selector
 function initializeYearSelector() {
     const timeline = document.getElementById('yearTimeline');
+    const timelineScroll = document.getElementById('yearTimelineScroll');
     const yearDisplay = document.getElementById('yearDisplay');
-    const navLeft = document.getElementById('yearNavLeft');
-    const navRight = document.getElementById('yearNavRight');
+    const setTimeBtn = document.getElementById('setTimeBtn');
 
     const years = generateYearTimeline();
+    let selectedYearTemp = AppState.selectedYear; // Temporary selection before "Set Time" is clicked
     let currentIndex = years.indexOf(AppState.selectedYear);
     if (currentIndex === -1) currentIndex = years.indexOf(2025);
 
-    // Render timeline
+    // Render full timeline
     function renderTimeline() {
         timeline.innerHTML = '';
-        const visibleRange = 7; // Show 7 years at a time
-        const startIdx = Math.max(0, currentIndex - Math.floor(visibleRange / 2));
-        const endIdx = Math.min(years.length, startIdx + visibleRange);
 
-        for (let i = startIdx; i < endIdx; i++) {
+        for (let i = 0; i < years.length; i++) {
             const yearBtn = document.createElement('button');
             yearBtn.className = 'year-tick';
             yearBtn.textContent = years[i];
             yearBtn.dataset.index = i;
+            yearBtn.dataset.year = years[i];
 
-            if (i === currentIndex) {
+            if (years[i] === selectedYearTemp) {
                 yearBtn.classList.add('active');
             }
 
             yearBtn.addEventListener('click', () => {
-                currentIndex = i;
-                selectYear(years[i]);
-                renderTimeline();
+                selectYearTemp(years[i], i);
             });
 
             timeline.appendChild(yearBtn);
         }
 
-        // Update navigation button states
-        navLeft.disabled = currentIndex === 0;
-        navRight.disabled = currentIndex === years.length - 1;
+        // Scroll active year into view
+        setTimeout(() => {
+            const activeBtn = timeline.querySelector('.active');
+            if (activeBtn) {
+                activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }, 100);
     }
 
-    // Select year
-    function selectYear(year) {
-        AppState.selectedYear = year;
-        localStorage.setItem('travel_guide_year', year);
+    // Temporarily select year (doesn't regenerate yet)
+    function selectYearTemp(year, index) {
+        selectedYearTemp = year;
+        currentIndex = index;
         yearDisplay.textContent = formatYearDisplay(year);
+
+        // Update active state
+        timeline.querySelectorAll('.year-tick').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = timeline.querySelector(`[data-year="${year}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // Show/hide "Set Time" button
+        if (year !== AppState.selectedYear) {
+            setTimeBtn.style.display = 'block';
+        } else {
+            setTimeBtn.style.display = 'none';
+        }
+    }
+
+    // Apply year and regenerate
+    function applyYear() {
+        AppState.selectedYear = selectedYearTemp;
+        localStorage.setItem('travel_guide_year', selectedYearTemp);
+        setTimeBtn.style.display = 'none';
+
+        // Show notification with voice and year
+        const styleName = WRITING_STYLES[AppState.writingStyle]?.name || AppState.customVoices[AppState.writingStyle]?.style?.name || AppState.writingStyle;
+        const yearText = formatYearDisplay(selectedYearTemp);
+        showNotification(`Time: ${yearText} • Voice: ${styleName}`, 'info');
 
         // Regenerate current page if viewing one
         if (AppState.currentLocation) {
@@ -806,22 +836,8 @@ function initializeYearSelector() {
         }
     }
 
-    // Navigation
-    navLeft.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            selectYear(years[currentIndex]);
-            renderTimeline();
-        }
-    });
-
-    navRight.addEventListener('click', () => {
-        if (currentIndex < years.length - 1) {
-            currentIndex++;
-            selectYear(years[currentIndex]);
-            renderTimeline();
-        }
-    });
+    // Set Time button click
+    setTimeBtn.addEventListener('click', applyYear);
 
     // Initial render
     renderTimeline();
@@ -1125,9 +1141,10 @@ function selectVoice(voice) {
     // Update active state
     updateActiveVoiceOption();
 
-    // Show notification
-    const styleName = WRITING_STYLES[voice]?.name || AppState.customVoices[voice]?.name || voice;
-    showNotification(`Writing style: ${styleName}`, 'info');
+    // Show notification with voice and year
+    const styleName = WRITING_STYLES[voice]?.name || AppState.customVoices[voice]?.style?.name || voice;
+    const yearText = formatYearDisplay(AppState.selectedYear);
+    showNotification(`Voice: ${styleName} • Time: ${yearText}`, 'info');
 
     // Refresh current page if viewing one
     if (AppState.currentLocation) {
@@ -1657,9 +1674,12 @@ async function loadPlace(location, addToHistory = true) {
     document.getElementById('loadingState').style.display = 'flex';
     document.getElementById('categoriesContainer').innerHTML = '';
 
-    // Update loading text with a random educational message
+    // Update loading text with a random educational message plus voice and year context
     const randomMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
-    document.getElementById('loadingText').textContent = randomMessage;
+    const styleName = WRITING_STYLES[AppState.writingStyle]?.name || AppState.customVoices[AppState.writingStyle]?.style?.name || 'Custom Voice';
+    const yearText = formatYearDisplay(AppState.selectedYear);
+    const loadingText = `${randomMessage}\n\nGenerating with ${styleName} for ${yearText}...`;
+    document.getElementById('loadingText').textContent = loadingText;
 
     // Update header immediately with the new location
     document.getElementById('placeName').textContent = location;
