@@ -451,67 +451,69 @@ body {
     text-align: center;
 }
 
-.year-timeline-scroll {
-    overflow-x: auto;
-    overflow-y: hidden;
+.timeline-container {
     margin-bottom: 0.75rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-accent) var(--color-bg);
-    scroll-snap-type: x proximity;
-}
-
-.year-timeline-scroll::-webkit-scrollbar {
-    height: 6px;
-}
-
-.year-timeline-scroll::-webkit-scrollbar-track {
-    background: var(--color-bg);
-    border-radius: 3px;
-}
-
-.year-timeline-scroll::-webkit-scrollbar-thumb {
-    background: var(--color-accent);
-    border-radius: 3px;
-}
-
-.year-timeline-scroll::-webkit-scrollbar-thumb:hover {
-    background: var(--color-accent-hover);
-}
-
-.year-timeline {
-    display: inline-flex;
-    gap: 0.5rem;
     padding: 0.5rem 0;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.year-tick {
-    flex-shrink: 0;
-    padding: 0.5rem 0.75rem;
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    font-size: 0.813rem;
+.timeline-svg {
+    width: 100%;
+    height: auto;
+    cursor: grab;
+    display: block;
+}
+
+.timeline-svg:active {
+    cursor: grabbing;
+}
+
+/* Timeline SVG elements styling via CSS */
+.timeline-base-line {
+    stroke: var(--color-border);
+    stroke-width: 2;
+}
+
+.timeline-tick-major {
+    stroke: var(--color-text-secondary);
+    stroke-width: 2;
+}
+
+.timeline-tick-minor {
+    stroke: var(--color-border);
+    stroke-width: 1;
+}
+
+.timeline-label {
+    fill: var(--color-text-secondary);
+    font-size: 10px;
     font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
+}
+
+.timeline-handle {
+    cursor: grab;
+}
+
+.timeline-handle:active {
+    cursor: grabbing;
+}
+
+.timeline-handle-circle {
+    fill: var(--color-accent);
+    stroke: white;
+    stroke-width: 2;
     transition: all 0.2s ease;
-    white-space: nowrap;
-    scroll-snap-align: center;
 }
 
-.year-tick:hover {
-    background: var(--color-bg);
-    border-color: var(--color-accent);
-    color: var(--color-text);
+.timeline-handle:hover .timeline-handle-circle {
+    fill: var(--color-accent-hover);
 }
 
-.year-tick.active {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: white;
-    font-weight: 600;
-    transform: scale(1.05);
+.timeline-handle-line {
+    stroke: var(--color-accent);
+    stroke-width: 2;
 }
 
 .year-display {

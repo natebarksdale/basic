@@ -49,8 +49,10 @@
                 <!-- Year Selector -->
                 <div class="year-selector-section">
                     <div class="year-selector-label">Time Period</div>
-                    <div class="year-timeline-scroll" id="yearTimelineScroll">
-                        <div class="year-timeline" id="yearTimeline"></div>
+                    <div class="timeline-container">
+                        <svg class="timeline-svg" id="timelineSvg" viewBox="0 0 800 80" preserveAspectRatio="xMidYMid meet">
+                            <!-- Timeline elements will be drawn here -->
+                        </svg>
                     </div>
                     <div class="year-display" id="yearDisplay">Present Day (2025)</div>
                     <button id="setTimeBtn" class="btn-set-time" style="display: none;">Set Time & Regenerate</button>

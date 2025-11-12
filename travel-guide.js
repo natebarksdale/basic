@@ -690,120 +690,281 @@ function generateSuggestionChips() {
 // YEAR SELECTOR FUNCTIONALITY
 // ==========================================
 
-// Generate logarithmic year timeline
-function generateYearTimeline() {
-    const currentYear = 2025;
-    const years = [];
-
-    // Future years (2025-2500) - accelerated progression
-    for (let y = currentYear; y <= 2500; y += getYearIncrement(y, currentYear, true)) {
-        years.push(y);
-    }
-
-    // Past years - logarithmic scale
-    // Recent past: decades (1820s-2020s)
-    for (let y = currentYear - 10; y >= 1820; y -= 10) {
-        if (y !== currentYear) years.unshift(y);
-    }
-
-    // 1500-1800: every 20-50 years
-    for (let y = 1800; y >= 1500; y -= 25) {
-        years.unshift(y);
-    }
-
-    // 1000-1500: every 50 years
-    for (let y = 1500; y >= 1000; y -= 50) {
-        years.unshift(y);
-    }
-
-    // 0-1000: every 100 years
-    for (let y = 1000; y >= 100; y -= 100) {
-        years.unshift(y);
-    }
-
-    // Ancient history: wider spans
-    years.unshift(1, -500, -1000, -2000, -3000, -5000, -10000);
-
-    return years;
-}
-
-// Get year increment based on position (for future years)
-function getYearIncrement(year, currentYear, isFuture) {
-    if (!isFuture) return 10;
-
-    const distance = year - currentYear;
-    if (distance < 50) return 5;
-    if (distance < 100) return 10;
-    if (distance < 200) return 25;
-    return 50;
-}
+// Timeline constants
+const TIMELINE_CONFIG = {
+    BIG_BANG: -13800000000,  // 13.8 billion years ago
+    FAR_FUTURE: 1000002025,  // 1 billion years from now
+    PRESENT: 2025,
+    SVG_WIDTH: 800,
+    SVG_HEIGHT: 80,
+    MARGIN: 40,
+    TIMELINE_Y: 40
+};
 
 // Format year for display
 function formatYearDisplay(year) {
     if (year === 2025) return 'Present Day (2025)';
-    if (year > 2025) return `Future: ${year} CE`;
+
+    // Far future or past (use scientific notation for billions)
+    if (Math.abs(year) > 10000000) {
+        const billions = Math.abs(year) / 1000000000;
+        if (year > 0) {
+            return `${billions.toFixed(1)}B years in the future`;
+        } else {
+            return `${billions.toFixed(1)}B years ago (Big Bang era)`;
+        }
+    }
+
+    // Millions of years
+    if (Math.abs(year) > 1000000) {
+        const millions = Math.abs(year) / 1000000;
+        if (year > 0) {
+            return `${millions.toFixed(1)}M years in the future`;
+        } else {
+            return `${millions.toFixed(1)}M years ago`;
+        }
+    }
+
+    // Thousands of years
+    if (year < 0) {
+        if (year < -100000) {
+            const thousands = Math.abs(year) / 1000;
+            return `${thousands.toFixed(0)}K years ago`;
+        }
+        return `${Math.abs(year)} BCE`;
+    }
+
+    // Future
+    if (year > 2025) {
+        if (year > 100000) {
+            const thousands = year / 1000;
+            return `${thousands.toFixed(0)}K years in the future`;
+        }
+        return `Future: ${year} CE`;
+    }
+
+    // Historical CE
     if (year > 0) return `${year} CE`;
     if (year === 1) return '1 CE';
+
     return `${Math.abs(year)} BCE`;
 }
 
-// Initialize year selector
+// Logarithmic position-to-year conversion
+function positionToYear(position) {
+    const {BIG_BANG, FAR_FUTURE, PRESENT, MARGIN, SVG_WIDTH} = TIMELINE_CONFIG;
+    const x = (position - MARGIN) / (SVG_WIDTH - 2 * MARGIN);
+
+    // Use asymmetric logarithmic scale
+    // Center is present (2025), left is past, right is future
+    const centerX = 0.5;
+
+    if (x < centerX) {
+        // Past: map from Big Bang to Present
+        const t = x / centerX; // 0 to 1
+        // Logarithmic interpolation
+        const logMin = Math.log10(1);
+        const logMax = Math.log10(PRESENT - BIG_BANG + 1);
+        const logValue = logMin + t * (logMax - logMin);
+        const yearsFromBigBang = Math.pow(10, logValue) - 1;
+        return Math.round(BIG_BANG + yearsFromBigBang);
+    } else {
+        // Future: map from Present to Far Future
+        const t = (x - centerX) / (1 - centerX); // 0 to 1
+        // Logarithmic interpolation
+        const logMin = Math.log10(1);
+        const logMax = Math.log10(FAR_FUTURE - PRESENT + 1);
+        const logValue = logMin + t * (logMax - logMin);
+        const yearsFromPresent = Math.pow(10, logValue) - 1;
+        return Math.round(PRESENT + yearsFromPresent);
+    }
+}
+
+// Year-to-position conversion (inverse of above)
+function yearToPosition(year) {
+    const {BIG_BANG, FAR_FUTURE, PRESENT, MARGIN, SVG_WIDTH} = TIMELINE_CONFIG;
+    const centerX = 0.5;
+
+    let x;
+    if (year <= PRESENT) {
+        // Past
+        const yearsFromBigBang = year - BIG_BANG;
+        const logMin = Math.log10(1);
+        const logMax = Math.log10(PRESENT - BIG_BANG + 1);
+        const logValue = Math.log10(yearsFromBigBang + 1);
+        const t = (logValue - logMin) / (logMax - logMin);
+        x = t * centerX;
+    } else {
+        // Future
+        const yearsFromPresent = year - PRESENT;
+        const logMin = Math.log10(1);
+        const logMax = Math.log10(FAR_FUTURE - PRESENT + 1);
+        const logValue = Math.log10(yearsFromPresent + 1);
+        const t = (logValue - logMin) / (logMax - logMin);
+        x = centerX + t * (1 - centerX);
+    }
+
+    return MARGIN + x * (SVG_WIDTH - 2 * MARGIN);
+}
+
+// Generate tick marks for the timeline
+function generateTimelineTicks() {
+    const ticks = [];
+
+    // Major ticks with labels
+    const majorYears = [
+        TIMELINE_CONFIG.BIG_BANG,
+        -10000000000,  // 10B years ago
+        -5000000000,   // 5B years ago
+        -1000000000,   // 1B years ago
+        -100000000,    // 100M years ago
+        -10000000,     // 10M years ago
+        -1000000,      // 1M years ago
+        -100000,       // 100K years ago
+        -10000,
+        -5000,
+        -2000,
+        -1000,
+        -500,
+        1,
+        500,
+        1000,
+        1500,
+        2000,
+        TIMELINE_CONFIG.PRESENT,
+        2100,
+        2500,
+        5000,
+        10000,
+        100000,        // 100K years future
+        1000000,       // 1M years future
+        10000000,      // 10M years future
+        100000000,     // 100M years future
+        500000000,     // 500M years future
+        TIMELINE_CONFIG.FAR_FUTURE
+    ];
+
+    majorYears.forEach(year => {
+        ticks.push({
+            year,
+            x: yearToPosition(year),
+            major: true,
+            label: formatTickLabel(year)
+        });
+    });
+
+    return ticks;
+}
+
+// Format tick label (shorter than full display)
+function formatTickLabel(year) {
+    if (year === TIMELINE_CONFIG.BIG_BANG) return 'Big Bang';
+    if (year === TIMELINE_CONFIG.PRESENT) return 'Now';
+    if (year === TIMELINE_CONFIG.FAR_FUTURE) return '+1B yr';
+
+    if (Math.abs(year) >= 1000000000) {
+        const b = Math.abs(year) / 1000000000;
+        return year > 0 ? `+${b.toFixed(0)}B` : `-${b.toFixed(0)}B`;
+    }
+    if (Math.abs(year) >= 1000000) {
+        const m = Math.abs(year) / 1000000;
+        return year > 0 ? `+${m.toFixed(0)}M` : `-${m.toFixed(0)}M`;
+    }
+    if (Math.abs(year) >= 10000) {
+        const k = Math.abs(year) / 1000;
+        return year > 0 ? `+${k.toFixed(0)}K` : `-${k.toFixed(0)}K`;
+    }
+    if (year < 0) return `${Math.abs(year)} BCE`;
+    if (year < 2000) return `${year}`;
+    return `${year}`;
+}
+
+// Initialize year selector with SVG timeline
 function initializeYearSelector() {
-    const timeline = document.getElementById('yearTimeline');
-    const timelineScroll = document.getElementById('yearTimelineScroll');
+    const svg = document.getElementById('timelineSvg');
     const yearDisplay = document.getElementById('yearDisplay');
     const setTimeBtn = document.getElementById('setTimeBtn');
 
-    const years = generateYearTimeline();
-    let selectedYearTemp = AppState.selectedYear; // Temporary selection before "Set Time" is clicked
-    let currentIndex = years.indexOf(AppState.selectedYear);
-    if (currentIndex === -1) currentIndex = years.indexOf(2025);
+    let selectedYearTemp = AppState.selectedYear;
+    let isDragging = false;
 
-    // Render full timeline
-    function renderTimeline() {
-        timeline.innerHTML = '';
+    // Draw the timeline
+    function drawTimeline() {
+        const {SVG_WIDTH, SVG_HEIGHT, MARGIN, TIMELINE_Y} = TIMELINE_CONFIG;
+        svg.innerHTML = '';
 
-        for (let i = 0; i < years.length; i++) {
-            const yearBtn = document.createElement('button');
-            yearBtn.className = 'year-tick';
-            yearBtn.textContent = years[i];
-            yearBtn.dataset.index = i;
-            yearBtn.dataset.year = years[i];
+        // Base line
+        const baseLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        baseLine.setAttribute('x1', MARGIN);
+        baseLine.setAttribute('y1', TIMELINE_Y);
+        baseLine.setAttribute('x2', SVG_WIDTH - MARGIN);
+        baseLine.setAttribute('y2', TIMELINE_Y);
+        baseLine.setAttribute('class', 'timeline-base-line');
+        svg.appendChild(baseLine);
 
-            if (years[i] === selectedYearTemp) {
-                yearBtn.classList.add('active');
+        // Tick marks
+        const ticks = generateTimelineTicks();
+        ticks.forEach(tick => {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', tick.x);
+            line.setAttribute('x2', tick.x);
+            line.setAttribute('y1', TIMELINE_Y - (tick.major ? 10 : 5));
+            line.setAttribute('y2', TIMELINE_Y + (tick.major ? 10 : 5));
+            line.setAttribute('class', tick.major ? 'timeline-tick-major' : 'timeline-tick-minor');
+            svg.appendChild(line);
+
+            // Label for major ticks
+            if (tick.major && tick.label) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', tick.x);
+                text.setAttribute('y', TIMELINE_Y + 25);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('class', 'timeline-label');
+                text.textContent = tick.label;
+                svg.appendChild(text);
             }
+        });
 
-            yearBtn.addEventListener('click', () => {
-                selectYearTemp(years[i], i);
-            });
+        // Draggable handle
+        const handleX = yearToPosition(selectedYearTemp);
+        const handle = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        handle.setAttribute('class', 'timeline-handle');
+        handle.setAttribute('id', 'timelineHandle');
 
-            timeline.appendChild(yearBtn);
-        }
+        const handleLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        handleLine.setAttribute('x1', handleX);
+        handleLine.setAttribute('y1', TIMELINE_Y - 15);
+        handleLine.setAttribute('x2', handleX);
+        handleLine.setAttribute('y2', TIMELINE_Y + 15);
+        handleLine.setAttribute('class', 'timeline-handle-line');
 
-        // Scroll active year into view
-        setTimeout(() => {
-            const activeBtn = timeline.querySelector('.active');
-            if (activeBtn) {
-                activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            }
-        }, 100);
+        const handleCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        handleCircle.setAttribute('cx', handleX);
+        handleCircle.setAttribute('cy', TIMELINE_Y);
+        handleCircle.setAttribute('r', 8);
+        handleCircle.setAttribute('class', 'timeline-handle-circle');
+
+        handle.appendChild(handleLine);
+        handle.appendChild(handleCircle);
+        svg.appendChild(handle);
     }
 
-    // Temporarily select year (doesn't regenerate yet)
-    function selectYearTemp(year, index) {
+    // Update handle position
+    function updateHandle(x) {
+        const {MARGIN, SVG_WIDTH} = TIMELINE_CONFIG;
+        x = Math.max(MARGIN, Math.min(SVG_WIDTH - MARGIN, x));
+
+        const year = positionToYear(x);
         selectedYearTemp = year;
-        currentIndex = index;
         yearDisplay.textContent = formatYearDisplay(year);
 
-        // Update active state
-        timeline.querySelectorAll('.year-tick').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        const activeBtn = timeline.querySelector(`[data-year="${year}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const handle = document.getElementById('timelineHandle');
+        if (handle) {
+            const line = handle.querySelector('.timeline-handle-line');
+            const circle = handle.querySelector('.timeline-handle-circle');
+            line.setAttribute('x1', x);
+            line.setAttribute('x2', x);
+            circle.setAttribute('cx', x);
         }
 
         // Show/hide "Set Time" button
@@ -814,18 +975,61 @@ function initializeYearSelector() {
         }
     }
 
-    // Apply year and regenerate
-    function applyYear() {
+    // Mouse/touch event handlers
+    function handleStart(e) {
+        e.preventDefault();
+        isDragging = true;
+        svg.style.cursor = 'grabbing';
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+
+        const rect = svg.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const svgX = ((clientX - rect.left) / rect.width) * TIMELINE_CONFIG.SVG_WIDTH;
+
+        updateHandle(svgX);
+    }
+
+    function handleEnd(e) {
+        if (isDragging) {
+            isDragging = false;
+            svg.style.cursor = 'grab';
+        }
+    }
+
+    // Click to select
+    function handleClick(e) {
+        if (e.target.closest('.timeline-handle')) return;
+
+        const rect = svg.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const svgX = ((clientX - rect.left) / rect.width) * TIMELINE_CONFIG.SVG_WIDTH;
+
+        updateHandle(svgX);
+    }
+
+    // Add event listeners
+    svg.addEventListener('mousedown', handleStart);
+    svg.addEventListener('touchstart', handleStart);
+    svg.addEventListener('mousemove', handleMove);
+    svg.addEventListener('touchmove', handleMove);
+    svg.addEventListener('mouseup', handleEnd);
+    svg.addEventListener('touchend', handleEnd);
+    svg.addEventListener('mouseleave', handleEnd);
+    svg.addEventListener('click', handleClick);
+
+    // Set Time button
+    setTimeBtn.addEventListener('click', () => {
         AppState.selectedYear = selectedYearTemp;
         localStorage.setItem('travel_guide_year', selectedYearTemp);
         setTimeBtn.style.display = 'none';
 
-        // Show notification with voice and year
         const styleName = WRITING_STYLES[AppState.writingStyle]?.name || AppState.customVoices[AppState.writingStyle]?.style?.name || AppState.writingStyle;
         const yearText = formatYearDisplay(selectedYearTemp);
         showNotification(`Time: ${yearText} • Voice: ${styleName}`, 'info');
 
-        // Regenerate current page if viewing one
         if (AppState.currentLocation) {
             if (!hasApiAccess()) {
                 showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
@@ -834,13 +1038,10 @@ function initializeYearSelector() {
             }
             regenerateCurrentPage();
         }
-    }
+    });
 
-    // Set Time button click
-    setTimeBtn.addEventListener('click', applyYear);
-
-    // Initial render
-    renderTimeline();
+    // Initial draw
+    drawTimeline();
     yearDisplay.textContent = formatYearDisplay(AppState.selectedYear);
 }
 
