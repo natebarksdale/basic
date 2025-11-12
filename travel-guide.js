@@ -875,7 +875,8 @@ function generateTimelineTicks() {
                 year: y,
                 x: yearToPosition(y),
                 major: false,
-                label: formatTickLabel(y)
+                label: formatTickLabel(y),
+                showLabel: false  // Will be determined later based on spacing
             });
         }
 
@@ -885,8 +886,28 @@ function generateTimelineTicks() {
                 year: period.end,
                 x: period.endX,
                 major: true,
-                label: formatTickLabel(period.end)
+                label: formatTickLabel(period.end),
+                showLabel: true
             });
+        }
+    });
+
+    // Determine which labels to show based on spacing (prevent overlap)
+    const MIN_LABEL_SPACING = 35; // Minimum pixels between labels
+    let lastLabelX = -Infinity;
+
+    ticks.forEach(tick => {
+        if (tick.isEraLabel) {
+            tick.showLabel = true; // Always show era labels
+        } else if (tick.major) {
+            tick.showLabel = true; // Always show major tick labels
+            lastLabelX = tick.x;
+        } else {
+            // Show minor label only if there's enough space
+            if (tick.x - lastLabelX >= MIN_LABEL_SPACING) {
+                tick.showLabel = true;
+                lastLabelX = tick.x;
+            }
         }
     });
 
@@ -961,8 +982,8 @@ function initializeYearSelector() {
                 line.setAttribute('class', tick.major ? 'timeline-tick-major' : 'timeline-tick-minor');
                 svg.appendChild(line);
 
-                // Label for all ticks (both major and minor)
-                if (tick.label) {
+                // Label only if showLabel is true (prevents overlap)
+                if (tick.showLabel && tick.label) {
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', tick.x);
                     text.setAttribute('y', TIMELINE_Y + 30);
@@ -2041,16 +2062,16 @@ async function generatePlaceContent(location) {
 
     const categories = CATEGORY_TEMPLATES[locationType] || CATEGORY_TEMPLATES.default;
 
-    // Add year context if not present day
+    // Add year context if not present day (keep it concise for speed)
     let yearContext = '';
     if (AppState.selectedYear !== 2025) {
         const yearDisplay = formatYearDisplay(AppState.selectedYear);
         if (AppState.selectedYear > 2025) {
-            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Speculate about what this location might be like in that future time period. Consider technological advancement, climate change, social evolution, and architectural development. Be creative but plausible in your speculation about how the place might have evolved or what might exist there.`;
+            yearContext = ` Write as if visiting in ${yearDisplay}. Speculate on future developments.`;
         } else if (AppState.selectedYear > 0) {
-            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Focus on what this location was actually like during that historical period. Include historically accurate facts about what existed, who lived there, major events, architecture, culture, and daily life of that era. If the modern city didn't exist yet, describe what was there instead - the settlement, landscape, or civilization that occupied that location.`;
+            yearContext = ` Write about ${yearDisplay}. Describe what actually existed then.`;
         } else {
-            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Describe what this location was like in prehistoric or ancient times. Consider archaeological evidence, ancient civilizations, geological features, climate conditions, and what might have existed at this location during that period of human (or pre-human) history.`;
+            yearContext = ` Write about ${yearDisplay} (ancient/prehistoric era). Describe the landscape and what existed.`;
         }
     }
 
