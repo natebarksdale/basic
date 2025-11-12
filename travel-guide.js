@@ -724,9 +724,10 @@ const TIME_PERIODS = [
     { start: 1950, end: 2000, pixels: 500, label: 'Late 20th' },
     { start: 2000, end: 2025, pixels: 350, label: '21st Century' },
     // Future
-    { start: 2025, end: 2100, pixels: 300, label: 'Near Future' },
-    { start: 2100, end: 3000, pixels: 250, label: 'Next Millennium' },
-    { start: 3000, end: 100000, pixels: 200, label: 'Distant Future' },
+    { start: 2025, end: 2100, pixels: 350, label: 'Near Future' },
+    { start: 2100, end: 2500, pixels: 300, label: '22nd-25th Century' },
+    { start: 2500, end: 5000, pixels: 300, label: 'Next Millennia' },
+    { start: 5000, end: 100000, pixels: 200, label: 'Distant Future' },
     { start: 100000, end: 1000002025, pixels: 150, label: 'Deep Future' }
 ];
 
@@ -852,21 +853,21 @@ function generateTimelineTicks() {
             label: formatTickLabel(period.start)
         });
 
-        // Add intermediate ticks based on period size
+        // Add intermediate ticks based on period size (2-3x more frequent than before)
         const yearSpan = period.end - period.start;
         let tickInterval;
 
-        if (yearSpan > 1000000000) tickInterval = 1000000000; // billions
-        else if (yearSpan > 100000000) tickInterval = 100000000; // 100M
-        else if (yearSpan > 10000000) tickInterval = 10000000; // 10M
-        else if (yearSpan > 1000000) tickInterval = 500000; // 500K
-        else if (yearSpan > 100000) tickInterval = 50000; // 50K
-        else if (yearSpan > 10000) tickInterval = 2000; // 2K
-        else if (yearSpan > 1000) tickInterval = 500; // 500 years
-        else if (yearSpan > 500) tickInterval = 100; // 100 years
-        else if (yearSpan > 100) tickInterval = 50; // 50 years
-        else if (yearSpan > 50) tickInterval = 25; // 25 years
-        else tickInterval = 10; // 10 years
+        if (yearSpan > 1000000000) tickInterval = 400000000; // 400M
+        else if (yearSpan > 100000000) tickInterval = 40000000; // 40M
+        else if (yearSpan > 10000000) tickInterval = 4000000; // 4M
+        else if (yearSpan > 1000000) tickInterval = 200000; // 200K
+        else if (yearSpan > 100000) tickInterval = 20000; // 20K
+        else if (yearSpan > 10000) tickInterval = 800; // 800 years
+        else if (yearSpan > 1000) tickInterval = 200; // 200 years
+        else if (yearSpan > 500) tickInterval = 40; // 40 years
+        else if (yearSpan > 100) tickInterval = 20; // 20 years
+        else if (yearSpan > 50) tickInterval = 10; // 10 years
+        else tickInterval = 5; // 5 years
 
         // Add intermediate minor ticks
         for (let y = period.start + tickInterval; y < period.end; y += tickInterval) {
@@ -1088,15 +1089,29 @@ function initializeYearSelector() {
         }
     });
 
+    // Function to center on a specific year
+    function centerOnYear(year) {
+        const scrollContainer = document.getElementById('timelineScrollContainer');
+        const yearX = yearToPosition(year);
+        const containerWidth = scrollContainer.clientWidth;
+        scrollContainer.scrollTo({
+            left: yearX - containerWidth / 2,
+            behavior: 'smooth'
+        });
+    }
+
+    // Recenter button
+    const recenterBtn = document.getElementById('recenterBtn');
+    recenterBtn.addEventListener('click', () => {
+        centerOnYear(2025);
+    });
+
     // Initial draw
     drawTimeline();
     yearDisplay.textContent = formatYearDisplay(AppState.selectedYear);
 
     // Scroll to show the current year centered
-    const scrollContainer = document.getElementById('timelineScrollContainer');
-    const currentYearX = yearToPosition(AppState.selectedYear);
-    const containerWidth = scrollContainer.clientWidth;
-    scrollContainer.scrollLeft = currentYearX - containerWidth / 2;
+    centerOnYear(AppState.selectedYear);
 }
 
 // ==========================================
