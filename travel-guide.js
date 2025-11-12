@@ -123,7 +123,8 @@ const AppState = {
     isGenerating: false,
     guesses: {}, // Track user guesses: { 'cat-item': true/false }
     pageAwarded: false, // Track if page bonus has been awarded
-    customVoices: JSON.parse(localStorage.getItem('travel_guide_custom_voices') || '{}') // Custom user-defined voices
+    customVoices: JSON.parse(localStorage.getItem('travel_guide_custom_voices') || '{}'), // Custom user-defined voices
+    selectedYear: parseInt(localStorage.getItem('travel_guide_year')) || 2025 // Selected year for historical context
 };
 
 // Writing Style Personas
@@ -685,6 +686,152 @@ function generateSuggestionChips() {
 }
 
 // Initialize Application
+// ==========================================
+// YEAR SELECTOR FUNCTIONALITY
+// ==========================================
+
+// Generate logarithmic year timeline
+function generateYearTimeline() {
+    const currentYear = 2025;
+    const years = [];
+
+    // Future years (2025-2500) - accelerated progression
+    for (let y = currentYear; y <= 2500; y += getYearIncrement(y, currentYear, true)) {
+        years.push(y);
+    }
+
+    // Past years - logarithmic scale
+    // Recent past: decades (1820s-2020s)
+    for (let y = currentYear - 10; y >= 1820; y -= 10) {
+        if (y !== currentYear) years.unshift(y);
+    }
+
+    // 1500-1800: every 20-50 years
+    for (let y = 1800; y >= 1500; y -= 25) {
+        years.unshift(y);
+    }
+
+    // 1000-1500: every 50 years
+    for (let y = 1500; y >= 1000; y -= 50) {
+        years.unshift(y);
+    }
+
+    // 0-1000: every 100 years
+    for (let y = 1000; y >= 100; y -= 100) {
+        years.unshift(y);
+    }
+
+    // Ancient history: wider spans
+    years.unshift(1, -500, -1000, -2000, -3000, -5000, -10000);
+
+    return years;
+}
+
+// Get year increment based on position (for future years)
+function getYearIncrement(year, currentYear, isFuture) {
+    if (!isFuture) return 10;
+
+    const distance = year - currentYear;
+    if (distance < 50) return 5;
+    if (distance < 100) return 10;
+    if (distance < 200) return 25;
+    return 50;
+}
+
+// Format year for display
+function formatYearDisplay(year) {
+    if (year === 2025) return 'Present Day (2025)';
+    if (year > 2025) return `Future: ${year} CE`;
+    if (year > 0) return `${year} CE`;
+    if (year === 1) return '1 CE';
+    return `${Math.abs(year)} BCE`;
+}
+
+// Initialize year selector
+function initializeYearSelector() {
+    const timeline = document.getElementById('yearTimeline');
+    const yearDisplay = document.getElementById('yearDisplay');
+    const navLeft = document.getElementById('yearNavLeft');
+    const navRight = document.getElementById('yearNavRight');
+
+    const years = generateYearTimeline();
+    let currentIndex = years.indexOf(AppState.selectedYear);
+    if (currentIndex === -1) currentIndex = years.indexOf(2025);
+
+    // Render timeline
+    function renderTimeline() {
+        timeline.innerHTML = '';
+        const visibleRange = 7; // Show 7 years at a time
+        const startIdx = Math.max(0, currentIndex - Math.floor(visibleRange / 2));
+        const endIdx = Math.min(years.length, startIdx + visibleRange);
+
+        for (let i = startIdx; i < endIdx; i++) {
+            const yearBtn = document.createElement('button');
+            yearBtn.className = 'year-tick';
+            yearBtn.textContent = years[i];
+            yearBtn.dataset.index = i;
+
+            if (i === currentIndex) {
+                yearBtn.classList.add('active');
+            }
+
+            yearBtn.addEventListener('click', () => {
+                currentIndex = i;
+                selectYear(years[i]);
+                renderTimeline();
+            });
+
+            timeline.appendChild(yearBtn);
+        }
+
+        // Update navigation button states
+        navLeft.disabled = currentIndex === 0;
+        navRight.disabled = currentIndex === years.length - 1;
+    }
+
+    // Select year
+    function selectYear(year) {
+        AppState.selectedYear = year;
+        localStorage.setItem('travel_guide_year', year);
+        yearDisplay.textContent = formatYearDisplay(year);
+
+        // Regenerate current page if viewing one
+        if (AppState.currentLocation) {
+            if (!hasApiAccess()) {
+                showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
+                toggleSettings();
+                return;
+            }
+            regenerateCurrentPage();
+        }
+    }
+
+    // Navigation
+    navLeft.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            selectYear(years[currentIndex]);
+            renderTimeline();
+        }
+    });
+
+    navRight.addEventListener('click', () => {
+        if (currentIndex < years.length - 1) {
+            currentIndex++;
+            selectYear(years[currentIndex]);
+            renderTimeline();
+        }
+    });
+
+    // Initial render
+    renderTimeline();
+    yearDisplay.textContent = formatYearDisplay(AppState.selectedYear);
+}
+
+// ==========================================
+// APP INITIALIZATION
+// ==========================================
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
@@ -834,6 +981,9 @@ function initializeApp() {
 
     // Load custom voices
     loadCustomVoices();
+
+    // Initialize year selector
+    initializeYearSelector();
 
     // Custom voice generation
     document.getElementById('createVoiceBtn').addEventListener('click', generateCustomVoice);
@@ -1595,8 +1745,21 @@ async function generatePlaceContent(location) {
 
     const categories = CATEGORY_TEMPLATES[locationType] || CATEGORY_TEMPLATES.default;
 
+    // Add year context if not present day
+    let yearContext = '';
+    if (AppState.selectedYear !== 2025) {
+        const yearDisplay = formatYearDisplay(AppState.selectedYear);
+        if (AppState.selectedYear > 2025) {
+            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Speculate about what this location might be like in that future time period. Consider technological advancement, climate change, social evolution, and architectural development. Be creative but plausible in your speculation about how the place might have evolved or what might exist there.`;
+        } else if (AppState.selectedYear > 0) {
+            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Focus on what this location was actually like during that historical period. Include historically accurate facts about what existed, who lived there, major events, architecture, culture, and daily life of that era. If the modern city didn't exist yet, describe what was there instead - the settlement, landscape, or civilization that occupied that location.`;
+        } else {
+            yearContext = `\n\nIMPORTANT TEMPORAL CONTEXT: You are writing about ${yearDisplay}. Describe what this location was like in prehistoric or ancient times. Consider archaeological evidence, ancient civilizations, geological features, climate conditions, and what might have existed at this location during that period of human (or pre-human) history.`;
+        }
+    }
+
     // Generate content - optimized prompt for speed
-    const prompt = `Travel guide for "${location}". ${writingStyle.prompt}
+    const prompt = `Travel guide for "${location}". ${writingStyle.prompt}${yearContext}
 
 For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
 
