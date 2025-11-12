@@ -695,11 +695,56 @@ const TIMELINE_CONFIG = {
     BIG_BANG: -13800000000,  // 13.8 billion years ago
     FAR_FUTURE: 1000002025,  // 1 billion years from now
     PRESENT: 2025,
-    SVG_WIDTH: 800,
-    SVG_HEIGHT: 80,
-    MARGIN: 40,
-    TIMELINE_Y: 40
+    SVG_WIDTH: 5000,
+    SVG_HEIGHT: 120,
+    MARGIN: 50,
+    TIMELINE_Y: 60
 };
+
+// Define time periods with pixel allocations (left to right: past to future)
+// More pixels = more detail/granularity
+const TIME_PERIODS = [
+    // Deep past
+    { start: -13800000000, end: -4600000000, pixels: 150, label: 'Big Bang Era' },
+    { start: -4600000000, end: -541000000, pixels: 200, label: 'Precambrian' },
+    // Geological eras
+    { start: -541000000, end: -252000000, pixels: 200, label: 'Paleozoic' },
+    { start: -252000000, end: -66000000, pixels: 200, label: 'Mesozoic' },
+    { start: -66000000, end: -2600000, pixels: 250, label: 'Cenozoic' },
+    { start: -2600000, end: -10000, pixels: 300, label: 'Pleistocene' },
+    // Human history
+    { start: -10000, end: -3000, pixels: 450, label: 'Neolithic' },
+    { start: -3000, end: 0, pixels: 550, label: 'Bronze/Iron Age' },
+    { start: 0, end: 500, pixels: 350, label: 'Classical' },
+    { start: 500, end: 1000, pixels: 300, label: 'Early Medieval' },
+    { start: 1000, end: 1500, pixels: 350, label: 'Late Medieval' },
+    { start: 1500, end: 1800, pixels: 400, label: 'Early Modern' },
+    { start: 1800, end: 1900, pixels: 500, label: '19th Century' },
+    { start: 1900, end: 1950, pixels: 400, label: 'Early 20th' },
+    { start: 1950, end: 2000, pixels: 500, label: 'Late 20th' },
+    { start: 2000, end: 2025, pixels: 350, label: '21st Century' },
+    // Future
+    { start: 2025, end: 2100, pixels: 300, label: 'Near Future' },
+    { start: 2100, end: 3000, pixels: 250, label: 'Next Millennium' },
+    { start: 3000, end: 100000, pixels: 200, label: 'Distant Future' },
+    { start: 100000, end: 1000002025, pixels: 150, label: 'Deep Future' }
+];
+
+// Build cumulative pixel positions for periods
+function buildPixelMap() {
+    let cumulative = TIMELINE_CONFIG.MARGIN;
+    return TIME_PERIODS.map(period => {
+        const startX = cumulative;
+        cumulative += period.pixels;
+        return {
+            ...period,
+            startX,
+            endX: cumulative
+        };
+    });
+}
+
+const PIXEL_MAP = buildPixelMap();
 
 // Format year for display
 function formatYearDisplay(year) {
@@ -750,107 +795,98 @@ function formatYearDisplay(year) {
     return `${Math.abs(year)} BCE`;
 }
 
-// Logarithmic position-to-year conversion
+// Piecewise position-to-year conversion
 function positionToYear(position) {
-    const {BIG_BANG, FAR_FUTURE, PRESENT, MARGIN, SVG_WIDTH} = TIMELINE_CONFIG;
-    const x = (position - MARGIN) / (SVG_WIDTH - 2 * MARGIN);
-
-    // Use asymmetric logarithmic scale
-    // Center is present (2025), left is past, right is future
-    const centerX = 0.5;
-
-    if (x < centerX) {
-        // Past: map from Big Bang to Present
-        const t = x / centerX; // 0 to 1
-        // Logarithmic interpolation
-        const logMin = Math.log10(1);
-        const logMax = Math.log10(PRESENT - BIG_BANG + 1);
-        const logValue = logMin + t * (logMax - logMin);
-        const yearsFromBigBang = Math.pow(10, logValue) - 1;
-        return Math.round(BIG_BANG + yearsFromBigBang);
-    } else {
-        // Future: map from Present to Far Future
-        const t = (x - centerX) / (1 - centerX); // 0 to 1
-        // Logarithmic interpolation
-        const logMin = Math.log10(1);
-        const logMax = Math.log10(FAR_FUTURE - PRESENT + 1);
-        const logValue = logMin + t * (logMax - logMin);
-        const yearsFromPresent = Math.pow(10, logValue) - 1;
-        return Math.round(PRESENT + yearsFromPresent);
+    // Find which period this position falls into
+    for (const period of PIXEL_MAP) {
+        if (position >= period.startX && position <= period.endX) {
+            // Linear interpolation within this period
+            const t = (position - period.startX) / (period.endX - period.startX);
+            const year = period.start + t * (period.end - period.start);
+            return Math.round(year);
+        }
     }
+
+    // Fallback for edge cases
+    if (position < PIXEL_MAP[0].startX) return PIXEL_MAP[0].start;
+    return PIXEL_MAP[PIXEL_MAP.length - 1].end;
 }
 
 // Year-to-position conversion (inverse of above)
 function yearToPosition(year) {
-    const {BIG_BANG, FAR_FUTURE, PRESENT, MARGIN, SVG_WIDTH} = TIMELINE_CONFIG;
-    const centerX = 0.5;
-
-    let x;
-    if (year <= PRESENT) {
-        // Past
-        const yearsFromBigBang = year - BIG_BANG;
-        const logMin = Math.log10(1);
-        const logMax = Math.log10(PRESENT - BIG_BANG + 1);
-        const logValue = Math.log10(yearsFromBigBang + 1);
-        const t = (logValue - logMin) / (logMax - logMin);
-        x = t * centerX;
-    } else {
-        // Future
-        const yearsFromPresent = year - PRESENT;
-        const logMin = Math.log10(1);
-        const logMax = Math.log10(FAR_FUTURE - PRESENT + 1);
-        const logValue = Math.log10(yearsFromPresent + 1);
-        const t = (logValue - logMin) / (logMax - logMin);
-        x = centerX + t * (1 - centerX);
+    // Find which period this year falls into
+    for (const period of PIXEL_MAP) {
+        if (year >= period.start && year <= period.end) {
+            // Linear interpolation within this period
+            const t = (year - period.start) / (period.end - period.start);
+            const x = period.startX + t * (period.endX - period.startX);
+            return x;
+        }
     }
 
-    return MARGIN + x * (SVG_WIDTH - 2 * MARGIN);
+    // Fallback for edge cases
+    if (year < PIXEL_MAP[0].start) return PIXEL_MAP[0].startX;
+    return PIXEL_MAP[PIXEL_MAP.length - 1].endX;
 }
 
 // Generate tick marks for the timeline
 function generateTimelineTicks() {
     const ticks = [];
 
-    // Major ticks with labels
-    const majorYears = [
-        TIMELINE_CONFIG.BIG_BANG,
-        -10000000000,  // 10B years ago
-        -5000000000,   // 5B years ago
-        -1000000000,   // 1B years ago
-        -100000000,    // 100M years ago
-        -10000000,     // 10M years ago
-        -1000000,      // 1M years ago
-        -100000,       // 100K years ago
-        -10000,
-        -5000,
-        -2000,
-        -1000,
-        -500,
-        1,
-        500,
-        1000,
-        1500,
-        2000,
-        TIMELINE_CONFIG.PRESENT,
-        2100,
-        2500,
-        5000,
-        10000,
-        100000,        // 100K years future
-        1000000,       // 1M years future
-        10000000,      // 10M years future
-        100000000,     // 100M years future
-        500000000,     // 500M years future
-        TIMELINE_CONFIG.FAR_FUTURE
-    ];
-
-    majorYears.forEach(year => {
+    // Add period boundaries and era labels
+    PIXEL_MAP.forEach((period, idx) => {
+        // Era label at the center of each period
+        const centerX = (period.startX + period.endX) / 2;
         ticks.push({
-            year,
-            x: yearToPosition(year),
-            major: true,
-            label: formatTickLabel(year)
+            year: null,
+            x: centerX,
+            isEraLabel: true,
+            label: period.label
         });
+
+        // Start boundary tick
+        ticks.push({
+            year: period.start,
+            x: period.startX,
+            major: true,
+            label: formatTickLabel(period.start)
+        });
+
+        // Add intermediate ticks based on period size
+        const yearSpan = period.end - period.start;
+        let tickInterval;
+
+        if (yearSpan > 1000000000) tickInterval = 1000000000; // billions
+        else if (yearSpan > 100000000) tickInterval = 100000000; // 100M
+        else if (yearSpan > 10000000) tickInterval = 10000000; // 10M
+        else if (yearSpan > 1000000) tickInterval = 500000; // 500K
+        else if (yearSpan > 100000) tickInterval = 50000; // 50K
+        else if (yearSpan > 10000) tickInterval = 2000; // 2K
+        else if (yearSpan > 1000) tickInterval = 500; // 500 years
+        else if (yearSpan > 500) tickInterval = 100; // 100 years
+        else if (yearSpan > 100) tickInterval = 50; // 50 years
+        else if (yearSpan > 50) tickInterval = 25; // 25 years
+        else tickInterval = 10; // 10 years
+
+        // Add intermediate minor ticks
+        for (let y = period.start + tickInterval; y < period.end; y += tickInterval) {
+            ticks.push({
+                year: y,
+                x: yearToPosition(y),
+                major: false,
+                label: formatTickLabel(y)
+            });
+        }
+
+        // End boundary (for last period)
+        if (idx === PIXEL_MAP.length - 1) {
+            ticks.push({
+                year: period.end,
+                x: period.endX,
+                major: true,
+                label: formatTickLabel(period.end)
+            });
+        }
     });
 
     return ticks;
@@ -905,23 +941,35 @@ function initializeYearSelector() {
         // Tick marks
         const ticks = generateTimelineTicks();
         ticks.forEach(tick => {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', tick.x);
-            line.setAttribute('x2', tick.x);
-            line.setAttribute('y1', TIMELINE_Y - (tick.major ? 10 : 5));
-            line.setAttribute('y2', TIMELINE_Y + (tick.major ? 10 : 5));
-            line.setAttribute('class', tick.major ? 'timeline-tick-major' : 'timeline-tick-minor');
-            svg.appendChild(line);
-
-            // Label for major ticks
-            if (tick.major && tick.label) {
+            if (tick.isEraLabel) {
+                // Era label above the timeline
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', tick.x);
-                text.setAttribute('y', TIMELINE_Y + 25);
+                text.setAttribute('y', TIMELINE_Y - 20);
                 text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('class', 'timeline-label');
+                text.setAttribute('class', 'timeline-era-label');
                 text.textContent = tick.label;
                 svg.appendChild(text);
+            } else {
+                // Tick mark
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', tick.x);
+                line.setAttribute('x2', tick.x);
+                line.setAttribute('y1', TIMELINE_Y - (tick.major ? 12 : 6));
+                line.setAttribute('y2', TIMELINE_Y + (tick.major ? 12 : 6));
+                line.setAttribute('class', tick.major ? 'timeline-tick-major' : 'timeline-tick-minor');
+                svg.appendChild(line);
+
+                // Label for major ticks
+                if (tick.major && tick.label) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', tick.x);
+                    text.setAttribute('y', TIMELINE_Y + 30);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('class', 'timeline-label');
+                    text.textContent = tick.label;
+                    svg.appendChild(text);
+                }
             }
         });
 
@@ -1043,6 +1091,12 @@ function initializeYearSelector() {
     // Initial draw
     drawTimeline();
     yearDisplay.textContent = formatYearDisplay(AppState.selectedYear);
+
+    // Scroll to show the current year centered
+    const scrollContainer = document.getElementById('timelineScrollContainer');
+    const currentYearX = yearToPosition(AppState.selectedYear);
+    const containerWidth = scrollContainer.clientWidth;
+    scrollContainer.scrollLeft = currentYearX - containerWidth / 2;
 }
 
 // ==========================================
