@@ -434,13 +434,127 @@ body {
     transform: translateY(-50%) scale(1.1);
 }
 
+/* Year Selector */
+.year-selector-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.year-selector-label {
+    font-size: 0.9rem;
+    color: var(--color-text);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.year-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.year-timeline-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.year-timeline {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.year-tick {
+    flex-shrink: 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.813rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.year-tick:hover {
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.year-tick.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+    font-weight: 600;
+    transform: scale(1.1);
+}
+
+.year-nav-btn {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    font-size: 1.25rem;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.year-nav-btn:hover:not(:disabled) {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+}
+
+.year-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.year-display {
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+/* Built-in Voices Divider */
+.builtin-voices-divider {
+    margin: 1.5rem 0 1rem 0;
+    padding: 0.5rem 0;
+    font-size: 0.813rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-top: 2px solid var(--color-border);
+    padding-top: 1rem;
+}
+
 /* Custom Voice Input */
 .custom-voice-input {
-    margin-top: 1.5rem;
-    margin-bottom: 3rem; /* Extra spacing for mobile Safari toolbar */
-    padding-top: 1.5rem;
-    padding-bottom: 1rem;
-    border-top: 2px solid var(--color-border);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
 }
 
 .custom-voice-label {

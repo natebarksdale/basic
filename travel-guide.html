@@ -46,6 +46,32 @@
                 <button class="close-voice-menu" id="closeVoiceMenu">×</button>
             </div>
             <div class="voice-menu-body">
+                <!-- Year Selector -->
+                <div class="year-selector-section">
+                    <div class="year-selector-label">Time Period</div>
+                    <div class="year-selector-container">
+                        <button class="year-nav-btn year-nav-left" id="yearNavLeft">‹</button>
+                        <div class="year-timeline-wrapper">
+                            <div class="year-timeline" id="yearTimeline"></div>
+                        </div>
+                        <button class="year-nav-btn year-nav-right" id="yearNavRight">›</button>
+                    </div>
+                    <div class="year-display" id="yearDisplay">Present Day (2025)</div>
+                </div>
+
+                <!-- Custom Voice Input - Moved to top -->
+                <div class="custom-voice-input">
+                    <div class="custom-voice-label">Create your own voice:</div>
+                    <input type="text" id="customVoiceInput" placeholder='e.g., "Alien Anthropologist"' class="custom-voice-field">
+                    <button id="createVoiceBtn" class="btn-create-voice">Generate Voice</button>
+                    <div id="customVoiceStatus" class="custom-voice-status"></div>
+                </div>
+
+                <!-- Custom Voices Section - Generated voices appear here -->
+                <div id="customVoicesContainer"></div>
+
+                <!-- Built-in Voices -->
+                <div class="builtin-voices-divider">Built-in Voices</div>
                 <button class="voice-option" data-voice="parker">
                     <div class="voice-option-emoji">🍸</div>
                     <div class="voice-option-text">
@@ -81,17 +107,6 @@
                         <div class="voice-option-desc">Distracted, scattered thoughts</div>
                     </div>
                 </button>
-
-                <!-- Custom Voices Section -->
-                <div id="customVoicesContainer"></div>
-
-                <!-- Custom Voice Input -->
-                <div class="custom-voice-input">
-                    <div class="custom-voice-label">Or create your own voice:</div>
-                    <input type="text" id="customVoiceInput" placeholder='e.g., "Alien Anthropologist"' class="custom-voice-field">
-                    <button id="createVoiceBtn" class="btn-create-voice">Generate Voice</button>
-                    <div id="customVoiceStatus" class="custom-voice-status"></div>
-                </div>
             </div>
         </div>
 
