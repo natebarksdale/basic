@@ -506,7 +506,13 @@ body {
 .timeline-label {
     fill: var(--color-text-secondary);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.timeline-label-minor {
+    fill: var(--color-text-light);
+    font-size: 11px;
+    font-weight: 400;
 }
 
 .timeline-era-label {
