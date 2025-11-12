@@ -451,24 +451,38 @@ body {
     text-align: center;
 }
 
-.year-selector-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.year-timeline-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-bottom: 0.75rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-accent) var(--color-bg);
+    scroll-snap-type: x proximity;
 }
 
-.year-timeline-wrapper {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
+.year-timeline-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.year-timeline-scroll::-webkit-scrollbar-track {
+    background: var(--color-bg);
+    border-radius: 3px;
+}
+
+.year-timeline-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: 3px;
+}
+
+.year-timeline-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-hover);
 }
 
 .year-timeline {
-    display: flex;
+    display: inline-flex;
     gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
+    padding: 0.5rem 0;
 }
 
 .year-tick {
@@ -483,6 +497,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    scroll-snap-align: center;
 }
 
 .year-tick:hover {
@@ -496,34 +511,7 @@ body {
     border-color: var(--color-accent);
     color: white;
     font-weight: 600;
-    transform: scale(1.1);
-}
-
-.year-nav-btn {
-    flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 50%;
-    font-size: 1.25rem;
-    color: var(--color-text);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.year-nav-btn:hover:not(:disabled) {
-    background: var(--color-accent);
-    color: white;
-    border-color: var(--color-accent);
-}
-
-.year-nav-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+    transform: scale(1.05);
 }
 
 .year-display {
@@ -531,6 +519,29 @@ body {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-accent);
+    margin-bottom: 0.75rem;
+}
+
+.btn-set-time {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-set-time:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+.btn-set-time:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Built-in Voices Divider */
@@ -1372,6 +1383,10 @@ input, select, textarea {
 .loading-state p {
     font-size: 0.875rem;
     color: var(--color-text-light);
+    line-height: 1.6;
+    text-align: center;
+    max-width: 90%;
+    white-space: pre-line;
 }
 
 /* Modal */

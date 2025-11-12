@@ -49,14 +49,11 @@
                 <!-- Year Selector -->
                 <div class="year-selector-section">
                     <div class="year-selector-label">Time Period</div>
-                    <div class="year-selector-container">
-                        <button class="year-nav-btn year-nav-left" id="yearNavLeft">‹</button>
-                        <div class="year-timeline-wrapper">
-                            <div class="year-timeline" id="yearTimeline"></div>
-                        </div>
-                        <button class="year-nav-btn year-nav-right" id="yearNavRight">›</button>
+                    <div class="year-timeline-scroll" id="yearTimelineScroll">
+                        <div class="year-timeline" id="yearTimeline"></div>
                     </div>
                     <div class="year-display" id="yearDisplay">Present Day (2025)</div>
+                    <button id="setTimeBtn" class="btn-set-time" style="display: none;">Set Time & Regenerate</button>
                 </div>
 
                 <!-- Custom Voice Input - Moved to top -->
