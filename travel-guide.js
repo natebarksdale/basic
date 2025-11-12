@@ -695,7 +695,7 @@ const TIMELINE_CONFIG = {
     BIG_BANG: -13800000000,  // 13.8 billion years ago
     FAR_FUTURE: 1000002025,  // 1 billion years from now
     PRESENT: 2025,
-    SVG_WIDTH: 5000,
+    SVG_WIDTH: 7000,  // Increased to accommodate all periods
     SVG_HEIGHT: 120,
     MARGIN: 50,
     TIMELINE_Y: 60
@@ -961,13 +961,13 @@ function initializeYearSelector() {
                 line.setAttribute('class', tick.major ? 'timeline-tick-major' : 'timeline-tick-minor');
                 svg.appendChild(line);
 
-                // Label for major ticks
-                if (tick.major && tick.label) {
+                // Label for all ticks (both major and minor)
+                if (tick.label) {
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', tick.x);
                     text.setAttribute('y', TIMELINE_Y + 30);
                     text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('class', 'timeline-label');
+                    text.setAttribute('class', tick.major ? 'timeline-label' : 'timeline-label-minor');
                     text.textContent = tick.label;
                     svg.appendChild(text);
                 }
@@ -1024,15 +1024,23 @@ function initializeYearSelector() {
         }
     }
 
-    // Mouse/touch event handlers
+    // Mouse/touch event handlers - only on the handle
+    const handle = document.getElementById('timelineHandle');
+    const scrollContainer = document.getElementById('timelineScrollContainer');
+
     function handleStart(e) {
-        e.preventDefault();
-        isDragging = true;
-        svg.style.cursor = 'grabbing';
+        // Only start dragging if touching the handle
+        if (e.target.closest('.timeline-handle')) {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+        }
     }
 
     function handleMove(e) {
         if (!isDragging) return;
+        e.preventDefault();
+        e.stopPropagation();
 
         const rect = svg.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1044,29 +1052,27 @@ function initializeYearSelector() {
     function handleEnd(e) {
         if (isDragging) {
             isDragging = false;
-            svg.style.cursor = 'grab';
         }
     }
 
-    // Click to select
+    // Click to select (anywhere on timeline)
     function handleClick(e) {
         if (e.target.closest('.timeline-handle')) return;
 
         const rect = svg.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientX = e.clientX;
         const svgX = ((clientX - rect.left) / rect.width) * TIMELINE_CONFIG.SVG_WIDTH;
 
         updateHandle(svgX);
     }
 
-    // Add event listeners
+    // Add event listeners on document for drag, but only on svg for click
     svg.addEventListener('mousedown', handleStart);
-    svg.addEventListener('touchstart', handleStart);
-    svg.addEventListener('mousemove', handleMove);
-    svg.addEventListener('touchmove', handleMove);
-    svg.addEventListener('mouseup', handleEnd);
-    svg.addEventListener('touchend', handleEnd);
-    svg.addEventListener('mouseleave', handleEnd);
+    svg.addEventListener('touchstart', handleStart, { passive: false });
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchend', handleEnd);
     svg.addEventListener('click', handleClick);
 
     // Set Time button
