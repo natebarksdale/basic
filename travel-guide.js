@@ -429,15 +429,15 @@ const VOICE_ICONS = {
     sunglasses: '🕶️',
 };
 
-// Category Templates by Location Type
+// Category Templates by Location Type - optimized for faster LLM generation
 const CATEGORY_TEMPLATES = {
-    city: ['Introduction', 'Where to Go', 'What to Eat', 'What to Do', 'Where to Stay', 'Getting Around', 'Day Trips', 'Practical Tips'],
-    museum: ['Introduction', 'History & Architecture', 'Must-See Exhibits', 'Hidden Gems', 'Special Collections', 'Visitor Information'],
-    building: ['Introduction', 'History', 'Architecture & Design', 'Notable Features', 'Cultural Significance', 'Visiting'],
-    monument: ['Introduction', 'Historical Context', 'Design & Construction', 'Cultural Impact', 'Visiting Information'],
-    nature: ['Introduction', 'Geography & Climate', 'Flora & Fauna', 'What to Do', 'Best Times to Visit', 'Conservation'],
-    restaurant: ['Introduction', 'Signature Dishes', 'Atmosphere', 'History', 'Practical Information'],
-    default: ['Introduction', 'Background', 'Where to Go', 'What to Eat', 'What to Do', 'Practical Information']
+    city: ['Introduction', 'Where to Go', 'What to Eat', 'What to Do', 'Practical Tips'],
+    museum: ['Introduction', 'Must-See Exhibits', 'Hidden Gems', 'Visitor Information'],
+    building: ['Introduction', 'History', 'Notable Features', 'Visiting'],
+    monument: ['Introduction', 'Historical Context', 'Cultural Impact', 'Visiting'],
+    nature: ['Introduction', 'What to Do', 'Flora & Fauna', 'Best Times to Visit'],
+    restaurant: ['Introduction', 'Signature Dishes', 'Atmosphere', 'Practical Information'],
+    default: ['Introduction', 'Where to Go', 'What to Do', 'Practical Information']
 };
 
 // Diverse suggestion pools for dynamic generation
@@ -2057,6 +2057,18 @@ async function loadPlace(location, addToHistory = true) {
     }
 }
 
+// Randomize which items are lies - each tile has 33% chance of being false
+function randomizeTileTruths(placeData) {
+    placeData.categories.forEach(category => {
+        // For each category, randomly assign isLie to each of the 3 items
+        // Each item has a 33% chance of being false
+        category.items.forEach(item => {
+            item.isLie = Math.random() < 0.33;
+        });
+    });
+    return placeData;
+}
+
 // Generate Place Content using LLM
 async function generatePlaceContent(location) {
     const writingStyle = WRITING_STYLES[AppState.writingStyle];
@@ -2093,15 +2105,13 @@ async function generatePlaceContent(location) {
     // Generate content - optimized prompt for speed
     const prompt = `Travel guide for "${location}". ${writingStyle.prompt}${yearContext}
 
-For each category below, write 3 items (2-3 sentences each): TWO TRUE facts and ONE PLAUSIBLE LIE. Mix randomly.
+For each category, write 3 interesting facts (2-3 sentences each). Make them plausible and detailed.
 
-CRITICAL: Format text like a travel guide by wrapping important place names, landmarks, neighborhoods, restaurants, museums, and key nouns/phrases in <strong> tags. These should be words that would typically be boldfaced in a travel guide.
-
-REQUIREMENT: EVERY item MUST have AT LEAST 2 strong-tagged phrases. Do not skip this - it's essential for navigation.
+Format: Wrap place names, landmarks, restaurants, museums, and key details in <strong> tags. Every item needs at least 2 strong-tagged phrases.
 
 Categories: ${categories.join(', ')}
 
-Return ONLY valid JSON:
+Return valid JSON:
 {
   "name": "${location}",
   "type": "${locationType}",
@@ -2110,15 +2120,15 @@ Return ONLY valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>important details</strong>.", "isLie": false},
-        {"text": "Another with <strong>Notable Landmark</strong> and <strong>specific feature</strong>.", "isLie": true},
-        {"text": "Third mentioning <strong>Famous Restaurant</strong> and <strong>signature dish</strong>.", "isLie": false}
+        {"text": "Description with <strong>Place Name</strong> and <strong>details</strong>.", "isLie": false},
+        {"text": "Another with <strong>Landmark</strong> and <strong>feature</strong>.", "isLie": false},
+        {"text": "Third with <strong>Restaurant</strong> and <strong>dish</strong>.", "isLie": false}
       ]
     }
   ]
 }`;
 
-    const response = await callLLM(prompt, 2500);
+    const response = await callLLM(prompt, 1800);
 
     // Parse JSON response
     let placeData;
@@ -2134,6 +2144,9 @@ Return ONLY valid JSON:
         console.error('Failed to parse JSON:', error);
         throw new Error('Failed to parse location data');
     }
+
+    // Randomize which items are lies (33% chance per item)
+    randomizeTileTruths(placeData);
 
     // Skip geocoding for speed - just return the data
     placeData.mentionedPlaces = [];
