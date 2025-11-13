@@ -45,6 +45,47 @@
             font-display: swap;
         }
 
+        /* Faune Font Family */
+        @font-face {
+            font-family: 'Faune';
+            src: url('https://natebarksdale.xyz/fonts/Faune.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Faune';
+            src: url('https://natebarksdale.xyz/fonts/Faune-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Faune';
+            src: url('https://natebarksdale.xyz/fonts/Faune-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Faune';
+            src: url('https://natebarksdale.xyz/fonts/Faune-Italic.woff2') format('woff2');
+            font-weight: 400;
+            font-style: italic;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Faune';
+            src: url('https://natebarksdale.xyz/fonts/Faune-BoldItalic.woff2') format('woff2');
+            font-weight: 700;
+            font-style: italic;
+            font-display: swap;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -216,7 +257,8 @@
             font-size: 1rem;
             font-weight: 600;
             color: var(--text-secondary);
-            font-family: 'DovesType-Text', 'Lora', serif, 'Noto Emoji';
+            font-family: 'Faune', 'DovesType-Text', 'Lora', serif, 'Noto Emoji';
+            font-style: italic;
         }
 
         .preview-content {
@@ -360,6 +402,19 @@
         /* Emoji styling */
         .preview-content .emoji {
             font-family: 'Noto Emoji', sans-serif !important;
+        }
+
+        /* Faune for emphasis and decorative text */
+        .preview-content em {
+            font-family: 'Faune', 'DovesType-Text', 'Lora', serif, 'Noto Emoji' !important;
+            font-style: italic;
+        }
+
+        .preview-content strong em,
+        .preview-content em strong {
+            font-family: 'Faune', 'DovesType-Text', 'Lora', serif, 'Noto Emoji' !important;
+            font-weight: 700;
+            font-style: italic;
         }
 
         .spinner {
