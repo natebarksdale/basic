@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Post Composer</title>
+
+    <!-- Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS from natebarksdale.xyz -->
+    <link rel="stylesheet" href="https://natebarksdale.xyz/custom-styles.css">
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
@@ -376,7 +385,7 @@
         <div class="editor-panel">
             <div class="toolbar">
                 <h1>Blog Post Composer</h1>
-                <button class="btn btn-secondary" onclick="showApiConfig()">⚙️ API Config</button>
+                <button class="btn btn-secondary" onclick="showApiConfig()">⚙️ Model Config</button>
                 <button class="btn btn-primary" onclick="generateHeader()" id="generateBtn">
                     ✨ Generate Header
                 </button>
@@ -421,17 +430,25 @@
     <!-- API Config Modal -->
     <div class="modal" id="apiModal">
         <div class="modal-content">
-            <h3>API Configuration</h3>
-            <label for="apiProvider">Provider:</label>
-            <select id="apiProvider" onchange="updateApiConfig()">
-                <option value="anthropic">Anthropic (Claude)</option>
-                <option value="openai">OpenAI</option>
-                <option value="openrouter">OpenRouter</option>
+            <h3>Model Configuration</h3>
+            <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem; padding: 0.75rem; background: var(--surface); border-radius: 0.375rem;">
+                ℹ️ API key is managed server-side via Cloudflare Worker for security.
+            </div>
+            <label for="apiModel">Model (OpenRouter format):</label>
+            <select id="apiModel" onchange="updateModelInput()">
+                <option value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Fast & Free)</option>
+                <option value="anthropic/claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                <option value="anthropic/claude-3-haiku-20240307">Claude 3 Haiku</option>
+                <option value="openai/gpt-4-turbo-preview">GPT-4 Turbo</option>
+                <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="__custom__">Custom Model...</option>
             </select>
-            <label for="apiKey">API Key:</label>
-            <input type="password" id="apiKey" placeholder="sk-...">
-            <label for="apiModel">Model:</label>
-            <input type="text" id="apiModel" value="claude-3-5-sonnet-20241022">
+            <div id="customModelInput" class="custom-model-input" style="display: none;">
+                <input type="text" id="customModelField" placeholder="e.g., google/gemini-2.0-flash-001" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 0.375rem;">
+                <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">
+                    Find models at <a href="https://openrouter.ai/models" target="_blank" style="color: #2196F3;">openrouter.ai/models</a>
+                </div>
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeApiConfig()">Cancel</button>
                 <button class="btn btn-primary" onclick="saveApiConfig()">Save</button>
@@ -498,9 +515,19 @@
             const apiConfig = localStorage.getItem('apiConfig');
             if (apiConfig) {
                 const config = JSON.parse(apiConfig);
-                document.getElementById('apiProvider').value = config.provider || 'anthropic';
-                document.getElementById('apiKey').value = config.apiKey || '';
-                document.getElementById('apiModel').value = config.model || 'claude-3-5-sonnet-20241022';
+                const modelSelect = document.getElementById('apiModel');
+                const model = config.model || 'google/gemini-2.5-flash-lite';
+
+                // Check if it's a custom model
+                const isCustom = !Array.from(modelSelect.options).some(opt => opt.value === model && opt.value !== '__custom__');
+
+                if (isCustom) {
+                    modelSelect.value = '__custom__';
+                    document.getElementById('customModelField').value = model;
+                    document.getElementById('customModelInput').style.display = 'block';
+                } else {
+                    modelSelect.value = model;
+                }
             }
         }
 
@@ -512,29 +539,39 @@
             document.getElementById('apiModal').classList.remove('active');
         }
 
-        function updateApiConfig() {
-            const provider = document.getElementById('apiProvider').value;
-            const modelInput = document.getElementById('apiModel');
+        function updateModelInput() {
+            const modelSelect = document.getElementById('apiModel');
+            const customInput = document.getElementById('customModelInput');
 
-            const defaultModels = {
-                'anthropic': 'claude-3-5-sonnet-20241022',
-                'openai': 'gpt-4-turbo-preview',
-                'openrouter': 'anthropic/claude-3.5-sonnet'
-            };
-
-            modelInput.value = defaultModels[provider];
+            if (modelSelect.value === '__custom__') {
+                customInput.style.display = 'block';
+            } else {
+                customInput.style.display = 'none';
+            }
         }
 
         function saveApiConfig() {
+            const modelSelect = document.getElementById('apiModel');
+            let model = modelSelect.value;
+
+            // If custom model is selected, get the value from the custom field
+            if (model === '__custom__') {
+                const customField = document.getElementById('customModelField');
+                model = customField.value.trim();
+
+                if (!model) {
+                    showStatus('Please enter a custom model name', 'error');
+                    return;
+                }
+            }
+
             const config = {
-                provider: document.getElementById('apiProvider').value,
-                apiKey: document.getElementById('apiKey').value,
-                model: document.getElementById('apiModel').value
+                model: model
             };
 
             localStorage.setItem('apiConfig', JSON.stringify(config));
             closeApiConfig();
-            showStatus('API configuration saved', 'success');
+            showStatus('Model configuration saved', 'success');
         }
 
         async function generateHeader() {
@@ -546,11 +583,6 @@
             }
 
             const config = JSON.parse(localStorage.getItem('apiConfig') || '{}');
-            if (!config.apiKey) {
-                showStatus('Please configure your API key first', 'error');
-                showApiConfig();
-                return;
-            }
 
             const btn = document.getElementById('generateBtn');
             btn.disabled = true;
@@ -573,58 +605,25 @@
         async function callLLM(bodyText, config) {
             const prompt = buildPrompt(bodyText);
 
-            let response;
+            // Use Cloudflare Worker proxy for secure API calls
+            const CLOUDFLARE_WORKER_URL = 'https://travel-guide-api-proxy.natebarksdale.workers.dev';
 
-            if (config.provider === 'anthropic') {
-                response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': config.apiKey,
-                        'anthropic-version': '2023-06-01'
-                    },
-                    body: JSON.stringify({
-                        model: config.model,
-                        max_tokens: 2000,
-                        messages: [{
-                            role: 'user',
-                            content: prompt
-                        }]
-                    })
-                });
-            } else if (config.provider === 'openai') {
-                response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${config.apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: config.model,
-                        messages: [{
-                            role: 'user',
-                            content: prompt
-                        }]
-                    })
-                });
-            } else if (config.provider === 'openrouter') {
-                response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${config.apiKey}`,
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'Blog Post Composer'
-                    },
-                    body: JSON.stringify({
-                        model: config.model,
-                        messages: [{
-                            role: 'user',
-                            content: prompt
-                        }]
-                    })
-                });
-            }
+            // Determine model - use OpenRouter format
+            const model = config.model || 'google/gemini-2.5-flash-lite';
+
+            const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [{
+                        role: 'user',
+                        content: prompt
+                    }]
+                })
+            });
 
             if (!response.ok) {
                 const error = await response.json();
@@ -633,13 +632,8 @@
 
             const data = await response.json();
 
-            // Extract content based on provider
-            let content;
-            if (config.provider === 'anthropic') {
-                content = data.content[0].text;
-            } else {
-                content = data.choices[0].message.content;
-            }
+            // Extract content from OpenRouter response
+            const content = data.choices[0].message.content;
 
             // Extract just the YAML header (between --- markers)
             const headerMatch = content.match(/---\n([\s\S]*?)\n---/);
