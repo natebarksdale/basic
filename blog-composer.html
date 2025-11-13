@@ -781,13 +781,23 @@
                 expandedText = `For the John Templeton Foundation, I wrote about [topic based on URL]\n\n>[First paragraph after "In our Study of the Day feature series,"]\n\n[Read more at templeton.org](${bodyText})`;
             }
 
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayDate = `${year}-${month}-${day}`;
+
+            // Available tags (all start with emoji)
+            const availableTags = `⏰ Time, ♻️ Repurposing, ⚒️ Blacksmiths, ⚔️ Enemies, ⚕️ Medicine, ⚖️ Algorithms, ⚖️ Choices, ⚖️ Courtroom, ⚖️ Ethics, ⚖️ Law, ⚙️ Engineering, ⚙️ Technology, ⚠️ Danger, ⚰️ Cemeteries, ⛪ Religion, 🇦🇺 Australia, 🇧🇴 Bolivia, 🇨🇦 Canada, 🇨🇳 China, 🇨🇺 Cuba, 🇫🇷 France, 🇬🇧 London, 🇮🇹 Italy, 🇯🇴 Jordan, 🇯🇵 Japan, 🇰🇭 Cambodia, 🇱🇧 Lebanon, 🇲🇱 Mali, 🇳🇱 Netherlands, 🇳🇵 Nepal, 🇵🇷 Puerto Ricos, 🇷🇺 Russia, 🇹🇷 Turkey, 🇺🇸 United States, 🇾🇪 Yemen, ✈️ Aviation, ✍️ Literature, ✍️ Poetry, ✍️ Translation, ✝️ Christianity, ✝️ Scriptures, ✡️ Judaism, ✨ Beauty, ✨ Gestures, ❤️ Charity, ❤️ Forgiveness, ❤️ Kindness, ❤️ Love, ❤️ Resilience, 🌀 Complexity, 🌄 Dreams, 🌄 Volcanoes, 🌅 Reflection, 🌆 Brooklyn, 🌆 Cities, 🌆 Connecticut, 🌆 Urban Spaces, 🌆 Utopia, 🌊 Harbors, 🌊 Ocean, 🌊 Water, 🌌 Astronomy, 🌌 Dystopias, 🌍 Accessibility, 🌍 Activism, 🌍 Africa, 🌍 Cartography, 🌍 Consciousness, 🌍 Culture, 🌍 Development, 🌍 Diversity, 🌍 Ecology, 🌍 Environment, 🌍 Evolution, 🌍 Exploration, 🌍 Globalization, 🌍 Haiti, 🌍 Health, 🌍 History, 🌍 Identity, 🌍 Immigrants, 🌍 Indigenous Culture, 🌍 Pilgrimage, 🌍 Piracy, 🌍 Society, 🌍 Southeast Asia, 🌍 Storytelling, 🌍 Vision, 🌎 Borders, 🌏 Cinema, 🌐 Blogging, 🌐 Digital, 🌐 Geography, 🌐 Internet, 🌐 Minimalism, 🌐 Websites, 🌙 Islam, 🌞 Leisure, 🌞 Summer, 🌟 Broadway, 🌟 Inspiration, 🌠 Mortality, 🌧️ Nature, 🌱 Earth, 🌱 Entrepreneurship, 🌱 Growth, 🌱 Sustainability, 🌳 Landscapes, 🌳 Wilderness, 🌶️ Spices, 🌸 Flowers, 🌸 Happiness, 🌼 Spring, 🌾 Agriculture, 🌿 Gardens, 🍃 Delight, 🍋 Flavor, 🍔 Fast Food, 🍗 Food, 🍞 Bread, 🍫 Candy, 🍬 Desserts, 🍲 Proverbs, 🍳 Cooking, 🍴 Cuisine, 🍷 Alcohol, 🍷 Wine, 🍺 Beer, 🍽️ Kitchens, 🍿 Movies, 🎁 Gifts, 🎈 Fun, 🎉 Anniversaries, 🎉 Celebration, 🎉 Feasts, 🎉 Friendship, 🎓 Status Symbols, 🎖️ Olympics, 🎖️ Rescue, 🎖️ Statues, 🎗️ Cancer, 🎤 Celebrities, 🎤 Hip-Hop, 🎤 Performances, 🎤 Singing, 🎤 Speech, 🎥 Film, 🎥 Subtitles, 🎨 Aesthetics, 🎨 Art, 🎨 Cartoons, 🎨 Colors, 🎨 Creativity, 🎨 Graffiti, 🎨 Knitting, 🎬 Hollywood, 🎭 Comedy, 🎭 Costumes, 🎭 Entertainment, 🎭 Futurism, 🎭 Irony, 🎭 Miscommunication, 🎭 Tragedy, 🎯 Focus, 🎯 Hunting, 🎱 Games, 🎲 Gambling, 🎲 Lotteries, 🎵 Mix CDs, 🎵 Music, 🎵 Parody, 🎵 Songs, 🎶 Activities, 🎶 Ballads, 🎶 Sounds, 🏆 Awards, 🏆 Success, 🏈 Football, 🏔️ Mountains, 🏖️ Beaches, 🏗️ Construction, 🏘️ Communities, 🏙️ Atlanta, 🏙️ Mexico City, 🏙️ Migration, 🏙️ Population, 🏚️ Abandonment, 🏛️ Architecture, 🏛️ Churches, 🏛️ Government, 🏛️ Museums, 🏞️ National Parks, 🏢 Buildings, 🏥 Hospitals, 🏥 Mental Health, 🏦 Banks, 🏪 Markets, 🏭 Factories, 🏭 Manufacturing, 🏰 Castles, 🏳️ Flags, 🏺 Sculpture, 🐄 Cattle, 🐄 Cheeses, 🐘 Elephants, 🐜 Ants, 🐬 Dolphins, 🐱 Cat Memes, 🐴 Donkeys, 🐸 Frogs, 🐾 Pets, 👀 Attention, 👁️ Expression, 👋 Greetings, 👑 Fame, 👑 Names, 👕 Clothes, 👟 Shoes, 👤 Portraits, 👥 Emotions, 👥 Observers, 👥 Youth, 👦 Imagination, 👦 Teenagers, 👪 Parents, 👩‍🏫 Education, 🌳 Family, 👫 Groups, 👶 Children, 👶 Parenthood, 💃 Dance, 💎 Jewelry, 💔 Failure, 💔 Grief, 💡 Design, 💡 Innovation, 💡 Intelligence, 💡 Metaphors, 💡 Wisdom, 💧 Rituals, 💪 Difficulty, 💪 Power, 💬 Communication, 💬 Narratives, 💰 Commerce, 💵 Currency, 💵 Dollars, 💵 Philanthropy, 💸 Tipping, 💼 Business, 💼 Capitalism, 💼 Employment, 💼 Funding, 💼 Jobs, 💼 Leadership, 💿 Nostalgia, 📀 CDs, 📅 1870s, 📈 Charts, 📈 Confidence, 📈 Marketing, 📈 Regulations, 📉 Addiction, 📉 Decline, 📉 Economics, 📊 Research, 📊 Statistics, 📊 Surveys, 📍 Travel, 📖 Articles, 📖 Bible, 📖 Biographies, 📖 Books, 📖 Clichés, 📖 Discussions, 📖 Quotes, 📚 Archives, 📚 Botany, 📚 College, 📚 Dialogue, 📚 Dictionaries, 📚 Disciplines, 📚 Ephemera, 📚 Essays, 📚 Guides, 📚 Linguistics, 📚 Lists, 📚 Preservation, 📚 Publications, 📜 Ancient Texts, 📜 Commandments, 📜 Footnotes, 📜 Letters, 📜 Poetry, 📝 Writing, 📣 Propaganda, 📧 Email, 📰 Magazines, 📰 Media, 📱 Distraction, 📱 Social Networks, 📸 Galleries, 📺 Broadcasting, 📺 Television, 📺 YouTube, 📽️ Hitchcock, 🔄 Commitment, 🔄 Repetition, 🔄 Serendipity, 🔍 Accountability, 🔍 Critique, 🔍 Discoveries, 🔍 Errors, 🔍 Logic, 🔍 Uncertainty, 🔤 Clicks, 🔥 Energy, 🔥 Redemption, 🔧 Machinery, 🔨 Destruction, 🔬 Typologies, 🕊️ Memorials, 🕊️ Peace, 🕊️ Solitude, 🕌 Monuments, 🕌 Mosques, 🕰️ Nostalgia, 🕵 Identity, 🖊️ Editing, 🖋️ Calligraphy, 🖋️ Commentary, 🖋️ Handwriting, 🖨️ Printing, 🖼️ Artifacts, 🖼️ Exhibitions, 🗑️ Garbage, 🗣️ Language, 🗣️ Words, 🗳️ Elections, 🗳️ Politics, 🗺️ Maine, 🗺️ Provence, 🗺️ States, 🗿 Antiquities, 🤔 Puzzles, 🤝 Altruism, 🤝 Collaboration, 🤝 Families, 🤝 Unity, 🤹 Clowns, 🥇 Olympics, 🥗 Virtue, 🥘 Rice, 🥡 Objects, 🥤 Beverages, 🥤 Soft Drinks, 🥦 Groceries, 🦅 Eagles, 🦋 Butterflies, 🦠 Germs, 🦧 Primates, 🦫 Beavers, 🧊 ICE, 🧘‍♂️ Psychology, 🧠 Genius, 🧠 Neuroscience, 🧠 Psychology, 🧠 Therapy, 🧦 Socks, 🧬 Biology, 🧬 Genetics, 🧭 Navigation, 🧵 Quilts, 🧵 Sewing, 🧵 Textiles, 🧵 Threads, 🧹 Robots, 🧼 Cleanliness, 🧼 Sponges, 🪑 Chairs, 🪨 Islands, 😂 Humor, 😊 Joy, 😎 Coolness, 😮 Emotions, 😷 Masks, 🙌 Civic Engagement, 🙏 Faith, 🙏 Gratitude, 🙏 Mindfulness, 🚂 Railroads, 🚉 Transportation, 🚌 Postcards, 🚍 Commuting, 🚍 Public Transport, 🚔 Police, 🚗 Cars, 🚚 Logistics, 🚢 Ships, 🚦 Public Safety, 🚦 Traffic, 🚨 Emergencies, 🚨 Warnings, 🚪 Prison, 🚫 Surveillance, 🚬 Cigarettes, 🚮 Littering, 🚲 Bicycles, 🚶 Walking, 🚺 Women, 🛋️ Furniture, 🛋️ Sofas, 🛍️ Collectors, 🛍️ Supermarkets, 🛠️ DIY, 🛠️ Tools, 🛠️ Work, 🛡️ Moderation, 🛫 Flight, 🛸 Aliens, 🅰️ Typography, 🌀 Templeton`;
+
             return `Given the following blog post content, generate ONLY the YAML header section in the exact format specified below. Return just the header between --- markers, nothing else.
 
 Format:
 ---
 author: Nate Barksdale
-pubDatetime: {today's date in format YYYY-MM-DD}
-modDatetime: {today's date in format YYYY-MM-DD}
+pubDatetime: ${todayDate}
+modDatetime: ${todayDate}
 title: {A well-written headline; if there is a # Markdown Header in the input text, use that; otherwise compose the headline}
 slug: {slugified version of title - e.g. "This Is My @ing Title?" becomes "this-is-my-ing-title"}
 featured: false
@@ -795,13 +805,16 @@ draft: false
 description: {A punchy, erudite present-tense one-sentence description, avoiding repetitiveness and favoring pith}
 emoji: {a single emoji character that best indicates the post's topic}
 tags:
-  - {3-5 most appropriate tags for the post, each on its own line}
+  - {Select 3-5 most appropriate tags from the list below, each on its own line}
 haiku: |
   {standard Haiku summarizing the content}
   {second line}
   {third line}
 coordinates: {best-guess latitude and longitude in format [lat, lng]}
 ---
+
+Available tags to choose from:
+${availableTags}
 
 Blog post content:
 ${expandedText}`;
