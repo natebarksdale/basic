@@ -31,7 +31,7 @@
                         <div class="header-score" id="headerScore" style="display: none;">
                             <span id="headerScoreValue">0</span>
                         </div>
-                        <button class="voice-toggle" id="voiceToggle" title="Change writing style">
+                        <button class="voice-toggle" id="voiceToggle" title="Time and voice settings">
                             <div class="voice-icon" id="voiceIcon">📖</div>
                         </button>
                     </div>
@@ -42,23 +42,30 @@
         <!-- Voice Menu Panel - Initially Hidden -->
         <div class="voice-menu-panel" id="voiceMenuPanel" style="display: none;">
             <div class="voice-menu-header">
-                <h3>Writing Style</h3>
+                <h3>Time and Voice</h3>
                 <button class="close-voice-menu" id="closeVoiceMenu">×</button>
             </div>
             <div class="voice-menu-body">
                 <!-- Year Selector -->
-                <div class="year-selector-section">
-                    <div class="year-selector-label">Time Period</div>
-                    <div class="timeline-scroll-container" id="timelineScrollContainer">
-                        <svg class="timeline-svg" id="timelineSvg" viewBox="0 0 7000 120" preserveAspectRatio="none">
-                            <!-- Timeline elements will be drawn here -->
-                        </svg>
+                <div class="year-selector-section" id="yearSelectorSection">
+                    <div class="year-selector-header">
+                        <div class="year-selector-label">Time Period</div>
+                        <label class="time-toggle">
+                            <input type="checkbox" id="timeBoxToggle" checked>
+                            <span class="time-toggle-slider"></span>
+                        </label>
                     </div>
-                    <div class="year-display-row">
-                        <div class="year-display" id="yearDisplay">Present Day (2025)</div>
-                        <button id="recenterBtn" class="btn-recenter" title="Scroll to present day">↻</button>
+                    <div class="timeline-content" id="timelineContent">
+                        <div class="timeline-scroll-container" id="timelineScrollContainer">
+                            <svg class="timeline-svg" id="timelineSvg" viewBox="0 0 7000 120" preserveAspectRatio="none">
+                                <!-- Timeline elements will be drawn here -->
+                            </svg>
+                        </div>
+                        <div class="year-display-row">
+                            <div class="year-display" id="yearDisplay">Present Day (2025)</div>
+                        </div>
+                        <button id="setTimeBtn" class="btn-set-time" style="display: none;">Set Time & Regenerate</button>
                     </div>
-                    <button id="setTimeBtn" class="btn-set-time" style="display: none;">Set Time & Regenerate</button>
                 </div>
 
                 <!-- Custom Voice Input - Moved to top -->
@@ -184,8 +191,8 @@
                 </section>
 
                 <section class="info-section">
-                    <h4>Writing Styles</h4>
-                    <p>Tap the icon to choose your narrator—from Dorothy Parker to Hunter S. Thompson, or create your own.</p>
+                    <h4>Time and Voice</h4>
+                    <p>Tap the book icon to travel through time and choose your narrator—from Dorothy Parker to Hunter S. Thompson, or create your own.</p>
                 </section>
 
                 <section class="info-section info-disclaimer">
