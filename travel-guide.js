@@ -2179,7 +2179,14 @@ Return valid JSON:
         throw new Error('Failed to parse location data');
     }
 
-    // No need to randomize - LLM already provided the true/false mix with explanations
+    // Randomize the order of items in each category so the false one isn't always in the same position
+    placeData.categories.forEach(category => {
+        // Fisher-Yates shuffle
+        for (let i = category.items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [category.items[i], category.items[j]] = [category.items[j], category.items[i]];
+        }
+    });
 
     // Skip geocoding for speed - just return the data
     placeData.mentionedPlaces = [];
@@ -2548,15 +2555,20 @@ function makeGuess(itemEl, itemId, guessIsLie) {
     const item = AppState.currentLocation.categories[categoryIdx].items[itemIdx];
     const explanation = actualIsLie && item.explanation ? item.explanation : null;
 
-    if (correct) {
-        resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
-    } else {
-        resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
-    }
-
-    // Add explanation for false statements (whether guessed correctly or not)
+    // For false statements, show terse explanation instead of generic feedback
     if (actualIsLie && explanation) {
-        resultMessage += `<div style="margin-top: 8px; font-size: 0.9em; font-style: italic; opacity: 0.9;">${explanation}</div>`;
+        if (correct) {
+            resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ ${explanation}</div>`;
+        } else {
+            resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ ${explanation}</div>`;
+        }
+    } else {
+        // For true statements, use voice messages
+        if (correct) {
+            resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
+        } else {
+            resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
+        }
     }
 
     // Create and show overlay with feedback (only over buttons area)
