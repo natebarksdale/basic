@@ -2138,7 +2138,7 @@ async function generatePlaceContent(location) {
 
 For each category, write 2 TRUE facts and 1 FALSE fact (2-3 sentences each). Make them all plausible and detailed.
 
-For FALSE facts ONLY: Include a brief "explanation" field (1 sentence) explaining why the claim is false.
+For FALSE facts ONLY: Include "explanation" field (10 words or less) explaining why it's false.
 For TRUE facts: No explanation needed.
 
 Format: Wrap place names, landmarks, restaurants, museums, and key details in <strong> tags. Every item needs at least 2 strong-tagged phrases.
@@ -2155,7 +2155,7 @@ Return valid JSON:
       "name": "Category Name",
       "items": [
         {"text": "True description with <strong>Place Name</strong> and <strong>details</strong>.", "isLie": false},
-        {"text": "False description with <strong>Landmark</strong> and <strong>feature</strong>.", "isLie": true, "explanation": "Why this is false in 1 sentence."},
+        {"text": "False description with <strong>Landmark</strong> and <strong>feature</strong>.", "isLie": true, "explanation": "Short reason (10 words max)"},
         {"text": "Another true fact with <strong>Restaurant</strong> and <strong>dish</strong>.", "isLie": false}
       ]
     }
