@@ -2136,7 +2136,10 @@ async function generatePlaceContent(location) {
     // Generate content - optimized prompt for speed
     const prompt = `Travel guide for "${location}". ${writingStyle.prompt}${yearContext}
 
-For each category, write 3 interesting facts (2-3 sentences each). Make them plausible and detailed.
+For each category, write 2 TRUE facts and 1 FALSE fact (2-3 sentences each). Make them all plausible and detailed.
+
+For FALSE facts ONLY: Include a brief "explanation" field (1 sentence) explaining why the claim is false.
+For TRUE facts: No explanation needed.
 
 Format: Wrap place names, landmarks, restaurants, museums, and key details in <strong> tags. Every item needs at least 2 strong-tagged phrases.
 
@@ -2151,9 +2154,9 @@ Return valid JSON:
     {
       "name": "Category Name",
       "items": [
-        {"text": "Description with <strong>Place Name</strong> and <strong>details</strong>.", "isLie": false},
-        {"text": "Another with <strong>Landmark</strong> and <strong>feature</strong>.", "isLie": false},
-        {"text": "Third with <strong>Restaurant</strong> and <strong>dish</strong>.", "isLie": false}
+        {"text": "True description with <strong>Place Name</strong> and <strong>details</strong>.", "isLie": false},
+        {"text": "False description with <strong>Landmark</strong> and <strong>feature</strong>.", "isLie": true, "explanation": "Why this is false in 1 sentence."},
+        {"text": "Another true fact with <strong>Restaurant</strong> and <strong>dish</strong>.", "isLie": false}
       ]
     }
   ]
@@ -2176,8 +2179,7 @@ Return valid JSON:
         throw new Error('Failed to parse location data');
     }
 
-    // Randomize which items are lies (33% chance per item)
-    randomizeTileTruths(placeData);
+    // No need to randomize - LLM already provided the true/false mix with explanations
 
     // Skip geocoding for speed - just return the data
     placeData.mentionedPlaces = [];
@@ -2540,10 +2542,21 @@ function makeGuess(itemEl, itemId, guessIsLie) {
     const messages = badgeMessages[scenario];
     voiceMessage = messages[Math.floor(Math.random() * messages.length)];
 
+    // Get explanation for false statements
+    const categoryIdx = parseInt(categoryIndex);
+    const itemIdx = parseInt(itemEl.dataset.itemIndex);
+    const item = AppState.currentLocation.categories[categoryIdx].items[itemIdx];
+    const explanation = actualIsLie && item.explanation ? item.explanation : null;
+
     if (correct) {
         resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
     } else {
         resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
+    }
+
+    // Add explanation for false statements (whether guessed correctly or not)
+    if (actualIsLie && explanation) {
+        resultMessage += `<div style="margin-top: 8px; font-size: 0.9em; font-style: italic; opacity: 0.9;">${explanation}</div>`;
     }
 
     // Create and show overlay with feedback (only over buttons area)
