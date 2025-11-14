@@ -31,7 +31,7 @@
                         <div class="header-score" id="headerScore" style="display: none;">
                             <span id="headerScoreValue">0</span>
                         </div>
-                        <button class="voice-toggle" id="voiceToggle" title="Time and voice settings">
+                        <button class="voice-toggle" id="voiceToggle" title="Time and author settings">
                             <div class="voice-icon" id="voiceIcon">📖</div>
                         </button>
                     </div>
@@ -42,7 +42,7 @@
         <!-- Voice Menu Panel - Initially Hidden -->
         <div class="voice-menu-panel" id="voiceMenuPanel" style="display: none;">
             <div class="voice-menu-header">
-                <h3>Time and Voice</h3>
+                <h3>Time and Author</h3>
                 <button class="close-voice-menu" id="closeVoiceMenu">×</button>
             </div>
             <div class="voice-menu-body">
@@ -70,9 +70,9 @@
 
                 <!-- Custom Voice Input - Moved to top -->
                 <div class="custom-voice-input">
-                    <div class="custom-voice-label">Create your own voice:</div>
+                    <div class="custom-voice-label">Create your own author:</div>
                     <input type="text" id="customVoiceInput" placeholder='e.g., "Alien Anthropologist"' class="custom-voice-field">
-                    <button id="createVoiceBtn" class="btn-create-voice">Generate Voice</button>
+                    <button id="createVoiceBtn" class="btn-create-voice">Generate Author</button>
                     <div id="customVoiceStatus" class="custom-voice-status"></div>
                 </div>
 
@@ -80,7 +80,7 @@
                 <div id="customVoicesContainer"></div>
 
                 <!-- Built-in Voices -->
-                <div class="builtin-voices-divider">Built-in Voices</div>
+                <div class="builtin-voices-divider">Built-in Authors</div>
                 <button class="voice-option" data-voice="parker">
                     <div class="voice-option-emoji">🍸</div>
                     <div class="voice-option-text">
@@ -191,7 +191,7 @@
                 </section>
 
                 <section class="info-section">
-                    <h4>Time and Voice</h4>
+                    <h4>Time and Author</h4>
                     <p>Tap the book icon to travel through time and choose your narrator—from Dorothy Parker to Hunter S. Thompson, or create your own.</p>
                 </section>
 
