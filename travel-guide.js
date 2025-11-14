@@ -2563,11 +2563,11 @@ function makeGuess(itemEl, itemId, guessIsLie) {
             resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ ${explanation}</div>`;
         }
     } else {
-        // For true statements, use voice messages
+        // For true statements
         if (correct) {
             resultMessage = `<div style="font-weight: 600; color: #4CAF50;">✓ Correct! +1</div><div>${voiceMessage}</div>`;
         } else {
-            resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ Wrong -1</div><div>${voiceMessage}</div>`;
+            resultMessage = `<div style="font-weight: 600; color: #f44336;">✗ True, actually</div><div>${voiceMessage}</div>`;
         }
     }
 
