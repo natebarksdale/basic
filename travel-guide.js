@@ -82,7 +82,7 @@ const randomDestination = GLOBAL_DESTINATIONS[Math.floor(Math.random() * GLOBAL_
 // Educational Loading Messages
 // These rotate randomly during content generation to help users discover features
 const LOADING_MESSAGES = [
-    "Tip: Click the voice icon to choose different writing styles like Dorothy Parker or Hunter S. Thompson",
+    "Tip: Click the book icon to access Time and Voice settings for different eras and writing styles",
     "Did you know? You can create custom voices by describing any writing style you want",
     "Try the 'Near Me' button to explore places close to your current location",
     "Tip: Drag the map marker to explore any location in the world",
@@ -102,11 +102,11 @@ const LOADING_MESSAGES = [
     "Tip: Click suggestion chips for quick access to popular destinations",
     "Custom voices are generated on-demand and saved for future use",
     "Try switching voices mid-journey to see familiar places in new ways",
-    "Tip: Use the timeline in the voice menu to travel through time from the Big Bang to the far future",
+    "Tip: Use the timeline in Time and Voice settings to travel through time from the Big Bang to the far future",
     "Did you know? You can visit ancient Rome, medieval Paris, or future cities by adjusting the time period",
     "Tip: Drag the timeline handle to explore different eras, then click 'Set Time & Regenerate'",
     "The timeline includes geological eras like the Paleozoic, Mesozoic, and Cenozoic periods",
-    "Tip: Click the ↻ button in the voice menu to quickly return to present day",
+    "Tip: Toggle off the Time Period to quickly return to present-day content",
     "Travel back to see what actually existed at your location throughout history",
     "Tip: The timeline scrolls horizontally - explore decades near the present or geological eras in deep time"
 ];
@@ -131,7 +131,8 @@ const AppState = {
     guesses: {}, // Track user guesses: { 'cat-item': true/false }
     pageAwarded: false, // Track if page bonus has been awarded
     customVoices: JSON.parse(localStorage.getItem('travel_guide_custom_voices') || '{}'), // Custom user-defined voices
-    selectedYear: parseInt(localStorage.getItem('travel_guide_year')) || 2025 // Selected year for historical context
+    selectedYear: parseInt(localStorage.getItem('travel_guide_year')) || 2025, // Selected year for historical context
+    timeBoxEnabled: localStorage.getItem('travel_guide_timebox_enabled') !== 'false' // Time period feature toggle (default: true)
 };
 
 // Writing Style Personas
@@ -1139,10 +1140,40 @@ function initializeYearSelector() {
         }
     });
 
-    // Recenter button
-    const recenterBtn = document.getElementById('recenterBtn');
-    recenterBtn.addEventListener('click', () => {
-        centerTimelineOnYear(2025);
+    // Time box toggle
+    const timeBoxToggle = document.getElementById('timeBoxToggle');
+    const timelineContent = document.getElementById('timelineContent');
+
+    // Set initial state
+    timeBoxToggle.checked = AppState.timeBoxEnabled;
+    if (!AppState.timeBoxEnabled) {
+        timelineContent.style.display = 'none';
+        AppState.selectedYear = 2025;
+        localStorage.setItem('travel_guide_year', '2025');
+    }
+
+    timeBoxToggle.addEventListener('change', (e) => {
+        AppState.timeBoxEnabled = e.target.checked;
+        localStorage.setItem('travel_guide_timebox_enabled', e.target.checked);
+
+        if (e.target.checked) {
+            // Enable time box - show timeline
+            timelineContent.style.display = 'block';
+        } else {
+            // Disable time box - collapse timeline and reset to present
+            timelineContent.style.display = 'none';
+            AppState.selectedYear = 2025;
+            localStorage.setItem('travel_guide_year', '2025');
+
+            // If viewing a page, regenerate with present day
+            if (AppState.currentLocation) {
+                if (!hasApiAccess()) {
+                    showNotification('Please add your OpenRouter API key in settings to regenerate content', 'error');
+                    return;
+                }
+                regenerateCurrentPage();
+            }
+        }
     });
 
     // Initial draw
